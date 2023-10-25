@@ -99,6 +99,7 @@ def data_loader():
             multiple=False
         ),
         html.Div('Upload parameters'),
+        dcc.Store(id='stored-params', data=None),
         dcc.Upload(
             id='upload-params',
             children=html.Div([
@@ -191,7 +192,7 @@ def parse_contents_params(contents, filename, date):
         ])
     
     return html.Div([
-        dcc.Store(id='stored-param', data=content_dict),
+        dcc.Store(id='stored-params', data=content_dict),
 
         # For debugging, display the raw contents provided by the web browser
         html.Div('Raw Content'),
@@ -237,22 +238,51 @@ def update_output(contents_data, name_data, date_data):
 @app.callback(Output('output-param', 'children'),
               Output('data-loaded', 'children'),
               Input('submit-button','n_clicks'),
-              State('stored-data','data'))
-def update_parameters(n, data):
+              State('stored-data','data'),
+              State('stored-params','data'))
+def update_parameters(n, data, params):
     if n is None:
         return no_update
-    else:
-        params = ['Weight', 'Expert Min', 'Expert Max', 'Objective']
+    
+    if params is None:
+        params_labels = ['Weight', 'Expert Min', 'Expert Max', 'Objective']
         criteria = list(data[0].keys())
+        
+        return html.Div([
+            #https://dash.plotly.com/datatable/editable
+            dash_table.DataTable(
+                id = 'table-edit',
+                columns = [{'id': 'Criterion', 'name': 'Criterion'}] + 
+                            [{'id': p, 'name': p} for p in params_labels],
+                data = [dict(Criterion=i, **{p: 0 for p in params_labels})
+                for i in criteria[1:]],
+                editable = True
+            ),
+        ]), data_loaded(data)
+    else:
+        params_labels = ['Weight', 'Expert Min', 'Expert Max', 'Objective']
+        criteria = list(data[0].keys())
+        weights = params["Weights"]
+        expert_mins = params["Expert Min"]
+        expert_maxs = params["Expert Max"]
+        objectives = params["Objective"]
+
+        data_params = []
+
+        for id, c in enumerate(criteria[1:]):
+            data_params.append(dict(Criterion=c,
+                        **{'Weight' : weights[id],
+                         'Expert Min' : expert_mins[id],
+                         'Expert Max' : expert_maxs[id],
+                         'Objective' : objectives[id]}))
 
         return html.Div([
             #https://dash.plotly.com/datatable/editable
             dash_table.DataTable(
                 id = 'table-edit',
                 columns = [{'id': 'Criterion', 'name': 'Criterion'}] + 
-                            [{'id': p, 'name': p} for p in params],
-                data = [dict(Criterion=i, **{param: 0 for param in params})
-                for i in criteria[1:]],
+                            [{'id': p, 'name': p} for p in params_labels],
+                data = data_params,
                 editable = True
             )
         ]), data_loaded(data)
