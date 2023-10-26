@@ -22,41 +22,57 @@ import dash_table
 import dash_daq as daq
 import pandas as pd
 import plotly.express as px
+import dash_mantine_components as dmc
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.UNITED])
-
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUMEN, dbc.icons.FONT_AWESOME])
 
 def header():
-    #TO DO
-    #logika przycisków
-    return html.Div(children=[
-        html.Button('home'),
-        html.H3('MSD Transformer app', style={'textAlign' : 'center'}),
-        html.Button('information', style={'float' : 'right'})
+    return dbc.Row([
+        dbc.Col(dcc.Link(html.I(className="fa fa-home fa-2x"), href='/', style={'float': 'left', 'margin': '20px', 'color': 'white'}), width="auto"),
+        dbc.Col(html.H3('MSD Transformer app', style={'textAlign': 'center', 'margin': '20px', 'color': 'white'}), width="auto"),
+        dbc.Col(dcc.Link(html.I(className="fa fa-info fa-2x"), href='/information', style={'float': 'right', 'margin': '20px', 'color': 'white'}), width="auto")
     ], style={
-        'border-bottom-color' : 'black',
-        'border-bottom-width' : '5px',
-        'border-bottom-style' : 'solid',
-        'display' : 'flex',
-        'margin' : '20px'
+        'display': 'flex',
+        'background-color': '#006288',
+        'justify-content': 'space-between',
+        'margin-bottom': '20px'
     })
-
 
 def footer():
-    return html.Div(children=[
-        html.H1('footer', style={'textAlign' : 'center'})
+    github_url = "https://github.com/dabrze/topsis-msd-improvement-actions"
+    return dash.html.Footer(children=[
+        html.A(html.I(className="fab fa-github fa-2x"), href=github_url, target="_blank", style={'float': 'left', 'margin': '20px', 'color': 'white'}),
+        html.Div(html.Img(src="assets/PP_znak_pełny_RGB.png", style={'float': 'right', 'width': '50px', 'height': 'auto'}), style={'float': 'right', 'margin': '20px'})
     ], style={
-        'border-top-color' : 'black',
-        'border-top-width' : '5px',
-        'border-top-style' : 'solid',
-        'margin' : '20px'
+        'display': 'flex',
+        'background-color': '#006288',
+        'justify-content': 'space-between',
+        'margin-top': '20px'
     })
 
-
 def home():
-    #TO DO
-    #dwa przyciski przekierowujące
-    pass
+    return html.Div(children=[
+        html.Div([
+            html.Button(dcc.Link('Load your dataset using WIZARD', href='/wizard'), className='big-button', 
+                        style={'color': 'white',
+                               'background-color': '#61d0ff',
+                               'border-radius': '10px',
+                               'text-align': 'center',
+                               'font-size': '24px',
+                               'padding': '20px 40px',
+                               'margin': '10px'}),
+            html.Button(dcc.Link('Experiment with ready dataset', href='/main_dash'), className='big-button', 
+                        style={'color': 'white',
+                               'background-color': '#61d0ff',
+                               'border-radius': '10px',
+                               'text-align': 'center',
+                               'font-size': '24px',
+                               'padding': '20px 40px',
+                               'margin': '10px'}),
+        ], className='button-container')
+    ], style={
+        'text-align': 'center'
+    })
 
 
 def wizard():
@@ -130,7 +146,8 @@ def data_loaded(data):
             data=data,
             columns=[{'name': i, 'id': i} for i in list(data[0].keys())],
             page_size=8
-        )
+        ),
+        html.Button(dcc.Link('Next', href='/parameters'), className='next-button')
     ])
 
 
@@ -290,7 +307,9 @@ def update_parameters(n, data, params):
 
 def parameters_setter():
     return html.Div([
-        html.Div(id='output-param')
+        html.Div(id='output-param'),
+        html.Button(dcc.Link('Back', href='/data'), className='back-button'),
+        html.Button(dcc.Link('Next', href='/model'), className='next-button')
     ])
 
 
@@ -298,7 +317,7 @@ def model_setter():
     #https://dash-example-index.herokuapp.com/colourpicker-histogram
     return html.Div([
 
-        html.Div(
+        html.Div([html.Div(
             style = {
                 'height': '50px',
                 'width' : '50px',
@@ -310,7 +329,11 @@ def model_setter():
             label="Color picker",
             size=164,
             value=dict(hex="#FF0000")
-        )
+        ),
+        dcc.RadioItems(['R', 'I','A'], 'R')],
+        style={'display': 'flex', 'justify-content': 'space-between', 'margin-bottom': '20px'}),
+        html.Button(dcc.Link('Back', href='/parameters'), className='back-button'),
+        html.Button(dcc.Link('Finish', href='/main_dash'), className='finish-button')
     ])
 
 
@@ -342,9 +365,23 @@ def improvement_actions():
 
 app.layout = html.Div(children=[
     header(),
-    wizard(),
+    dcc.Location(id='url', refresh=False),
+    html.Div(id='page-content'),
     footer()
-])
+], style={'display': 'flex', 'flex-direction': 'column', 'justify-content': 'space-between', 'min-height': '100%'})
+
+@app.callback(Output('page-content', 'children'),
+              Input('url', 'pathname'))
+
+def display_page(pathname):
+    if pathname == '/':
+        return home()
+    elif pathname == '/wizard':
+        return wizard()
+    elif pathname == '/main_dash':
+        return main_dash()
+    else:
+        return '404 - Page not found'
 
 if __name__ == "__main__":
     app.run_server(debug=True)
