@@ -20,6 +20,7 @@ import dash_bootstrap_components as dbc
 import dash_table
 import dash_daq as daq
 import pandas as pd
+import numpy as np
 import plotly.express as px
 import dash_mantine_components as dmc
 
@@ -296,8 +297,6 @@ def submit_files_wizard_data(n, data, params):
     #https://dash.plotly.com/datatable/reference
     #https://dash.plotly.com/datatable/typing
 
-    df = pd.DataFrame.from_dict(data)
-
     if n is None:
         return no_update
     
@@ -326,16 +325,30 @@ def submit_files_wizard_data(n, data, params):
                     'type': 'text'                    
                 }]
     
+    df = pd.DataFrame.from_dict(data).set_index(criteria[0])
+    n_alternatives = df.shape[0]
+    m_criteria = df.shape[1]
+
+    weights = []
+    expert_mins = []
+    expert_maxs = []
+    objectives = []
+
+    data_params = []
+
     if params is None:
-        return html.Div([
-            #https://dash.plotly.com/datatable/editable
-            dash_table.DataTable(
-                columns = columns,
-                data = [dict(criterion=i, **{p: 0 for p in params_labels})
-                for i in criteria[1:]],
-                editable = True
-            ),
-        ]), show_page_wizard_data_after_submit(data)
+        weights = np.ones(m_criteria)
+        expert_mins = df.min()
+        expert_maxs = df.max()
+        objectives = np.repeat('max', m_criteria)
+
+        
+        for id, c in enumerate(criteria[1:]):
+            data_params.append(dict(criterion=c,
+                        **{params_labels[0] : weights[id],
+                         params_labels[1] : expert_mins[id],
+                         params_labels[2] : expert_maxs[id],
+                         params_labels[3] : objectives[id]}))
     
     else:
         weights = params["Weights"]
@@ -352,14 +365,14 @@ def submit_files_wizard_data(n, data, params):
                          params_labels[2] : expert_maxs[id],
                          params_labels[3] : objectives[id]}))
 
-        return html.Div([
-            #https://dash.plotly.com/datatable/editable
-            dash_table.DataTable(
-                columns = columns,
-                data = data_params,
-                editable = True
-            )
-        ]), show_page_wizard_data_after_submit(data)
+    return html.Div([
+        #https://dash.plotly.com/datatable/editable
+        dash_table.DataTable(
+            columns = columns,
+            data = data_params,
+            editable = True
+        )
+    ]), show_page_wizard_data_after_submit(data)
 
 
 #==============================================================
