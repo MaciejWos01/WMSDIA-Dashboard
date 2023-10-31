@@ -28,51 +28,25 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUMEN, dbc.icons.FONT
 
 def header():
     return dbc.Row([
-        dbc.Col(dcc.Link(html.I(className="fa fa-home fa-2x"), href='/', style={'float': 'left', 'margin': '20px', 'color': 'white'}), width="auto"),
-        dbc.Col(html.H3('MSD Transformer app', style={'textAlign': 'center', 'margin': '20px', 'color': 'white'}), width="auto"),
-        dbc.Col(dcc.Link(html.I(className="fa fa-info fa-2x"), href='/information', style={'float': 'right', 'margin': '20px', 'color': 'white'}), width="auto")
-    ], style={
-        'display': 'flex',
-        'background-color': '#006288',
-        'justify-content': 'space-between',
-        'margin-bottom': '20px'
-    })
+        dbc.Col(dcc.Link(html.I(className="fa fa-home fa-2x", id="css-home-icon"), href='/'), width="auto"),
+        dbc.Col(html.H3('MSD Transformer app', id="css-header-title"), width="auto"),
+        dbc.Col(dcc.Link(html.I(className="fa fa-info fa-2x", id="css-info-icon"), href='/information'), width="auto")
+    ], id="css-header")
 
 def footer():
     github_url = "https://github.com/dabrze/topsis-msd-improvement-actions"
     return dash.html.Footer(children=[
-        html.A(html.I(className="fab fa-github fa-2x"), href=github_url, target="_blank", style={'float': 'left', 'margin': '20px', 'color': 'white'}),
-        html.Div(html.Img(src="assets/PP_znak_pełny_RGB.png", style={'float': 'right', 'width': '50px', 'height': 'auto'}), style={'float': 'right', 'margin': '20px'})
-    ], style={
-        'display': 'flex',
-        'background-color': '#006288',
-        'justify-content': 'space-between',
-        'margin-top': '20px'
-    })
+        html.A(html.I(className="fab fa-github fa-2x", id="css-github-icon"), href=github_url, target="_blank"),
+        html.Div(html.Img(src="assets/PP_znak_pełny_RGB.png", id="css-logo-img"), id="css-logo-div")
+    ], id="css-footer")
 
 def home():
     return html.Div(children=[
         html.Div([
-            html.Button(dcc.Link('Load your dataset using WIZARD', href='/wizard'), className='big-button', 
-                        style={'color': 'white',
-                               'background-color': '#61d0ff',
-                               'border-radius': '10px',
-                               'text-align': 'center',
-                               'font-size': '24px',
-                               'padding': '20px 40px',
-                               'margin': '10px'}),
-            html.Button(dcc.Link('Experiment with ready dataset', href='/main_dash'), className='big-button', 
-                        style={'color': 'white',
-                               'background-color': '#61d0ff',
-                               'border-radius': '10px',
-                               'text-align': 'center',
-                               'font-size': '24px',
-                               'padding': '20px 40px',
-                               'margin': '10px'}),
+            html.Button(dcc.Link('Load your dataset using WIZARD', href='/show_page_wizard_data_before_submit'), className='big-button'),
+            html.Button(dcc.Link('Experiment with ready dataset', href='/main_dash'), className='big-button'),
         ], className='button-container')
-    ], style={
-        'text-align': 'center'
-    })
+    ])
 
 #==============================================================
 #   WIZARD
@@ -103,18 +77,7 @@ def show_page_wizard_data_before_submit():
             id='wizard-data-input-upload-data',
             children=html.Div([
                 'Drag and Drop or Select Files'
-            ],
-            id = 'wizard-data-output-upload-data-filename'),
-            style={
-                'width': '100%',
-                'height': '60px',
-                'lineHeight': '60px',
-                'borderWidth': '1px',
-                'borderStyle': 'dashed',
-                'borderRadius': '5px',
-                'textAlign': 'center',
-                'margin': '10px'
-            },
+            ], id = 'wizard-data-output-upload-data-filename'),
             multiple=False
         ),
 
@@ -124,23 +87,11 @@ def show_page_wizard_data_before_submit():
             id='wizard-data-input-upload-params',
             children=html.Div([
                 'Drag and Drop or Select Files'
-            ],
-            id = 'wizard-data-output-upload-params-filename'),
-            style={
-                'width': '100%',
-                'height': '60px',
-                'lineHeight': '60px',
-                'borderWidth': '1px',
-                'borderStyle': 'dashed',
-                'borderRadius': '5px',
-                'textAlign': 'center',
-                'margin': '10px'
-            },
+            ], id = 'wizard-data-output-upload-params-filename'),
             multiple=False
         ),
         html.Div(id='wizard-data-output-parsed-data'),
-        html.Div(id='wizard-data-output-parsed-params'),
-        
+        html.Div(id='wizard-data-output-parsed-params')        
     ])
 
 
@@ -180,8 +131,7 @@ def show_page_wizard_model():
             size=164,
             value=dict(hex="#FF0000")
         ),
-        dcc.RadioItems(['R', 'I','A'], 'R')],
-        style={'display': 'flex', 'justify-content': 'space-between', 'margin-bottom': '20px'}),
+        dcc.RadioItems(['R', 'I','A'], 'R')], id="css-radio-items"),
         html.Button(dcc.Link('Back', href='/parameters'), className='back-button'),
         html.Button(dcc.Link('Finish', href='/main_dash'), className='finish-button')
     ])
@@ -416,7 +366,7 @@ app.layout = html.Div(children=[
     dcc.Location(id='url', refresh=False),
     html.Div(id='page-content'),
     footer()
-], style={'display': 'flex', 'flex-direction': 'column', 'justify-content': 'space-between', 'min-height': '100%'})
+], id="css-layout")
 
 @app.callback(Output('page-content', 'children'),
               Input('url', 'pathname'))
@@ -433,4 +383,3 @@ def display_page(pathname):
 
 if __name__ == "__main__":
     app.run_server(debug=True)
-
