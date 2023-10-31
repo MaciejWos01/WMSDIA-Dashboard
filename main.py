@@ -293,27 +293,51 @@ def parse_file_wizard_data_params(contents, filename, date):
               State('wizard_state_stored-data','data'),
               State('wizard_state_stored-params','data'))
 def submit_files_wizard_data(n, data, params):
+    #https://dash.plotly.com/datatable/reference
+    #https://dash.plotly.com/datatable/typing
+
+    df = pd.DataFrame.from_dict(data)
+
     if n is None:
         return no_update
     
+    params_labels = ['weight', 'expert-min', 'expert-max', 'objective']
+    criteria = list(data[0].keys())
+    columns = [{
+                    'id': 'criterion', 
+                    'name': 'Criterion',
+                    'type': 'text',
+                    'editable': False
+                },{
+                    'id': params_labels[0], 
+                    'name': 'Weight',
+                    'type': 'numeric'
+                },{
+                    'id': params_labels[1], 
+                    'name': 'Expert Min',
+                    'type': 'numeric'
+                },{
+                    'id': params_labels[2], 
+                    'name': 'Expert Max',
+                    'type': 'numeric'
+                },{
+                    'id': params_labels[3], 
+                    'name': 'Objective',
+                    'type': 'text'                    
+                }]
+    
     if params is None:
-        params_labels = ['Weight', 'Expert Min', 'Expert Max', 'Objective']
-        criteria = list(data[0].keys())
-        
         return html.Div([
             #https://dash.plotly.com/datatable/editable
             dash_table.DataTable(
-                id = 'table-edit',
-                columns = [{'id': 'Criterion', 'name': 'Criterion'}] + 
-                            [{'id': p, 'name': p} for p in params_labels],
-                data = [dict(Criterion=i, **{p: 0 for p in params_labels})
+                columns = columns,
+                data = [dict(criterion=i, **{p: 0 for p in params_labels})
                 for i in criteria[1:]],
                 editable = True
             ),
         ]), show_page_wizard_data_after_submit(data)
+    
     else:
-        params_labels = ['Weight', 'Expert Min', 'Expert Max', 'Objective']
-        criteria = list(data[0].keys())
         weights = params["Weights"]
         expert_mins = params["Expert Min"]
         expert_maxs = params["Expert Max"]
@@ -322,18 +346,16 @@ def submit_files_wizard_data(n, data, params):
         data_params = []
 
         for id, c in enumerate(criteria[1:]):
-            data_params.append(dict(Criterion=c,
-                        **{'Weight' : weights[id],
-                         'Expert Min' : expert_mins[id],
-                         'Expert Max' : expert_maxs[id],
-                         'Objective' : objectives[id]}))
+            data_params.append(dict(criterion=c,
+                        **{params_labels[0] : weights[id],
+                         params_labels[1] : expert_mins[id],
+                         params_labels[2] : expert_maxs[id],
+                         params_labels[3] : objectives[id]}))
 
         return html.Div([
             #https://dash.plotly.com/datatable/editable
             dash_table.DataTable(
-                id = 'table-edit',
-                columns = [{'id': 'Criterion', 'name': 'Criterion'}] + 
-                            [{'id': p, 'name': p} for p in params_labels],
+                columns = columns,
                 data = data_params,
                 editable = True
             )
