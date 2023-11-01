@@ -110,6 +110,7 @@ def show_page_wizard_data_after_submit(data):
 def show_page_wizard_parameters():
     return html.Div([
         html.Div(id='wizard-parameters-output-params-table'),
+        html.Div(id = 'wizard-parameters-output-warning', children = ''),
         html.Button(dcc.Link('Back', href='/data'), className='back-button'),
         html.Button(dcc.Link('Next', href='/model'), className='next-button')
     ])
@@ -318,12 +319,33 @@ def submit_files_wizard_data(n, data, params):
     return html.Div([
         #https://dash.plotly.com/datatable/editable
         dash_table.DataTable(
+            id = 'wizard-parameters-input-parameters-table',
             columns = columns,
             data = data_params,
             editable = True
         )
     ]), show_page_wizard_data_after_submit(data)
 
+@app.callback(Output('wizard-parameters-output-warning', 'children'),
+              Input('wizard-parameters-input-parameters-table', 'derived_virtual_row_ids'),
+              Input('wizard-parameters-input-parameters-table', 'selected_row_ids'),
+              Input('wizard-parameters-input-parameters-table', 'active_cell'),
+              State('wizard-parameters-input-parameters-table', 'data'))
+def update_table_wizard_parameters(row_ids, selected_row_ids, active_cell, data):
+    #https://community.plotly.com/t/input-validation-in-data-table/24026
+
+    criteria = list(data[0].keys())
+    df = pd.DataFrame.from_dict(data).set_index(criteria[0])
+    print(active_cell)
+
+    warning = "Warning"
+
+    if active_cell:
+        warning = df.iloc[active_cell['row']][active_cell['column_id']]
+
+    return html.Div([
+        warning
+    ])
 
 #==============================================================
 #   PLAYGROUND
