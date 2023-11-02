@@ -238,6 +238,13 @@ def parse_file_wizard_data_params(contents, filename, date):
         })
     ])
 
+def fill_parameters_wizard_parameters_params(params, df):
+
+    if params is None:
+        m_criteria = df.shape[1]
+        return np.ones(m_criteria), df.min(), df.max(), np.repeat('max', m_criteria)
+    else:
+        return params["Weights"], params["Expert Min"], params["Expert Max"], params["Objective"]
 
 @app.callback(Output('wizard-parameters-output-params-table', 'children'),
               Output('wizard-data-output-data-table', 'children'),
@@ -277,47 +284,20 @@ def submit_files_wizard_data(n, data, params):
                 }]
     
     df = pd.DataFrame.from_dict(data).set_index(criteria[0])
-    n_alternatives = df.shape[0]
-    m_criteria = df.shape[1]
 
-    weights = []
-    expert_mins = []
-    expert_maxs = []
-    objectives = []
-
+    weights, expert_mins, expert_maxs, objectives = fill_parameters_wizard_parameters_params(params, df)
     data_params = []
 
-    if params is None:
-        weights = np.ones(m_criteria)
-        expert_mins = df.min()
-        expert_maxs = df.max()
-        objectives = np.repeat('max', m_criteria)
-
-        
-        for id, c in enumerate(criteria[1:]):
-            data_params.append(dict(criterion=c,
-                        **{params_labels[0] : weights[id],
-                         params_labels[1] : expert_mins[id],
-                         params_labels[2] : expert_maxs[id],
-                         params_labels[3] : objectives[id]}))
-    
-    else:
-        weights = params["Weights"]
-        expert_mins = params["Expert Min"]
-        expert_maxs = params["Expert Max"]
-        objectives = params["Objective"]
-
-        data_params = []
-
-        for id, c in enumerate(criteria[1:]):
-            data_params.append(dict(criterion=c,
-                        **{params_labels[0] : weights[id],
-                         params_labels[1] : expert_mins[id],
-                         params_labels[2] : expert_maxs[id],
-                         params_labels[3] : objectives[id]}))
+    for id, c in enumerate(criteria[1:]):
+        data_params.append(dict(criterion=c,
+                    **{params_labels[0] : weights[id],
+                    params_labels[1] : expert_mins[id],
+                    params_labels[2] : expert_maxs[id],
+                    params_labels[3] : objectives[id]}))
 
     return html.Div([
         #https://dash.plotly.com/datatable/editable
+        dcc.Store(id='wizard_state_stored-data', data=df.to_dict('records')),
         dash_table.DataTable(
             id = 'wizard-parameters-input-parameters-table',
             columns = columns,
@@ -326,6 +306,10 @@ def submit_files_wizard_data(n, data, params):
         )
     ]), show_page_wizard_data_after_submit(data)
 
+'''
+CHECK PARAMETERS
+
+#Approach 1 - use active cell
 @app.callback(Output('wizard-parameters-output-warning', 'children'),
               Input('wizard-parameters-input-parameters-table', 'derived_virtual_row_ids'),
               Input('wizard-parameters-input-parameters-table', 'selected_row_ids'),
@@ -346,6 +330,55 @@ def update_table_wizard_parameters(row_ids, selected_row_ids, active_cell, data)
     return html.Div([
         warning
     ])
+    
+'''
+
+def parse_warning(warning):
+    return html.Div([
+        warning
+    ])
+
+#Approach 2 - iterate through whole table
+@app.callback(Output('wizard-parameters-output-warning', 'children'),
+              Input('wizard-parameters-input-parameters-table', 'data_timestamp'),
+              State('wizard_state_stored-data','data'),
+              State('wizard-parameters-input-parameters-table', 'data'))
+def update_table_wizard_parameters(timestamp, data, params):
+    
+    criteria_params = list(params[0].keys())
+    
+    df_data = pd.DataFrame.from_dict(data)
+    df_params = pd.DataFrame.from_dict(params).set_index(criteria_params[0])
+    
+    warnings = []
+
+    #weights
+    if (df_params['weight'] < 0).any():
+        warnings.append("Weight must be a non-negative number")
+
+    if df_params['weight'].sum() == 0:
+        warnings.append("At least one weight must be greater than 0")
+
+    #expert range
+    lower_bound = df_data.min() 
+    upper_bound = df_data.max()
+
+    for lower, upper, mini, maxi in zip(lower_bound, upper_bound, df_params['expert-min'], df_params['expert-max']):
+        if mini > maxi:
+            warnings.append("Min value must be lower or equal than max value")
+        
+        if lower < mini:
+            warnings.append("Min value must be lower or equal than the minimal value of given criterion")
+
+        if upper > maxi:
+            warnings.append("Max value must be greater or equal than the maximal value of given criterion")
+    
+    warnings = list(set(warnings))
+
+    if warnings:
+        children = [parse_warning(warning) for warning in warnings]
+        return children
+
 
 #==============================================================
 #   PLAYGROUND
@@ -390,18 +423,20 @@ app.layout = html.Div(children=[
     footer()
 ], id="css-layout")
 
+
 @app.callback(Output('page-content', 'children'),
               Input('url', 'pathname'))
-
 def display_page(pathname):
     if pathname == '/':
         return home()
-    elif pathname == '/wizard':
+    elif pathname == '/show_page_wizard_data_before_submit':
+    #elif pathname == '/wizard':
         return wizard()
     elif pathname == '/main_dash':
         return main_dash()
     else:
         return '404 - Page not found'
+
 
 if __name__ == "__main__":
     app.run_server(debug=True)
