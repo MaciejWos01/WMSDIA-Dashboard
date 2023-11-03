@@ -17,7 +17,7 @@ from dash import dcc
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
-import dash_table
+from dash import dash_table
 import dash_daq as daq
 import pandas as pd
 import numpy as np
@@ -238,28 +238,7 @@ def parse_file_wizard_data_params(contents, filename, date):
         })
     ])
 
-def fill_parameters_wizard_parameters_params(params, df):
-
-    if params is None:
-        m_criteria = df.shape[1]
-        return np.ones(m_criteria), df.min(), df.max(), np.repeat('max', m_criteria)
-    else:
-        return params["Weights"], params["Expert Min"], params["Expert Max"], params["Objective"]
-
-@app.callback(Output('wizard-parameters-output-params-table', 'children'),
-              Output('wizard-data-output-data-table', 'children'),
-              Input('wizard_data_input_submit-button','n_clicks'),
-              State('wizard_state_stored-data','data'),
-              State('wizard_state_stored-params','data'))
-def submit_files_wizard_data(n, data, params):
-    #https://dash.plotly.com/datatable/reference
-    #https://dash.plotly.com/datatable/typing
-
-    if n is None:
-        return no_update
-    
-    params_labels = ['weight', 'expert-min', 'expert-max', 'objective']
-    criteria = list(data[0].keys())
+def return_columns_wizard_parameters_params_table(params_labels):
     columns = [{
                     'id': 'criterion', 
                     'name': 'Criterion',
@@ -283,6 +262,35 @@ def submit_files_wizard_data(n, data, params):
                     'type': 'text'                    
                 }]
     
+    return columns
+
+
+def fill_parameters_wizard_parameters_params(params, df):
+
+    if params is None:
+        m_criteria = df.shape[1]
+        return np.ones(m_criteria), df.min(), df.max(), np.repeat('max', m_criteria)
+    else:
+        return params["Weights"], params["Expert Min"], params["Expert Max"], params["Objective"]
+
+
+@app.callback(Output('wizard-parameters-output-params-table', 'children', allow_duplicate=True),
+              Output('wizard-data-output-data-table', 'children'),
+              Input('wizard_data_input_submit-button','n_clicks'),
+              State('wizard_state_stored-data','data'),
+              State('wizard_state_stored-params','data'),
+              prevent_initial_call=True)
+def submit_files_wizard_data(n, data, params):
+    #https://dash.plotly.com/datatable/reference
+    #https://dash.plotly.com/datatable/typing
+
+    if n is None:
+        return no_update
+    
+    params_labels = ['weight', 'expert-min', 'expert-max', 'objective']
+    columns = return_columns_wizard_parameters_params_table(params_labels)
+    
+    criteria = list(data[0].keys())
     df = pd.DataFrame.from_dict(data).set_index(criteria[0])
 
     weights, expert_mins, expert_maxs, objectives = fill_parameters_wizard_parameters_params(params, df)
@@ -306,11 +314,11 @@ def submit_files_wizard_data(n, data, params):
         )
     ]), show_page_wizard_data_after_submit(data)
 
-'''
-CHECK PARAMETERS
+'''  
+#CHECK PARAMETERS
 
 #Approach 1 - use active cell
-@app.callback(Output('wizard-parameters-output-warning', 'children'),
+@app.callback( Output('wizard-parameters-output-warning', 'children'),
               Input('wizard-parameters-input-parameters-table', 'derived_virtual_row_ids'),
               Input('wizard-parameters-input-parameters-table', 'selected_row_ids'),
               Input('wizard-parameters-input-parameters-table', 'active_cell'),
@@ -330,26 +338,10 @@ def update_table_wizard_parameters(row_ids, selected_row_ids, active_cell, data)
     return html.Div([
         warning
     ])
-    
+ 
 '''
 
-def parse_warning(warning):
-    return html.Div([
-        warning
-    ])
-
-#Approach 2 - iterate through whole table
-@app.callback(Output('wizard-parameters-output-warning', 'children'),
-              Input('wizard-parameters-input-parameters-table', 'data_timestamp'),
-              State('wizard_state_stored-data','data'),
-              State('wizard-parameters-input-parameters-table', 'data'))
-def update_table_wizard_parameters(timestamp, data, params):
-    
-    criteria_params = list(params[0].keys())
-    
-    df_data = pd.DataFrame.from_dict(data)
-    df_params = pd.DataFrame.from_dict(params).set_index(criteria_params[0])
-    
+def check_updated_params_wizard_parameters(df_data, df_params):
     warnings = []
 
     #weights
@@ -373,11 +365,50 @@ def update_table_wizard_parameters(timestamp, data, params):
         if upper > maxi:
             warnings.append("Max value must be greater or equal than the maximal value of given criterion")
     
-    warnings = list(set(warnings))
+    return list(set(warnings))
 
+def parse_warning(warning):
+    return html.Div([
+        warning
+    ])
+
+#Approach 2 - iterate through whole table
+@app.callback(Output('wizard-parameters-output-params-table', 'children'),
+              Output('wizard-parameters-output-warning', 'children'),
+              Input('wizard-parameters-input-parameters-table', 'data_timestamp'),
+              State('wizard_state_stored-data','data'),
+              State('wizard-parameters-input-parameters-table', 'data'),
+              State('wizard-parameters-input-parameters-table', 'data_previous'))
+def update_table_wizard_parameters(timestamp, data, params, params_previous):
+    #https://community.plotly.com/t/detecting-changed-cell-in-editable-datatable/26219/3
+    #https://dash.plotly.com/duplicate-callback-outputs
+    params_labels = ['weight', 'expert-min', 'expert-max', 'objective']
+    columns = return_columns_wizard_parameters_params_table(params_labels)
+
+    criteria_params = list(params[0].keys())
+    
+    df_data = pd.DataFrame.from_dict(data)
+    df_params = pd.DataFrame.from_dict(params).set_index(criteria_params[0])
+     
+    warnings = check_updated_params_wizard_parameters(df_data, df_params)
+                
     if warnings:
         children = [parse_warning(warning) for warning in warnings]
-        return children
+        params = params_previous
+    else:
+        children = html.Div([])
+
+    return html.Div([
+        #https://dash.plotly.com/datatable/editable
+        dcc.Store(id='wizard_state_stored-data', data=data),
+        dash_table.DataTable(
+            id = 'wizard-parameters-input-parameters-table',
+            columns = columns,
+            data = params,
+            editable = True
+        )
+    ]), children
+
 
 
 #==============================================================
