@@ -238,6 +238,76 @@ def parse_file_wizard_data_params(contents, filename, date):
         })
     ])
 
+
+def check_parameters_wizard_data_files(data, params):
+
+    criteria = list(data[0].keys())
+
+    df_data = pd.DataFrame.from_dict(data).set_index(criteria[0])
+    df_params = pd.DataFrame.from_dict(params)
+    
+    n_alternatives = df_data.shape[0]
+    m_criteria = df_data.shape[1]
+
+    if "Weights" in df_params:
+        if len(df_params["Weights"]) != m_criteria:
+            print("Invalid value 'weights'.")
+            return -1
+        if not all(type(item) in [int, float, np.float64] for item in df_params["Weights"]):
+            print("Invalid value 'weights'. Expected numerical value (int or float).")
+            return -1
+        if not all(item >= 0 for item in df_params["Weights"]):
+            print("Invalid value 'weights'. Expected value must be non-negative.")
+            return -1
+        if not any(item > 0 for item in df_params["Weights"]):
+            print("Invalid value 'weights'. At least one weight must be positive.")
+            return -1
+    else:
+        return -1
+    
+    if "Objective" in df_params:
+        if len(df_params["Objective"]) != m_criteria:
+            print("Invalid value 'objectives'.")
+            return -1
+        if not all(item in ["min", "max"] for item in df_params["Objective"]):
+            print("Invalid value at 'objectives'. Use 'min', 'max', 'gain', 'cost', 'g' or 'c'.")
+            return -1
+    else:
+        return -1
+    
+    if "Expert Min" in df_params and "Expert Max" in df_params:
+        if len(df_params["Expert Min"]) != m_criteria:
+            print("Invalid value at 'expert_range'. Length of should be equal to number of criteria.")
+            return -1
+        if len(df_params["Expert Max"]) != m_criteria:
+            print("Invalid value at 'expert_range'. Length of should be equal to number of criteria.")
+            return -1
+        if not all(type(item) in [int, float, np.float64] for item in df_params["Expert Min"]):
+            print("Invalid value at 'expert_range'. Expected numerical value (int or float).")
+            return -1
+        if not all(type(item) in [int, float, np.float64] for item in df_params["Expert Max"]):
+            print("Invalid value at 'expert_range'. Expected numerical value (int or float).")
+            return -1
+        
+        lower_bound = df_data.min() 
+        upper_bound = df_data.max()
+
+        for lower, upper, mini, maxi in zip(lower_bound, upper_bound, df_params["Expert Min"], df_params["Expert Max"]):
+            if mini > maxi:
+                print("Invalid value at 'expert_range'. Minimal value  is bigger then maximal value.")
+                return -1
+            if lower < mini:
+                print("Invalid value at 'expert_range'. All values from original data must be in a range of expert_range.")
+                return -1
+            if upper > maxi:
+                print("Invalid value at 'expert_range'. All values from original data must be in a range of expert_range.")
+                return -1
+    else:
+        return -1
+    
+    return 1
+
+
 def return_columns_wizard_parameters_params_table(params_labels):
     columns = [{
                     'id': 'criterion', 
@@ -286,6 +356,9 @@ def submit_files_wizard_data(n, data, params):
 
     if n is None:
         return no_update
+    
+    if params is not None and check_parameters_wizard_data_files(data, params) == -1:
+        print('Prevent update')
     
     params_labels = ['weight', 'expert-min', 'expert-max', 'objective']
     columns = return_columns_wizard_parameters_params_table(params_labels)
@@ -410,7 +483,6 @@ def update_table_wizard_parameters(timestamp, data, params, params_previous):
     ]), children
 
 
-
 #==============================================================
 #   PLAYGROUND
 #==============================================================
@@ -436,7 +508,6 @@ def model_setter():
 def ranking_vizualization():
     #TO DO
     pass
-
 
 def improvement_actions():
   #TO DO
