@@ -1,0 +1,6 @@
+{
+    "Weights" : [1, 1, 1, 1, 1, 1, 1, 1],
+    "Expert Min" : [0, 0, 0, 0, 0, 0, 0, 0],
+    "Expert Max" : [90, 2, 95, 486, 27, 33, 4, 148],
+    "Objective" : ["max", "max", "max", "max", "min", "min", "min", "min"]
+}
