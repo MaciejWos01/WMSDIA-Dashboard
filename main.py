@@ -11,6 +11,7 @@ import io
 #import datetime
 
 import dash
+from dash import Dash
 from dash import no_update
 from dash import html
 from dash import dcc
@@ -165,6 +166,7 @@ def update_wizard_data_output_data(contents_data, name_data, date_data):
     else:
         raise PreventUpdate
 
+
 @app.callback(Output('wizard-data-input-remove-upload-data', 'children'),
               Output('wizard-data-output-parsed-data', 'children'),
               Output('wizard-data-input-remove-data', 'children'),
@@ -187,6 +189,7 @@ def remove_file_wizard_data_data_file(n):
     table = None
     remove = None
     return child, table, remove
+
 
 @app.callback(Output('wizard-data-output-parsed-params', 'children', allow_duplicate=True),
               Output('wizard-data-output-upload-params-filename', 'children'),
@@ -231,6 +234,7 @@ def remove_file_wizard_data_params_file(n):
     table = None
     remove = None
     return child, table, remove
+
 
 def parse_file_wizard_data_data(contents, filename, date):
     content_type, content_string = contents.split(',')
@@ -391,7 +395,7 @@ def return_columns_wizard_parameters_params_table(params_labels):
                 },{
                     'id': params_labels[3], 
                     'name': 'Objective',
-                    'type': 'text'                    
+                    'presentation': 'dropdown'                    
                 }]
     
     return columns
@@ -437,16 +441,29 @@ def submit_files_wizard_data(n, data, params):
                     params_labels[1] : expert_mins[id],
                     params_labels[2] : expert_maxs[id],
                     params_labels[3] : objectives[id]}))
+        
+    #switches = [return_toggle_switch(id, o) for id, o in enumerate(objectives)]
 
     return html.Div([
         #https://dash.plotly.com/datatable/editable
+        #https://community.plotly.com/t/resolved-dropdown-options-in-datatable-not-showing/20366
         dcc.Store(id='wizard_state_stored-data', data=df.to_dict('records')),
         dash_table.DataTable(
             id = 'wizard-parameters-input-parameters-table',
             columns = columns,
             data = data_params,
-            editable = True
-        )
+            editable = True,
+            dropdown={
+                params_labels[3]: {
+                    'options': [
+                        {'label': i, 'value': i}
+                        for i in ['min', 'max']
+                    ],
+                    'clearable': False
+                },
+             }
+        ),
+        #html.Div(switches)
     ]), show_page_wizard_data_after_submit(data)
 
 
@@ -508,15 +525,28 @@ def update_table_wizard_parameters(timestamp, data, params, params_previous):
     else:
         children = html.Div([])
 
+    #switches = [return_toggle_switch(id, o) for id, o in enumerate(df_params['objective'])]
+
     return html.Div([
         #https://dash.plotly.com/datatable/editable
+        #https://community.plotly.com/t/resolved-dropdown-options-in-datatable-not-showing/20366
         dcc.Store(id='wizard_state_stored-data', data=data),
         dash_table.DataTable(
             id = 'wizard-parameters-input-parameters-table',
             columns = columns,
             data = params,
-            editable = True
-        )
+            editable = True,
+            dropdown={
+                params_labels[3]: {
+                    'options': [
+                        {'label': i, 'value': i}
+                        for i in ['min', 'max']
+                    ],
+                    'clearable': False
+                },
+             }
+        ),
+        #html.Div(switches)
     ]), children
 
 '''  
@@ -546,6 +576,18 @@ def update_table_wizard_parameters(row_ids, selected_row_ids, active_cell, data)
  
 '''
 
+'''
+#https://dash.plotly.com/dash-daq/toggleswitch
+def return_toggle_switch(id, o):
+    switch_id = 'switch-' + str(id)
+    objective = True if o == 'max' else False
+    return html.Div([
+        daq.ToggleSwitch(
+            id = switch_id,
+            value = objective
+        )
+    ])
+'''
 #==============================================================
 #   PLAYGROUND
 #==============================================================
