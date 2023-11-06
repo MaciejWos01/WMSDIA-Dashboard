@@ -73,23 +73,30 @@ def show_page_wizard_data_before_submit():
 
     return html.Div([
         html.Div('Upload data'),
-        dcc.Upload(
-            id='wizard-data-input-upload-data',
-            children=html.Div([
-                'Drag and Drop or Select Files'
-            ], id = 'wizard-data-output-upload-data-filename'),
-            multiple=False
-        ),
+        html.Div([
+            dcc.Upload(
+                id='wizard-data-input-upload-data',
+                children=html.Div([
+                    'Drag and Drop or Select Files'
+                ], id = 'wizard-data-output-upload-data-filename'),
+                multiple=False
+            ),
+            html.Div(id='wizard-data-input-remove-data'),
+            ], id = 'wizard-data-input-remove-upload-data'),
 
         html.Div('Upload parameters'),
-        dcc.Store(id='wizard_state_stored-params', data=None),
-        dcc.Upload(
-            id='wizard-data-input-upload-params',
-            children=html.Div([
-                'Drag and Drop or Select Files'
-            ], id = 'wizard-data-output-upload-params-filename'),
-            multiple=False
-        ),
+        html.Div([
+            dcc.Store(id='wizard_state_stored-params', data=None),
+            dcc.Upload(
+                id='wizard-data-input-upload-params',
+                children=html.Div([
+                    'Drag and Drop or Select Files'
+                ], id = 'wizard-data-output-upload-params-filename'),
+                multiple=False
+            ),
+            html.Div(id='wizard-data-input-remove-params'),
+            ], id = 'wizard-data-input-remove-upload-params'),
+
         html.Div(id='wizard-data-output-parsed-data'),
         html.Div(id='wizard-data-output-parsed-params')        
     ])
@@ -138,37 +145,92 @@ def show_page_wizard_model():
     ])
 
 
-@app.callback(Output('wizard-data-output-parsed-data', 'children'),
+@app.callback(Output('wizard-data-output-parsed-data', 'children', allow_duplicate=True),
               Output('wizard-data-output-upload-data-filename', 'children'),
+              Output('wizard-data-input-remove-data', 'children', allow_duplicate=True),
               Input('wizard-data-input-upload-data', 'contents'),
               State('wizard-data-input-upload-data', 'filename'),
-              State('wizard-data-input-upload-data', 'last_modified'))
+              State('wizard-data-input-upload-data', 'last_modified'),
+              prevent_initial_call=True)
 def update_wizard_data_output_data(contents_data, name_data, date_data):
 
     if contents_data is not None:
         child = [
             parse_file_wizard_data_data(c, n, d) for c, n, d in
-            zip([contents_data], [name_data], [date_data])]
-        return child, name_data   
+            zip([contents_data], [name_data], [date_data])]  
+                
+        remove = html.Button(id='wizard_data_input_remove-data-button', children='Remove')
+
+        return child, name_data, remove   
     else:
         raise PreventUpdate
 
+@app.callback(Output('wizard-data-input-remove-upload-data', 'children'),
+              Output('wizard-data-output-parsed-data', 'children'),
+              Output('wizard-data-input-remove-data', 'children'),
+              Input('wizard_data_input_remove-data-button','n_clicks'))
+def remove_file_wizard_data_data_file(n):
+    
+    if n is None:
+        return no_update
 
-@app.callback(Output('wizard-data-output-parsed-params', 'children'),
+    child =  [
+            dcc.Upload(
+                id='wizard-data-input-upload-data',
+                children=html.Div([
+                    'Drag and Drop or Select Files'
+                ], id = 'wizard-data-output-upload-data-filename'),
+                multiple=False
+            ),
+            html.Div(id='wizard-data-input-remove-data'),
+            ]
+    table = None
+    remove = None
+    return child, table, remove
+
+@app.callback(Output('wizard-data-output-parsed-params', 'children', allow_duplicate=True),
               Output('wizard-data-output-upload-params-filename', 'children'),
+              Output('wizard-data-input-remove-params', 'children', allow_duplicate=True),
               Input('wizard-data-input-upload-params', 'contents'),
               State('wizard-data-input-upload-params', 'filename'),
-              State('wizard-data-input-upload-params', 'last_modified'))
+              State('wizard-data-input-upload-params', 'last_modified'),
+              prevent_initial_call=True)
 def update_wizard_data_output_params(contents_params, name_params, date_params):
     
     if contents_params is not None:
         child = [
             parse_file_wizard_data_params(c, n, d) for c, n, d in
             zip([contents_params], [name_params], [date_params])]
-        return child, name_params
+        
+        remove = html.Button(id='wizard_data_input_remove-params-button', children='Remove')
+        return child, name_params, remove
     else:
         raise PreventUpdate
  
+
+@app.callback(Output('wizard-data-input-remove-upload-params', 'children'),
+              Output('wizard-data-output-parsed-params', 'children'),
+              Output('wizard-data-input-remove-params', 'children'),
+              Input('wizard_data_input_remove-params-button','n_clicks'))
+def remove_file_wizard_data_params_file(n):
+    
+    if n is None:
+        return no_update
+
+    child = [
+            dcc.Store(id='wizard_state_stored-params', data=None),
+            dcc.Upload(
+                id='wizard-data-input-upload-params',
+                children=html.Div([
+                    'Drag and Drop or Select Files'
+                ], id = 'wizard-data-output-upload-params-filename'),
+                multiple=False
+            ),
+            html.Div(id='wizard-data-input-remove-params'),
+            ]
+    table = None
+    remove = None
+    return child, table, remove
 
 def parse_file_wizard_data_data(contents, filename, date):
     content_type, content_string = contents.split(',')
@@ -387,32 +449,6 @@ def submit_files_wizard_data(n, data, params):
         )
     ]), show_page_wizard_data_after_submit(data)
 
-'''  
-#CHECK PARAMETERS
-
-#Approach 1 - use active cell
-@app.callback( Output('wizard-parameters-output-warning', 'children'),
-              Input('wizard-parameters-input-parameters-table', 'derived_virtual_row_ids'),
-              Input('wizard-parameters-input-parameters-table', 'selected_row_ids'),
-              Input('wizard-parameters-input-parameters-table', 'active_cell'),
-              State('wizard-parameters-input-parameters-table', 'data'))
-def update_table_wizard_parameters(row_ids, selected_row_ids, active_cell, data):
-    #https://community.plotly.com/t/input-validation-in-data-table/24026
-
-    criteria = list(data[0].keys())
-    df = pd.DataFrame.from_dict(data).set_index(criteria[0])
-    print(active_cell)
-
-    warning = "Warning"
-
-    if active_cell:
-        warning = df.iloc[active_cell['row']][active_cell['column_id']]
-
-    return html.Div([
-        warning
-    ])
- 
-'''
 
 def check_updated_params_wizard_parameters(df_data, df_params):
     warnings = []
@@ -439,6 +475,7 @@ def check_updated_params_wizard_parameters(df_data, df_params):
             warnings.append("Max value must be greater or equal than the maximal value of given criterion")
     
     return list(set(warnings))
+
 
 def parse_warning(warning):
     return html.Div([
@@ -482,6 +519,32 @@ def update_table_wizard_parameters(timestamp, data, params, params_previous):
         )
     ]), children
 
+'''  
+#CHECK PARAMETERS
+
+#Approach 1 - use active cell
+@app.callback( Output('wizard-parameters-output-warning', 'children'),
+              Input('wizard-parameters-input-parameters-table', 'derived_virtual_row_ids'),
+              Input('wizard-parameters-input-parameters-table', 'selected_row_ids'),
+              Input('wizard-parameters-input-parameters-table', 'active_cell'),
+              State('wizard-parameters-input-parameters-table', 'data'))
+def update_table_wizard_parameters(row_ids, selected_row_ids, active_cell, data):
+    #https://community.plotly.com/t/input-validation-in-data-table/24026
+
+    criteria = list(data[0].keys())
+    df = pd.DataFrame.from_dict(data).set_index(criteria[0])
+    print(active_cell)
+
+    warning = "Warning"
+
+    if active_cell:
+        warning = df.iloc[active_cell['row']][active_cell['column_id']]
+
+    return html.Div([
+        warning
+    ])
+ 
+'''
 
 #==============================================================
 #   PLAYGROUND
