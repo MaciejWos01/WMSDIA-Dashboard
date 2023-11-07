@@ -118,37 +118,6 @@ def show_page_wizard_data_after_submit(data):
     ])
 
 
-@app.callback(Output('wizard-data-after-submit-output-project-title', 'children', allow_duplicate=True),
-             Input('wizard-data-input-title', 'n_clicks'),
-             State('wizard-data-input-title', 'children'),
-             prevent_initial_call=True)
-def edit_title_wizard_data_after_submit(click, text):
-    
-    if click:
-        return html.Div([
-                dcc.Input(id='wizard-data-input-type-title',
-                        type = 'text',
-                        placeholder=text,
-                        minLength=1,
-                        maxLength=20),
-            ])
-
-    return no_update
-
-
-@app.callback(Output('wizard-data-after-submit-output-project-title', 'children'),
-             Input('wizard-data-input-type-title', 'n_submit'),
-             State('wizard-data-input-type-title', 'value'))
-def edit_title_wizard_data_after_submit(enter, text):
-    
-    if enter and text:
-        return html.Div([
-            html.Div(text, id='wizard-data-input-title')
-            ])
-
-    return no_update
-
-
 def show_page_wizard_parameters():
     return html.Div([
         html.Div(id='wizard-parameters-output-params-table'),
@@ -162,19 +131,35 @@ def show_page_wizard_model():
     #https://dash-example-index.herokuapp.com/colourpicker-histogram
     return html.Div([
 
-        html.Div([html.Div(
-            style = {
-                'height': '50px',
-                'width' : '50px',
-                'background-color': '#FF0000'
-            }
-        ),
-        daq.ColorPicker(
-            label="Color picker",
-            size=164,
-            value=dict(hex="#FF0000")
-        ),
-        dcc.RadioItems(['R', 'I','A'], 'R')], id="css-radio-items"),
+        html.Div([
+            dcc.RadioItems([
+                {
+                "label":[
+                    html.Div("R description")
+                ],
+                "value": 'R',
+                },{
+                "label":[
+                    html.Div("I description")
+                ],
+                "value": 'I',
+                },{
+                "label":[
+                    html.Div("A description")
+                ],
+                "value": 'A',
+                },
+            ], id="css-radio-items", inline=False),
+            html.Div(
+                style = {
+                    'height': '50px',
+                    'width' : '50px',
+                    'background-color': '#FF0000'
+                    },
+                id = "wizard-model-output-view"
+            ),
+        ]),
+        #dcc.RadioItems(['R', 'I','A'], 'R')], id="css-radio-items"),
         html.Button(dcc.Link('Back', href='/parameters'), className='back-button'),
         html.Button(dcc.Link('Finish', href='/main_dash'), className='finish-button')
     ])
@@ -502,6 +487,37 @@ def submit_files_wizard_data(n, data, params):
     ]), show_page_wizard_data_after_submit(data)
 
 
+@app.callback(Output('wizard-data-after-submit-output-project-title', 'children', allow_duplicate=True),
+             Input('wizard-data-input-title', 'n_clicks'),
+             State('wizard-data-input-title', 'children'),
+             prevent_initial_call=True)
+def edit_title_wizard_data_after_submit(click, text):
+    
+    if click:
+        return html.Div([
+                dcc.Input(id='wizard-data-input-type-title',
+                        type = 'text',
+                        placeholder=text,
+                        minLength=1,
+                        maxLength=20),
+            ])
+
+    return no_update
+
+
+@app.callback(Output('wizard-data-after-submit-output-project-title', 'children'),
+             Input('wizard-data-input-type-title', 'n_submit'),
+             State('wizard-data-input-type-title', 'value'))
+def edit_title_wizard_data_after_submit(enter, text):
+    
+    if enter and text:
+        return html.Div([
+            html.Div(text, id='wizard-data-input-title')
+            ])
+
+    return no_update
+
+
 def check_updated_params_wizard_parameters(df_data, df_params):
     warnings = []
 
@@ -597,6 +613,39 @@ def update_table_wizard_parameters(timestamp, objectives_val, data, params, para
         html.Div("Set all to Min/Max"),
         dcc.Dropdown(['-', 'min', 'max'], objectives_val, id = 'wizard-parameters-input-objectives-dropdown', clearable=False),
     ]), children
+
+
+@app.callback(Output('wizard-model-output-view', 'children'),
+              Input('css-radio-items', 'value'))
+def show_view_wizard_model(agg):
+    if agg == 'R':
+        return html.Div(
+                style = {
+                    'height': '50px',
+                    'width' : '50px',
+                    'background-color': '#FF0000'
+                    },
+                id = "wizard-model-output-view"
+            )
+    if agg == 'I':
+        return html.Div(
+                style = {
+                    'height': '50px',
+                    'width' : '50px',
+                    'background-color': '#00FF00'
+                    },
+                id = "wizard-model-output-view"
+            )
+    if agg == 'A':
+        return html.Div(
+                style = {
+                    'height': '50px',
+                    'width' : '50px',
+                    'background-color': '#0000FF'
+                    },
+                id = "wizard-model-output-view"
+            )
+    
 
 '''  
 #CHECK PARAMETERS
