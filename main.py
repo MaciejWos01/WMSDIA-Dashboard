@@ -130,7 +130,6 @@ def show_page_wizard_parameters():
 def show_page_wizard_model():
     #https://dash-example-index.herokuapp.com/colourpicker-histogram
     return html.Div([
-
         html.Div([
             dcc.RadioItems([
                 {
@@ -159,7 +158,30 @@ def show_page_wizard_model():
                 id = "wizard-model-output-view"
             ),
         ], id="css-radio-items"),
-        #dcc.RadioItems(['R', 'I','A'], 'R')], id="css-radio-items"),
+        html.Div([
+            dcc.RadioItems([
+                {
+                "label":[
+                    html.Img(),
+                    html.Div("link to image1")
+                ],
+                "value": 'color1',
+                },{
+                "label":[
+                    html.Img(),
+                    html.Div("link to image2")
+                ],
+                "value": 'color2',
+                },{
+                "label":[
+                    html.Img(),
+                    html.Div("link to image3")
+                ],
+                "value": 'color3',
+                },
+            ], value='color1', inline=False, id="wizard-model-input-radio-items-color"),
+        ], id="css-radio-items"),
+        #https://dash.plotly.com/dash-core-components/radioitems
         html.Button(dcc.Link('Back', href='/parameters'), className='back-button'),
         html.Button(dcc.Link('Finish', href='/main_dash'), className='finish-button')
     ])
