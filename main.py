@@ -106,9 +106,9 @@ def show_page_wizard_data_before_submit():
 def show_page_wizard_data_after_submit(data):
     return html.Div([
         html.Div([
-            html.Div(id='wizard-data-output-title'),
-            html.Button(id='wizard-data-input-title-button', children='title')
-        ], id='wizard-data-after-submit-project-title'),
+            html.Div("project_title", id='wizard-data-input-title'),
+            #html.Button(id='wizard-data-input-title-button', children='title')
+        ], id='wizard-data-after-submit-output-project-title'),
         dash_table.DataTable(
             data=data,
             columns=[{'name': i, 'id': i} for i in list(data[0].keys())],
@@ -117,20 +117,37 @@ def show_page_wizard_data_after_submit(data):
         html.Button(dcc.Link('Next', href='/parameters'), className='next-button')
     ])
 
-'''
-            dcc.Input(id='wizard-data-after-submit-project-title',
-                    type = 'text',
-                    placeholder='project_title',
-                    minLength=1,
-                    maxLength=20),
-'''
-@app.callback(Output('wizard-data-output-title', 'children'),
-             Input('wizard-data-input-title-button', 'n_clicks'))
-def edit_title_wizard_data_after_submit(click):
-    if click:
-        return click
+
+@app.callback(Output('wizard-data-after-submit-output-project-title', 'children', allow_duplicate=True),
+             Input('wizard-data-input-title', 'n_clicks'),
+             State('wizard-data-input-title', 'children'),
+             prevent_initial_call=True)
+def edit_title_wizard_data_after_submit(click, text):
     
-    return "Project_title"
+    if click:
+        return html.Div([
+                dcc.Input(id='wizard-data-input-type-title',
+                        type = 'text',
+                        placeholder=text,
+                        minLength=1,
+                        maxLength=20),
+            ])
+
+    return no_update
+
+
+@app.callback(Output('wizard-data-after-submit-output-project-title', 'children'),
+             Input('wizard-data-input-type-title', 'n_submit'),
+             State('wizard-data-input-type-title', 'value'))
+def edit_title_wizard_data_after_submit(enter, text):
+    
+    if enter and text:
+        return html.Div([
+            html.Div(text, id='wizard-data-input-title')
+            ])
+
+    return no_update
+
 
 def show_page_wizard_parameters():
     return html.Div([
