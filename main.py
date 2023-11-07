@@ -53,6 +53,9 @@ def home():
 #   WIZARD
 #==============================================================
 
+#Jak zapisywać dane?
+#https://dash.plotly.com/dash-core-components/store
+
 def wizard():
     return html.Div(children=[
         dcc.Tabs(vertical=True, children=[
