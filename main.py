@@ -157,8 +157,6 @@ def show_page_wizard_model():
                     },
                 id = "wizard-model-output-view"
             ),
-        ], id="css-radio-items"),
-        html.Div([
             dcc.RadioItems([
                 {
                 "label":[
@@ -182,6 +180,8 @@ def show_page_wizard_model():
             ], value='color1', inline=False, id="wizard-model-input-radio-items-color"),
         ], id="css-radio-items"),
         #https://dash.plotly.com/dash-core-components/radioitems
+        html.Button("Download JSON", id="btn_json"),
+        dcc.Download(id="download-dataframe-json"),
         html.Button(dcc.Link('Back', href='/parameters'), className='back-button'),
         html.Button(dcc.Link('Finish', href='/main_dash'), className='finish-button')
     ])
@@ -640,6 +640,7 @@ def update_table_wizard_parameters(timestamp, objectives_val, data, params, para
 @app.callback(Output('wizard-model-output-view', 'children'),
               Input('wizard-model-input-radio-items', 'value'))
 def show_view_wizard_model(agg):
+
     if agg == 'R':
         return html.Div(
                 style = {
@@ -647,7 +648,6 @@ def show_view_wizard_model(agg):
                     'width' : '50px',
                     'background-color': '#FF0000'
                     },
-                id = "wizard-model-output-view"
             )
     if agg == 'I':
         return html.Div(
@@ -656,7 +656,6 @@ def show_view_wizard_model(agg):
                     'width' : '50px',
                     'background-color': '#00FF00'
                     },
-                id = "wizard-model-output-view"
             )
     if agg == 'A':
         return html.Div(
@@ -665,9 +664,21 @@ def show_view_wizard_model(agg):
                     'width' : '50px',
                     'background-color': '#0000FF'
                     },
-                id = "wizard-model-output-view"
             )
     
+    return no_update
+
+    
+@app.callback(Output('download-dataframe-json', 'data'),
+              Input('btn_json', 'n_clicks'),
+              Input('wizard-parameters-input-parameters-table', 'data'),
+              prevent_initial_call=True)
+def finish_wizard(click, params):
+
+    if click:
+        df = pd.DataFrame(params)
+        return dcc.send_data_frame(df.to_json, "mydf.json")
+
 
 '''  
 #CHECK PARAMETERS
@@ -713,7 +724,10 @@ def return_toggle_switch(id, o):
 #==============================================================
 
 def main_dash():
+    
+
     return html.Div(children=[
+        html.Div(id='wizard-data'),
         dcc.Tabs(children=[
             dcc.Tab(label='Ranking vizualiazation', children=[
                 ranking_vizualization()
