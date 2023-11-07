@@ -149,7 +149,7 @@ def show_page_wizard_model():
                 ],
                 "value": 'A',
                 },
-            ], id="css-radio-items", inline=False),
+            ], value='R', inline=False, id="wizard-model-input-radio-items"),
             html.Div(
                 style = {
                     'height': '50px',
@@ -158,7 +158,7 @@ def show_page_wizard_model():
                     },
                 id = "wizard-model-output-view"
             ),
-        ]),
+        ], id="css-radio-items"),
         #dcc.RadioItems(['R', 'I','A'], 'R')], id="css-radio-items"),
         html.Button(dcc.Link('Back', href='/parameters'), className='back-button'),
         html.Button(dcc.Link('Finish', href='/main_dash'), className='finish-button')
@@ -616,7 +616,7 @@ def update_table_wizard_parameters(timestamp, objectives_val, data, params, para
 
 
 @app.callback(Output('wizard-model-output-view', 'children'),
-              Input('css-radio-items', 'value'))
+              Input('wizard-model-input-radio-items', 'value'))
 def show_view_wizard_model(agg):
     if agg == 'R':
         return html.Div(
