@@ -105,7 +105,10 @@ def show_page_wizard_data_before_submit():
 
 def show_page_wizard_data_after_submit(data):
     return html.Div([
-        html.Div('Data Loaded'),
+        html.Div([
+            html.Div(id='wizard-data-output-title'),
+            html.Button(id='wizard-data-input-title-button', children='title')
+        ], id='wizard-data-after-submit-project-title'),
         dash_table.DataTable(
             data=data,
             columns=[{'name': i, 'id': i} for i in list(data[0].keys())],
@@ -114,6 +117,20 @@ def show_page_wizard_data_after_submit(data):
         html.Button(dcc.Link('Next', href='/parameters'), className='next-button')
     ])
 
+'''
+            dcc.Input(id='wizard-data-after-submit-project-title',
+                    type = 'text',
+                    placeholder='project_title',
+                    minLength=1,
+                    maxLength=20),
+'''
+@app.callback(Output('wizard-data-output-title', 'children'),
+             Input('wizard-data-input-title-button', 'n_clicks'))
+def edit_title_wizard_data_after_submit(click):
+    if click:
+        return click
+    
+    return "Project_title"
 
 def show_page_wizard_parameters():
     return html.Div([
@@ -463,7 +480,8 @@ def submit_files_wizard_data(n, data, params):
                 },
              }
         ),
-        #html.Div(switches)
+        html.Div("Set all to Min/Max"),
+        dcc.Dropdown(['-', 'min', 'max'], '-', id = 'wizard-parameters-input-objectives-dropdown', clearable=False),
     ]), show_page_wizard_data_after_submit(data)
 
 
@@ -503,12 +521,15 @@ def parse_warning(warning):
 @app.callback(Output('wizard-parameters-output-params-table', 'children'),
               Output('wizard-parameters-output-warning', 'children'),
               Input('wizard-parameters-input-parameters-table', 'data_timestamp'),
+              Input('wizard-parameters-input-objectives-dropdown', 'value'),
               State('wizard_state_stored-data','data'),
               State('wizard-parameters-input-parameters-table', 'data'),
               State('wizard-parameters-input-parameters-table', 'data_previous'))
-def update_table_wizard_parameters(timestamp, data, params, params_previous):
+def update_table_wizard_parameters(timestamp, objectives_val, data, params, params_previous):
     #https://community.plotly.com/t/detecting-changed-cell-in-editable-datatable/26219/3
     #https://dash.plotly.com/duplicate-callback-outputs
+
+
     params_labels = ['weight', 'expert-min', 'expert-max', 'objective']
     columns = return_columns_wizard_parameters_params_table(params_labels)
 
@@ -524,6 +545,16 @@ def update_table_wizard_parameters(timestamp, data, params, params_previous):
         params = params_previous
     else:
         children = html.Div([])
+
+    if params_previous:
+        df_params_prev = pd.DataFrame.from_dict(params_previous).set_index(criteria_params[0])
+    
+        if not df_params['objective'].equals(df_params_prev['objective']):
+            objectives_val = '-'
+
+    if objectives_val != '-':
+        for id, val in enumerate(params):
+            params[id]['objective'] = objectives_val
 
     #switches = [return_toggle_switch(id, o) for id, o in enumerate(df_params['objective'])]
 
@@ -546,7 +577,8 @@ def update_table_wizard_parameters(timestamp, data, params, params_previous):
                 },
              }
         ),
-        #html.Div(switches)
+        html.Div("Set all to Min/Max"),
+        dcc.Dropdown(['-', 'min', 'max'], objectives_val, id = 'wizard-parameters-input-objectives-dropdown', clearable=False),
     ]), children
 
 '''  
