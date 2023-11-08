@@ -577,7 +577,8 @@ def check_updated_params_wizard_parameters(df_data, df_params):
     lower_bound = df_data.min() 
     upper_bound = df_data.max()
 
-    for lower, upper, mini, maxi in zip(lower_bound, upper_bound, df_params['expert-min'], df_params['expert-max']):
+
+    for lower, upper, mini, maxi in zip(lower_bound[1:], upper_bound[1:], df_params['expert-min'], df_params['expert-max']):
         if mini > maxi:
             warnings.append("Min value must be lower or equal than max value")
         
