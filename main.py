@@ -48,114 +48,123 @@ def home_layout():
 
 def wizard():
     return html.Div([
+        
+        # Data before Submit
         html.Div([
-        html.Div('Upload data'),
-        html.Div([
-            dcc.Store(id='wizard_state_stored-data', data=None),
-            dcc.Upload(
-                id='wizard-data-input-upload-data',
-                children=html.Div([
-                    'Drag and Drop or Select Files'
-                ], id = 'wizard-data-output-upload-data-filename'),
-                multiple=False
-            ),
-            html.Div(id='wizard-data-input-remove-data'),
-            ], id = 'wizard-data-input-remove-upload-data'),
+            html.Div('Upload data'),
+            html.Div([
+                dcc.Store(id='wizard_state_stored-data', data=None),
+                dcc.Upload(
+                    id='wizard-data-input-upload-data',
+                    children=html.Div([
+                        'Drag and Drop or Select Files'
+                    ], id = 'wizard-data-output-upload-data-filename'),
+                    multiple=False
+                ),
+                html.Div(id='wizard-data-input-remove-data'),
+                ], id = 'wizard-data-input-remove-upload-data'),
 
-        html.Div('Upload parameters'),
-        html.Div([
-            dcc.Store(id='wizard_state_stored-params', data=None),
-            dcc.Upload(
-                id='wizard-data-input-upload-params',
-                children=html.Div([
-                    'Drag and Drop or Select Files'
-                ], id = 'wizard-data-output-upload-params-filename'),
-                multiple=False
-            ),
-            html.Div(id='wizard-data-input-remove-params'),
-            ], id = 'wizard-data-input-remove-upload-params'),
+            html.Div('Upload parameters'),
+            html.Div([
+                dcc.Store(id='wizard_state_stored-params', data=None),
+                dcc.Upload(
+                    id='wizard-data-input-upload-params',
+                    children=html.Div([
+                        'Drag and Drop or Select Files'
+                    ], id = 'wizard-data-output-upload-params-filename'),
+                    multiple=False
+                ),
+                html.Div(id='wizard-data-input-remove-params'),
+                ], id = 'wizard-data-input-remove-upload-params'),
 
-        html.Div(id='wizard-data-output-parsed-data'),
-        html.Div(id='wizard-data-output-parsed-params'),
-        html.Div(id='data-preview'),
-        html.Div(id='data-table', style={'display': 'none'}),
-        #html.Button("Submit", id='wizard_data_input_submit-button', n_clicks=0, style={'display':'none'})
-        html.Button("Submit", id='wizard_data_input_submit-button'),
-    ], id='data_upload_layout', style={'display': 'block'}),
-    html.Div([
+            html.Div(id='wizard-data-output-parsed-data-before'),
+            html.Div(id='wizard-data-output-parsed-params'),
+            html.Div(id='data-preview'),
+            html.Div(id='data-table', style={'display': 'none'}),
+            #html.Button("Submit", id='wizard_data_input_submit-button', n_clicks=0, style={'display':'none'})
+            html.Button("Submit", id='wizard_data_input_submit-button'),
+        ], id='data_upload_layout', style={'display': 'block'}),
+
+        # Data after Submit
         html.Div([
-            html.Div("project_title", id='wizard-data-input-title'),
-            #html.Button(id='wizard-data-input-title-button', children='title')
-        ], id='wizard-data-after-submit-output-project-title'),
-        html.Div(id='wizard-data-output-parsed-data'),
-        html.Button('Next', id='data-to-param', className='next-button')
-    ], id='data_layout', style={'display': 'none'}),
-    html.Div([
-        html.Div(id='wizard-parameters-output-params-table'),
-        html.Div(id = 'wizard-parameters-output-warning', children = ''),
-        html.Button('Back', id='param-to-data', className='back-button'),
-        html.Button('Next', id='param-to-model', className='next-button')
-    ], id='parameters_layout', style={'display': 'none'}),
-    html.Div([
+            html.Div([
+                html.Div("project_title", id='wizard-data-input-title'),
+                #html.Button(id='wizard-data-input-title-button', children='title')
+            ], id='wizard-data-after-submit-output-project-title'),
+            html.Div(id='wizard-data-output-parsed-data-after'),
+            html.Button('Next', id='data-to-param', className='next-button')
+        ], id='data_layout', style={'display': 'none'}),
+
+        #Parameters
         html.Div([
-            dcc.RadioItems([
-                {
-                "label":[
-                    html.Div("R description")
-                ],
-                "value": 'R',
-                },{
-                "label":[
-                    html.Div("I description")
-                ],
-                "value": 'I',
-                },{
-                "label":[
-                    html.Div("A description")
-                ],
-                "value": 'A',
-                },
-            ], value='R', inline=False, id="wizard-model-input-radio-items"),
-            html.Div(
-                style = {
-                    'height': '50px',
-                    'width' : '50px',
-                    'background-color': '#FF0000'
+            html.Div(id='wizard-parameters-output-params-table'),
+            html.Div(id = 'wizard-parameters-output-warning', children = ''),
+            html.Button('Back', id='param-to-data', className='back-button'),
+            html.Button('Next', id='param-to-model', className='next-button')
+        ], id='parameters_layout', style={'display': 'none'}),
+
+        #Model
+        html.Div([
+            html.Div([
+                dcc.RadioItems([
+                    {
+                    "label":[
+                        html.Div("R description")
+                    ],
+                    "value": 'R',
+                    },{
+                    "label":[
+                        html.Div("I description")
+                    ],
+                    "value": 'I',
+                    },{
+                    "label":[
+                        html.Div("A description")
+                    ],
+                    "value": 'A',
                     },
-                id = "wizard-model-output-view"
-            ),
-        ], id="css-radio-items"),
-        html.Div([
-            dcc.RadioItems([
-                {
-                "label":[
-                    html.Img(),
-                    html.Div("link to image1")
-                ],
-                "value": 'color1',
-                },{
-                "label":[
-                    html.Img(),
-                    html.Div("link to image2")
-                ],
-                "value": 'color2',
-                },{
-                "label":[
-                    html.Img(),
-                    html.Div("link to image3")
-                ],
-                "value": 'color3',
-                },
-            ], value='color1', inline=False, id="wizard-model-input-radio-items-color"),
-        ], id="css-radio-items"),
-        #https://dash.plotly.com/dash-core-components/radioitems
-        html.Button('Back', id='model-to-param', className='back-button'),
-        html.Button(dcc.Link('Finish', href='/main_dash_layout'), className='finish-button')
-    ], id='model_layout', style={'display': 'none'})
+                ], value='R', inline=False, id="wizard-model-input-radio-items"),
+                html.Div(
+                    style = {
+                        'height': '50px',
+                        'width' : '50px',
+                        'background-color': '#FF0000'
+                        },
+                    id = "wizard-model-output-view"
+                ),
+            ], id="css-radio-items"),
+            html.Div([
+                dcc.RadioItems([
+                    {
+                    "label":[
+                        html.Img(),
+                        html.Div("link to image1")
+                    ],
+                    "value": 'color1',
+                    },{
+                    "label":[
+                        html.Img(),
+                        html.Div("link to image2")
+                    ],
+                    "value": 'color2',
+                    },{
+                    "label":[
+                        html.Img(),
+                        html.Div("link to image3")
+                    ],
+                    "value": 'color3',
+                    },
+                ], value='color1', inline=False, id="wizard-model-input-radio-items-color"),
+            ], id="css-radio-items"),
+            #https://dash.plotly.com/dash-core-components/radioitems
+            html.Button('Back', id='model-to-param', className='back-button'),
+            html.Button(dcc.Link('Finish', href='/main_dash_layout'), className='finish-button')
+        ], id='model_layout', style={'display': 'none'})
     ])
 
 
-@app.callback(Output('wizard-data-output-parsed-data', 'children', allow_duplicate=True),
+@app.callback(Output('wizard-data-output-parsed-data-before', 'children', allow_duplicate=True),
+              Output('wizard-data-output-parsed-data-after', 'children', allow_duplicate=True),
               Output('wizard-data-output-upload-data-filename', 'children'),
               Output('wizard-data-input-remove-data', 'children', allow_duplicate=True),
               Input('wizard-data-input-upload-data', 'contents'),
@@ -171,13 +180,14 @@ def update_wizard_data_output_data(contents_data, name_data, date_data):
                 
         remove = html.Button(id='wizard_data_input_remove-data-button', children='Remove')
 
-        return child, name_data, remove   
+        return child, child, name_data, remove
     else:
         raise PreventUpdate
 
 
 @app.callback(Output('wizard-data-input-remove-upload-data', 'children'),
-              Output('wizard-data-output-parsed-data', 'children'),
+              Output('wizard-data-output-parsed-data-before', 'children'),
+              Output('wizard-data-output-parsed-data-after', 'children'),
               Output('wizard-data-input-remove-data', 'children'),
               Input('wizard_data_input_remove-data-button','n_clicks'))
 def remove_file_wizard_data_data_file(n):
@@ -197,7 +207,7 @@ def remove_file_wizard_data_data_file(n):
             ]
     table = None
     remove = None
-    return child, table, remove
+    return child, table, table, remove
 
 
 @app.callback(Output('wizard-data-output-parsed-params', 'children', allow_duplicate=True),
