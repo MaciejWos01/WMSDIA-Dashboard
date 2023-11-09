@@ -51,6 +51,14 @@ def wizard():
         
         # Data before Submit
         html.Div([
+            html.Div([
+                html.Div('Delimiter:'),
+                dcc.Input(id='wizard-data-input-delimiter',
+                            type = 'text',
+                            placeholder=',',
+                            minLength=0,
+                            maxLength=1),
+                ]),
             html.Div('Upload data'),
             html.Div([
                 dcc.Store(id='wizard_state_stored-data', data=None),
@@ -168,15 +176,17 @@ def wizard():
               Output('wizard-data-output-upload-data-filename', 'children'),
               Output('wizard-data-input-remove-data', 'children', allow_duplicate=True),
               Input('wizard-data-input-upload-data', 'contents'),
+              Input('wizard-data-input-delimiter', 'n_submit'),
+              State('wizard-data-input-delimiter', 'value'),
               State('wizard-data-input-upload-data', 'filename'),
               State('wizard-data-input-upload-data', 'last_modified'),
               prevent_initial_call=True)
-def update_wizard_data_output_data(contents_data, name_data, date_data):
+def update_wizard_data_output_data(contents_data, enter, delimiter, name_data, date_data):
 
     if contents_data is not None:
         child = [
-            parse_file_wizard_data_data(c, n, d) for c, n, d in
-            zip([contents_data], [name_data], [date_data])]  
+            parse_file_wizard_data_data(c, n, d, deli) for c, n, d, deli  in
+            zip([contents_data], [name_data], [date_data], [delimiter])]  
                 
         remove = html.Button(id='wizard_data_input_remove-data-button', children='Remove')
 
@@ -255,15 +265,20 @@ def remove_file_wizard_data_params_file(n):
     return child, table, remove
 
 
-def parse_file_wizard_data_data(contents, filename, date):
+def parse_file_wizard_data_data(contents, filename, date, delimiter):
+    
     content_type, content_string = contents.split(',')
 
     decoded = base64.b64decode(content_string)
+    
+    if not delimiter:
+        delimiter = ','
+        
     try:
         if filename.endswith('.csv'):
             # Assume that the user uploaded a CSV file
             df = pd.read_csv(
-                io.StringIO(decoded.decode('utf-8')), sep=';')
+                io.StringIO(decoded.decode('utf-8')), sep = delimiter)
         elif filename.endswith('.xls'):
             # Assume that the user uploaded an excel file
             df = pd.read_excel(io.BytesIO(decoded))
