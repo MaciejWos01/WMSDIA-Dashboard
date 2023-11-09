@@ -3,6 +3,8 @@ import json
 import io
 #import datetime
 
+import time
+import MSDTransformer as msdt
 import dash
 from dash import Dash
 from dash import no_update
@@ -19,6 +21,7 @@ import plotly.express as px
 import dash_mantine_components as dmc
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUMEN, dbc.icons.FONT_AWESOME])
+params_g = None
 
 def header():
     return dbc.Row([
@@ -296,6 +299,8 @@ def parse_file_wizard_data_params(contents, filename, date):
     try:
         if filename.endswith('.json'):
             content_dict = json.loads(decoded)
+            global params_g 
+            params_g = content_dict
         else:
             return "Please upload a file with the .json extension"
     except Exception as e:
@@ -634,6 +639,9 @@ def update_table_wizard_parameters(timestamp, objectives_val, data, params, para
     if objectives_val != '-':
         for id, val in enumerate(params):
             params[id]['objective'] = objectives_val
+    
+    global params_g
+    params_g = params
 
     #switches = [return_toggle_switch(id, o) for id, o in enumerate(df_params['objective'])]
 
@@ -737,25 +745,20 @@ def return_toggle_switch(id, o):
 #   PLAYGROUND
 #==============================================================
 
-def model_setter():
-    pass
-
-def ranking_vizualization():
-    #TO DO
-    pass
-
-def improvement_actions():
-  #TO DO
-  pass
-
 def main_dash_layout():
+    
+    data = pd.read_csv("bus.csv", sep = ';', index_col = 0)
+    objectives = ['max', 'max', 'min', 'max', 'min', 'min', 'min', 'max']
+    buses = msdt.MSDTransformer(msdt.RTOPSIS, 'gurobi')
+    buses.fit_transform(data, None, objectives,  None)
     return html.Div(children=[
+        html.Div(id='wizard-data'),
         dcc.Tabs(children=[
             dcc.Tab(label='Ranking vizualiazation', children=[
-                ranking_vizualization()
+                ranking_vizualization(buses)
             ]),
             dcc.Tab(label='Improvement actions', children=[
-                improvement_actions()
+                improvement_actions(buses)
             ]),
             dcc.Tab(label='analisis of parameters', children=[
                 model_setter()
@@ -763,6 +766,209 @@ def main_dash_layout():
         ])
     ])
 
+def model_setter():
+    return html.Div(id = 'param-table', children=None)
+
+@app.callback(
+        Output('param-table', 'children'),
+        Input('param-table', 'value'),
+        prevent_initial_call = False
+)
+def display_parameters(a):
+    global params_g
+    params = params_g
+
+    params_labels = ['weight', 'expert-min', 'expert-max', 'objective']
+    columns = return_columns_wizard_parameters_params_table(params_labels)
+    df = pd.DataFrame.from_dict(params)
+
+    return dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns])
+
+
+def ranking_vizualization(buses):
+    df = buses.X_new.sort_values('AggFn', ascending = False).round(2)
+    df.index.rename('Name', inplace=True)
+    df.reset_index(inplace=True)
+    return html.Div(children=[
+        dcc.Graph(
+            id = 'vizualization',
+            figure = buses.plot()
+        ),
+        dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns])
+    ])
+
+def improvement_actions(buses):
+    global buses_g
+    buses_g = buses
+    return html.Div(children=[
+        html.Div(id = 'viz', children = ranking_vizualization(buses), style = {
+            'width' : '60%'
+        }),
+        html.Div(children=[
+            dcc.Dropdown(id = 'choose-method', options=[
+                {'label':method,'value':method}
+                for method in ['improvement_mean', 'improvement_std', 'improvement_features', 'improvement_genetic', 'improvement_single_feature']
+            ],
+            value = 'improvement_mean',
+            clearable = False
+            ),
+            dcc.Input(
+                id = 'alternative-to-improve',
+                type = 'text',
+                placeholder = 'alternative to improve'
+            ),
+            dcc.Input(
+                id = 'alternative-to-overcame',
+                type = 'text',
+                placeholder = 'alternative to overcame'
+            ),
+            html.Button('advanced settings', id='advanced-settings', n_clicks=0),
+            html.Div(id = 'advanced-content', children = None),
+            html.Button('aply', id = 'aply-button', n_clicks=0),
+            html.Div(id = 'improvement-result', children=None)
+        ], style={
+            'width' : '40%',
+        })
+    ], style={
+        'display': 'flex'
+    })
+
+@app.callback(
+    Output('advanced-content', 'children'),
+    Input('choose-method', 'value'),
+    Input('advanced-settings', 'n_clicks'),
+    prevent_initial_call = False
+)
+def set_advanced_settings(value, n_clicks):
+    if n_clicks % 2 == 0:
+        is_hidden = 'hidden'
+    else:
+        is_hidden = 'visible'
+    if value == 'improvement_mean':
+        return html.Div(children=[
+            dcc.Input(
+            type = 'number',
+            placeholder = 'improvement ratio'
+            ),
+            dcc.Input(
+            type = 'text',
+            placeholder = 'allow std'
+            )
+        ], style={
+            'visibility' : is_hidden,
+        })
+    elif value == 'improvement_features':
+        return html.Div(children=[
+            dcc.Input(
+            type = 'number',
+            placeholder = 'improvement ratio'
+            ),
+            dcc.Input(
+            type = 'text',
+            placeholder = 'features to change'
+            ),
+            dcc.Input(
+            type = 'text',
+            placeholder = 'boundary values'
+            )
+        ], style={
+            'visibility' : is_hidden,
+        })
+    elif value == 'improvement_genetic':
+        return html.Div(children=[
+            dcc.Input(
+            type = 'number',
+            placeholder = 'improvement ratio'
+            ),
+            dcc.Input(
+            type = 'text',
+            placeholder = 'features to change'
+            ),
+            dcc.Input(
+            type = 'text',
+            placeholder = 'boundary values'
+            ),
+            dcc.Input(
+            type = 'text',
+            placeholder = 'allow deterioration'
+            ),
+            dcc.Input(
+            type = 'text',
+            placeholder = 'popsize'
+            ),
+            dcc.Input(
+            type = 'text',
+            placeholder = 'generations'
+            )
+        ], style={
+            'visibility' : is_hidden,
+        })
+    elif value == 'improvement_single_feature':
+        return html.Div(children=[
+            dcc.Input(
+            type = 'number',
+            placeholder = 'improvement ratio'
+            ),
+            dcc.Input(
+            type = 'text',
+            placeholder = 'feature to change'
+            )
+        ], style={
+            'visibility' : is_hidden,
+        })
+    elif value == 'improvement_std':
+        return html.Div(children=[
+            dcc.Input(
+            type = 'number',
+            placeholder = 'improvement ratio'
+            )
+        ], style={
+            'visibility' : is_hidden,
+        })
+
+@app.callback(
+    Output('improvement-result', 'children'),
+    [Input('aply-button', 'n_clicks')],
+    #Input('alternative-to-improve', 'value'),
+    #Input('alternative-to-overcame', 'value'),
+    State('alternative-to-improve', 'value'),
+    State('alternative-to-overcame', 'value'),
+    State('choose-method', 'value'),
+    prevent_initial_call = True
+)
+def improvement_results(n, alternative_to_imptove, alternative_to_overcame, method):
+    
+    if n>0:
+        global improvement
+        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame)
+        return dash_table.DataTable(improvement.to_dict('records'), [{"name": i, "id": i} for i in improvement.columns])
+    else:
+        raise PreventUpdate
+
+
+@app.callback(
+    Output('viz', 'children'),
+    [Input('aply-button', 'n_clicks')],
+    #Input('alternative-to-improve', 'value'),
+    State(component_id='alternative-to-improve', component_property='value'),
+    prevent_initial_call = True
+)
+def vizualization_change(n, alternative_to_imptove):
+    time.sleep(1)
+    if n>0:
+        df = buses_g.X_new.sort_values('AggFn', ascending = False).round(2)
+        df.index.rename('Name', inplace=True)
+        df.reset_index(inplace=True)
+        a = buses_g.plot()
+        return html.Div(children=[
+            dcc.Graph(
+                id = 'vizualization',
+                figure = buses_g.plot2(alternative_to_imptove, improvement)
+            ),
+            dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns])
+        ])
+    else:
+        raise PreventUpdate
 
 #==============================================================
 #   MAIN
@@ -792,4 +998,4 @@ def display_page(pathname):
         return '404 - Page not found'
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=False)
