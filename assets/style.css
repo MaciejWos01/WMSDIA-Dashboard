@@ -103,3 +103,7 @@
     flex: 1;
     margin: 20px;
 }
+
+.Select-menu-outer {
+    display : block !important;
+    }
