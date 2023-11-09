@@ -52,6 +52,12 @@ def wizard():
         # Data before Submit
         html.Div([
             html.Div([
+                html.Div('Decimal:'),
+                dcc.Input(id='wizard-data-input-decimal',
+                            type = 'text',
+                            placeholder='.',
+                            minLength=0,
+                            maxLength=1),
                 html.Div('Delimiter:'),
                 dcc.Input(id='wizard-data-input-delimiter',
                             type = 'text',
@@ -178,15 +184,17 @@ def wizard():
               Input('wizard-data-input-upload-data', 'contents'),
               Input('wizard-data-input-delimiter', 'n_submit'),
               State('wizard-data-input-delimiter', 'value'),
+              Input('wizard-data-input-decimal', 'n_submit'),
+              State('wizard-data-input-decimal', 'value'),
               State('wizard-data-input-upload-data', 'filename'),
               State('wizard-data-input-upload-data', 'last_modified'),
               prevent_initial_call=True)
-def update_wizard_data_output_data(contents_data, enter, delimiter, name_data, date_data):
+def update_wizard_data_output_data(contents_data, enter_del, delimiter, enter_sep, decimal, name_data, date_data):
 
     if contents_data is not None:
         child = [
-            parse_file_wizard_data_data(c, n, d, deli) for c, n, d, deli  in
-            zip([contents_data], [name_data], [date_data], [delimiter])]  
+            parse_file_wizard_data_data(c, n, d, deli, dec) for c, n, d, deli, dec  in
+            zip([contents_data], [name_data], [date_data], [delimiter], [decimal])]  
                 
         remove = html.Button(id='wizard_data_input_remove-data-button', children='Remove')
 
@@ -265,7 +273,7 @@ def remove_file_wizard_data_params_file(n):
     return child, table, remove
 
 
-def parse_file_wizard_data_data(contents, filename, date, delimiter):
+def parse_file_wizard_data_data(contents, filename, date, delimiter, dec):
     
     content_type, content_string = contents.split(',')
 
@@ -273,12 +281,15 @@ def parse_file_wizard_data_data(contents, filename, date, delimiter):
     
     if not delimiter:
         delimiter = ','
+
+    if not dec:
+        dec = '.'
         
     try:
         if filename.endswith('.csv'):
             # Assume that the user uploaded a CSV file
             df = pd.read_csv(
-                io.StringIO(decoded.decode('utf-8')), sep = delimiter)
+                io.StringIO(decoded.decode('utf-8')), sep = delimiter, decimal = dec)
         elif filename.endswith('.xls'):
             # Assume that the user uploaded an excel file
             df = pd.read_excel(io.BytesIO(decoded))
