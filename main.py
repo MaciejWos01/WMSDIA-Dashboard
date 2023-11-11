@@ -462,7 +462,12 @@ def fill_parameters_wizard_parameters_params(params, df, param_keys):
         m_criteria = df.shape[1]
         return np.ones(m_criteria), df.min(), df.max(), np.repeat('max', m_criteria)
     else:
-        return params[param_keys[1]], params[param_keys[2]], params[param_keys[3]], params[param_keys[4]]
+        weights = list(params[param_keys[1]].values())
+        mins = list(params[param_keys[2]].values())
+        maxs = list(params[param_keys[3]].values())
+        objectives = list(params[param_keys[4]].values())
+
+        return weights, mins, maxs, objectives
     
 @app.callback([Output('data-preview', 'children'),
               Output('data-table', 'children', allow_duplicate=True),
@@ -488,6 +493,7 @@ def submit(n_clicks, data, params):
         data_table = dcc.Store(id='wizard_state_stored-data', data=data)
         if params is not None and check_parameters_wizard_data_files(data, params, param_keys) == -1:
             print('Prevent update')
+            return no_update, no_update, no_update, no_update, no_update, no_update, no_update
         
         
         columns = return_columns_wizard_parameters_params_table(param_keys)
@@ -501,10 +507,14 @@ def submit(n_clicks, data, params):
 
         for id, c in enumerate(criteria[1:]):
             data_params.append(dict(criterion=c,
-                        **{param_keys[1] : weights[str(id)],
-                        param_keys[2] : expert_mins[str(id)],
-                        param_keys[3] : expert_maxs[str(id)],
-                        param_keys[4] : objectives[str(id)]}))
+                        **{param_keys[1] : weights[id],
+                        param_keys[2] : expert_mins[id],
+                        param_keys[3] : expert_maxs[id],
+                        param_keys[4] : objectives[id]}))
+        
+        if not data_params:
+            print('Prevent update')
+            return no_update, no_update, no_update, no_update, no_update, no_update, no_update
             
         params_table = html.Div([
         #https://dash.plotly.com/datatable/editable
