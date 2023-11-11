@@ -1,6 +1,7 @@
 {
-    "Weights" : [1, 1, 1, 1, 1, 1, 1, 1],
-    "Expert Min" : [0, 0, 0, 0, 0, 0, 0, 0],
-    "Expert Max" : [90, 2, 95, 486, 27, 33, 4, 148],
-    "Objective" : ["max", "max", "max", "max", "min", "min", "min", "min"]
+"criterion":{"0":"MaxSpeed","1":"ComprPressure","2":"Blacking","3":"Torque","4":"SummerCons","5":"WinterCons","6":"OilCons","7":"HorsePower"},
+"weight":{"0":1,"1":1,"2":1,"3":1,"4":1,"5":1,"6":1,"7":1},
+"expert-min":{"0":60,"1":1,"2":26,"3":400,"4":20,"5":23,"6":0,"7":96},
+"expert-max":{"0":90,"1":2,"2":95,"3":486,"4":27,"5":33,"6":4,"7":148},
+"objective":{"0":"max","1":"max","2":"max","3":"max","4":"max","5":"max","6":"max","7":"max"}
 }

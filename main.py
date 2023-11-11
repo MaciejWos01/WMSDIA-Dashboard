@@ -360,60 +360,60 @@ def parse_file_wizard_data_params(contents, filename, date):
     ])
 
 
-def check_parameters_wizard_data_files(data, params):
+def check_parameters_wizard_data_files(data, params, param_keys):
 
     criteria = list(data[0].keys())
 
     df_data = pd.DataFrame.from_dict(data).set_index(criteria[0])
     df_params = pd.DataFrame.from_dict(params)
-    
+
     n_alternatives = df_data.shape[0]
     m_criteria = df_data.shape[1]
 
-    if "Weights" in df_params:
-        if len(df_params["Weights"]) != m_criteria:
+    if param_keys[1] in df_params:
+        if len(df_params[param_keys[1]]) != m_criteria:
             print("Invalid value 'weights'.")
             return -1
-        if not all(type(item) in [int, float, np.float64] for item in df_params["Weights"]):
+        if not all(type(item) in [int, float, np.float64] for item in df_params[param_keys[1]]):
             print("Invalid value 'weights'. Expected numerical value (int or float).")
             return -1
-        if not all(item >= 0 for item in df_params["Weights"]):
+        if not all(item >= 0 for item in df_params[param_keys[1]]):
             print("Invalid value 'weights'. Expected value must be non-negative.")
             return -1
-        if not any(item > 0 for item in df_params["Weights"]):
+        if not any(item > 0 for item in df_params[param_keys[1]]):
             print("Invalid value 'weights'. At least one weight must be positive.")
             return -1
     else:
         return -1
     
-    if "Objective" in df_params:
-        if len(df_params["Objective"]) != m_criteria:
+    if param_keys[4] in df_params:
+        if len(df_params[param_keys[4]]) != m_criteria:
             print("Invalid value 'objectives'.")
             return -1
-        if not all(item in ["min", "max"] for item in df_params["Objective"]):
+        if not all(item in ["min", "max"] for item in df_params[param_keys[4]]):
             print("Invalid value at 'objectives'. Use 'min', 'max', 'gain', 'cost', 'g' or 'c'.")
             return -1
     else:
         return -1
     
-    if "Expert Min" in df_params and "Expert Max" in df_params:
-        if len(df_params["Expert Min"]) != m_criteria:
+    if param_keys[2] in df_params and param_keys[3] in df_params:
+        if len(df_params[param_keys[2]]) != m_criteria:
             print("Invalid value at 'expert_range'. Length of should be equal to number of criteria.")
             return -1
-        if len(df_params["Expert Max"]) != m_criteria:
+        if len(df_params[param_keys[3]]) != m_criteria:
             print("Invalid value at 'expert_range'. Length of should be equal to number of criteria.")
             return -1
-        if not all(type(item) in [int, float, np.float64] for item in df_params["Expert Min"]):
+        if not all(type(item) in [int, float, np.float64] for item in df_params[param_keys[2]]):
             print("Invalid value at 'expert_range'. Expected numerical value (int or float).")
             return -1
-        if not all(type(item) in [int, float, np.float64] for item in df_params["Expert Max"]):
+        if not all(type(item) in [int, float, np.float64] for item in df_params[param_keys[3]]):
             print("Invalid value at 'expert_range'. Expected numerical value (int or float).")
             return -1
         
         lower_bound = df_data.min() 
         upper_bound = df_data.max()
 
-        for lower, upper, mini, maxi in zip(lower_bound, upper_bound, df_params["Expert Min"], df_params["Expert Max"]):
+        for lower, upper, mini, maxi in zip(lower_bound, upper_bound, df_params[param_keys[2]], df_params[param_keys[3]]):
             if mini > maxi:
                 print("Invalid value at 'expert_range'. Minimal value  is bigger then maximal value.")
                 return -1
@@ -429,26 +429,26 @@ def check_parameters_wizard_data_files(data, params):
     return 1
 
 
-def return_columns_wizard_parameters_params_table(params_labels):
+def return_columns_wizard_parameters_params_table(param_keys):
     columns = [{
                     'id': 'criterion', 
                     'name': 'Criterion',
                     'type': 'text',
                     'editable': False
                 },{
-                    'id': params_labels[0], 
+                    'id': param_keys[1], 
                     'name': 'Weight',
                     'type': 'numeric'
                 },{
-                    'id': params_labels[1], 
+                    'id': param_keys[2], 
                     'name': 'Expert Min',
                     'type': 'numeric'
                 },{
-                    'id': params_labels[2], 
+                    'id': param_keys[3], 
                     'name': 'Expert Max',
                     'type': 'numeric'
                 },{
-                    'id': params_labels[3], 
+                    'id': param_keys[4], 
                     'name': 'Objective',
                     'presentation': 'dropdown'                    
                 }]
@@ -456,13 +456,13 @@ def return_columns_wizard_parameters_params_table(params_labels):
     return columns
 
 
-def fill_parameters_wizard_parameters_params(params, df):
+def fill_parameters_wizard_parameters_params(params, df, param_keys):
 
     if params is None:
         m_criteria = df.shape[1]
         return np.ones(m_criteria), df.min(), df.max(), np.repeat('max', m_criteria)
     else:
-        return params["Weights"], params["Expert Min"], params["Expert Max"], params["Objective"]
+        return params[param_keys[1]], params[param_keys[2]], params[param_keys[3]], params[param_keys[4]]
     
 @app.callback([Output('data-preview', 'children'),
               Output('data-table', 'children', allow_duplicate=True),
@@ -476,6 +476,9 @@ def fill_parameters_wizard_parameters_params(params, df):
               State('wizard_state_stored-params','data')],
               prevent_initial_call=True)
 def submit(n_clicks, data, params):
+
+    param_keys = ['criterion', 'weight', 'expert-min', 'expert-max', 'objective']
+
     if n_clicks:
         data_preview = dash_table.DataTable(
             data=data,
@@ -483,24 +486,25 @@ def submit(n_clicks, data, params):
             page_size=8
         )
         data_table = dcc.Store(id='wizard_state_stored-data', data=data)
-        if params is not None and check_parameters_wizard_data_files(data, params) == -1:
+        if params is not None and check_parameters_wizard_data_files(data, params, param_keys) == -1:
             print('Prevent update')
         
-        params_labels = ['weight', 'expert-min', 'expert-max', 'objective']
-        columns = return_columns_wizard_parameters_params_table(params_labels)
+        
+        columns = return_columns_wizard_parameters_params_table(param_keys)
         
         criteria = list(data[0].keys())
         df = pd.DataFrame.from_dict(data).set_index(criteria[0])
 
-        weights, expert_mins, expert_maxs, objectives = fill_parameters_wizard_parameters_params(params, df)
+        weights, expert_mins, expert_maxs, objectives = fill_parameters_wizard_parameters_params(params, df, param_keys)
+
         data_params = []
 
         for id, c in enumerate(criteria[1:]):
             data_params.append(dict(criterion=c,
-                        **{params_labels[0] : weights[id],
-                        params_labels[1] : expert_mins[id],
-                        params_labels[2] : expert_maxs[id],
-                        params_labels[3] : objectives[id]}))
+                        **{param_keys[1] : weights[str(id)],
+                        param_keys[2] : expert_mins[str(id)],
+                        param_keys[3] : expert_maxs[str(id)],
+                        param_keys[4] : objectives[str(id)]}))
             
         params_table = html.Div([
         #https://dash.plotly.com/datatable/editable
@@ -511,7 +515,7 @@ def submit(n_clicks, data, params):
             data = data_params,
             editable = True,
             dropdown={
-                params_labels[3]: {
+                param_keys[4]: {
                     'options': [
                         {'label': i, 'value': i}
                         for i in ['min', 'max']
@@ -607,14 +611,14 @@ def edit_title_wizard_data_after_submit(enter, text):
     return no_update
 
 
-def check_updated_params_wizard_parameters(df_data, df_params):
+def check_updated_params_wizard_parameters(df_data, df_params, param_keys):
     warnings = []
 
     #weights
-    if (df_params['weight'] < 0).any():
+    if (df_params[param_keys[1]] < 0).any():
         warnings.append("Weight must be a non-negative number")
 
-    if df_params['weight'].sum() == 0:
+    if df_params[param_keys[1]].sum() == 0:
         warnings.append("At least one weight must be greater than 0")
 
     #expert range
@@ -622,7 +626,7 @@ def check_updated_params_wizard_parameters(df_data, df_params):
     upper_bound = df_data.max()
 
 
-    for lower, upper, mini, maxi in zip(lower_bound[1:], upper_bound[1:], df_params['expert-min'], df_params['expert-max']):
+    for lower, upper, mini, maxi in zip(lower_bound[1:], upper_bound[1:], df_params[param_keys[2]], df_params[param_keys[3]]):
         if mini > maxi:
             warnings.append("Min value must be lower or equal than max value")
         
@@ -653,15 +657,15 @@ def update_table_wizard_parameters(timestamp, objectives_val, data, params, para
     #https://dash.plotly.com/duplicate-callback-outputs
 
 
-    params_labels = ['weight', 'expert-min', 'expert-max', 'objective']
-    columns = return_columns_wizard_parameters_params_table(params_labels)
+    param_keys = ['criterion', 'weight', 'expert-min', 'expert-max', 'objective']
+    columns = return_columns_wizard_parameters_params_table(param_keys)
 
     criteria_params = list(params[0].keys())
     
     df_data = pd.DataFrame.from_dict(data)
     df_params = pd.DataFrame.from_dict(params).set_index(criteria_params[0])
      
-    warnings = check_updated_params_wizard_parameters(df_data, df_params)
+    warnings = check_updated_params_wizard_parameters(df_data, df_params, param_keys)
                 
     if warnings:
         children = [parse_warning(warning) for warning in warnings]
@@ -672,12 +676,12 @@ def update_table_wizard_parameters(timestamp, objectives_val, data, params, para
     if params_previous:
         df_params_prev = pd.DataFrame.from_dict(params_previous).set_index(criteria_params[0])
     
-        if not df_params['objective'].equals(df_params_prev['objective']):
+        if not df_params[param_keys[4]].equals(df_params_prev[param_keys[4]]):
             objectives_val = '-'
 
     if objectives_val != '-':
         for id, val in enumerate(params):
-            params[id]['objective'] = objectives_val
+            params[id][param_keys[4]] = objectives_val
 
     #switches = [return_toggle_switch(id, o) for id, o in enumerate(df_params['objective'])]
 
@@ -691,7 +695,7 @@ def update_table_wizard_parameters(timestamp, objectives_val, data, params, para
             data = params,
             editable = True,
             dropdown={
-                params_labels[3]: {
+                param_keys[4]: {
                     'options': [
                         {'label': i, 'value': i}
                         for i in ['min', 'max']
