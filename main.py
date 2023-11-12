@@ -99,7 +99,7 @@ def wizard():
             #html.Div(id='wizard_data_input_submit-button'),
             #html.Div(id='wizard_data_input_submit-button')
             #html.Button("Submit", id='wizard_data_input_submit-button', n_clicks=0, style={'display':'none'})
-            #html.Button("Submit", id='wizard_data_input_submit-button', style={'display':'none'}),
+            html.Button("Submit", id='wizard_data_input_submit-button', style={'display':'none'}),
         ], id='data_upload_layout', style={'display': 'block'}),
 
         # Data after Submit
@@ -184,7 +184,7 @@ def wizard():
               Output('wizard-data-output-parsed-data-after', 'children', allow_duplicate=True),
               Output('wizard-data-output-upload-data-filename', 'children'),
               Output('wizard-data-input-remove-data', 'children', allow_duplicate=True),
-              Output('wizard_data_input_submit-button', 'children', allow_duplicate=True),
+              Output('wizard_data_input_submit-button', 'style', allow_duplicate=True),
               Input('wizard-data-input-upload-data', 'contents'),
               Input('wizard-data-input-delimiter', 'n_submit'),
               State('wizard-data-input-delimiter', 'value'),
@@ -201,9 +201,8 @@ def update_wizard_data_output_data(contents_data, enter_del, delimiter, enter_se
             zip([contents_data], [name_data], [date_data], [delimiter], [decimal])]  
                 
         remove = html.Button(id='wizard_data_input_remove-data-button', children='Remove')
-        submit = html.Button(id='wizard_data_input_submit-button', children='Submit')
 
-        return child, child, name_data, remove, submit
+        return child, child, name_data, remove, {'display':'block'}
     else:
         raise PreventUpdate
 
@@ -212,7 +211,7 @@ def update_wizard_data_output_data(contents_data, enter_del, delimiter, enter_se
               Output('wizard-data-output-parsed-data-before', 'children'),
               Output('wizard-data-output-parsed-data-after', 'children'),
               Output('wizard-data-input-remove-data', 'children'),
-              Output('wizard_data_input_submit-button', 'children'),
+              Output('wizard_data_input_submit-button', 'style'),
               Input('wizard_data_input_remove-data-button','n_clicks'))
 def remove_file_wizard_data_data_file(n):
     
@@ -228,12 +227,10 @@ def remove_file_wizard_data_data_file(n):
                 multiple=False
             ),
             html.Div(id='wizard-data-input-remove-data'),
-            html.Div(id='wizard_data_input_submit-button')
             ]
     table = None
     remove = None
-    submit = None
-    return child, table, table, remove, submit
+    return child, table, table, remove, {'display':'none'}
 
 
 @app.callback(Output('wizard-data-output-parsed-params', 'children', allow_duplicate=True),
