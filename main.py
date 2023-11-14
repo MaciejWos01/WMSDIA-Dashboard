@@ -37,8 +37,8 @@ def footer():
 def home_layout():
     return html.Div(children=[
         html.Div([
-            html.Button(dcc.Link('Load your dataset using WIZARD', href='/wizard'), className='big-button'),
-            html.Button(dcc.Link('Experiment with ready dataset', href='/main_dash_layout'), className='big-button'),
+            dcc.Link(html.Button('Load your dataset using WIZARD', className='big-button'), href='/wizard'),
+            dcc.Link(html.Button('Experiment with ready dataset', className='big-button'), href='/main_dash_layout'),
         ], className='button-container')
     ])
 
@@ -52,45 +52,46 @@ def wizard():
         # Data before Submit
         html.Div([
             html.Div([
-                html.Div('Decimal:'),
-                dcc.Input(id='wizard-data-input-decimal',
-                            type = 'text',
-                            placeholder='.',
-                            minLength=0,
-                            maxLength=1),
-                html.Div('Delimiter:'),
-                dcc.Input(id='wizard-data-input-delimiter',
-                            type = 'text',
-                            placeholder=',',
-                            minLength=0,
-                            maxLength=1),
-                ]),
-            html.Div('Upload data'),
-            html.Div([
-                dcc.Store(id='wizard_state_stored-data', data=None),
-                dcc.Upload(
-                    id='wizard-data-input-upload-data',
-                    children=html.Div([
-                        'Drag and Drop or Select Files'
-                    ], id = 'wizard-data-output-upload-data-filename'),
-                    multiple=False
-                ),
-                html.Div(id='wizard-data-input-remove-data'),
-                html.Div(id='wizard_data_input_submit-button'),
-                ], id = 'wizard-data-input-remove-upload-data'),
+                html.Div([
+                    html.Div('Decimal:'),
+                    dcc.Input(id='wizard-data-input-decimal',
+                                type = 'text',
+                                placeholder='.',
+                                minLength=0,
+                                maxLength=1),
+                    html.Div('Delimiter:'),
+                    dcc.Input(id='wizard-data-input-delimiter',
+                                type = 'text',
+                                placeholder=',',
+                                minLength=0,
+                                maxLength=1),
+                    ], id='input-container'),
+                html.Div([
+                    html.Div('Upload data'),
+                    dcc.Store(id='wizard_state_stored-data', data=None),
+                    dcc.Upload(
+                        id='wizard-data-input-upload-data',
+                        children=html.Div([
+                            'Drag and Drop or Select Files'
+                        ], id = 'wizard-data-output-upload-data-filename'),
+                        multiple=False
+                    ),
+                    html.Div(id='wizard-data-input-remove-data'),
+                    ], id = 'wizard-data-input-remove-upload-data'),
 
-            html.Div('Upload parameters'),
-            html.Div([
-                dcc.Store(id='wizard_state_stored-params', data=None),
-                dcc.Upload(
-                    id='wizard-data-input-upload-params',
-                    children=html.Div([
-                        'Drag and Drop or Select Files'
-                    ], id = 'wizard-data-output-upload-params-filename'),
-                    multiple=False
-                ),
-                html.Div(id='wizard-data-input-remove-params'),
-                ], id = 'wizard-data-input-remove-upload-params'),
+                html.Div([
+                    html.Div('Upload parameters'),
+                    dcc.Store(id='wizard_state_stored-params', data=None),
+                    dcc.Upload(
+                        id='wizard-data-input-upload-params',
+                        children=html.Div([
+                            'Drag and Drop or Select Files'
+                        ], id = 'wizard-data-output-upload-params-filename'),
+                        multiple=False
+                    ),
+                    html.Div(id='wizard-data-input-remove-params'),
+                    ], id = 'wizard-data-input-remove-upload-params'),
+                ], id="input-upload-container"),
 
             html.Div(id='wizard-data-output-parsed-data-before'),
             html.Div(id='wizard-data-output-parsed-params'),
@@ -99,83 +100,150 @@ def wizard():
             #html.Div(id='wizard_data_input_submit-button'),
             #html.Div(id='wizard_data_input_submit-button')
             #html.Button("Submit", id='wizard_data_input_submit-button', n_clicks=0, style={'display':'none'})
-            html.Button("Submit", id='wizard_data_input_submit-button', style={'display':'none'}),
+            html.Div(html.Button("Submit", id='wizard_data_input_submit-button', className='submit-button', style={'display':'none'}), id='nav-buttons')
         ], id='data_upload_layout', style={'display': 'block'}),
+
 
         # Data after Submit
         html.Div([
             html.Div([
-                html.Div("project_title", id='wizard-data-input-title'),
-                #html.Button(id='wizard-data-input-title-button', children='title')
-            ], id='wizard-data-after-submit-output-project-title'),
-            html.Div(id='wizard-data-output-parsed-data-after'),
-            html.Button('Next', id='data-to-param', className='next-button')
+                html.Div([
+                    html.Div(className="progress-bar", children=[
+                        html.Div(className="progress-step", children=[
+                            html.Div(className="step-circle blue-circle"),
+                            html.Div("Data", className="step-label")
+                        ]),
+                        html.Div(className="progress-line"),
+                        html.Div(className="progress-step", children=[
+                            html.Div(className="step-circle"),
+                            html.Div("Parameters", className="step-label")
+                        ]),
+                        html.Div(className="progress-line"),
+                        html.Div(className="progress-step", children=[
+                            html.Div(className="step-circle"),
+                            html.Div("Model", className="step-label")
+                        ]),
+                    ])
+                ], className='side-bar'),
+                html.Div([
+                    html.Div([
+                        html.Div("project_title", id='wizard-data-input-title'),
+                        #html.Button(id='wizard-data-input-title-button', children='title')
+                    ], id='wizard-data-after-submit-output-project-title'),
+                    html.Div(id='wizard-data-output-parsed-data-after'),
+                    html.Div(html.Button('Next', id='data-to-param', className='next-button'), id='nav-buttons')
+                ], className='page-with-side-bar')], className='vertical-page')
         ], id='data_layout', style={'display': 'none'}),
 
         #Parameters
         html.Div([
-            html.Div(id='wizard-parameters-output-params-table'),
-            html.Div(id = 'wizard-parameters-output-warning', children = ''),
-            html.Button('Back', id='param-to-data', className='back-button'),
-            html.Button('Next', id='param-to-model', className='next-button')
+            html.Div([
+                html.Div([
+                    html.Div(className="progress-bar", children=[
+                        html.Div(className="progress-step", children=[
+                            html.Div(className="step-circle"),
+                            html.Div("Data", className="step-label")
+                        ]),
+                        html.Div(className="progress-line"),
+                        html.Div(className="progress-step", children=[
+                            html.Div(className="step-circle blue-circle"),
+                            html.Div("Parameters", className="step-label")
+                        ]),
+                        html.Div(className="progress-line"),
+                        html.Div(className="progress-step", children=[
+                            html.Div(className="step-circle"),
+                            html.Div("Model", className="step-label")
+                        ]),
+                    ])
+                ], className='side-bar'),
+                html.Div([
+                    html.Div(id='wizard-parameters-output-params-table'),
+                    html.Div(id = 'wizard-parameters-output-warning', children = ''),
+                    html.Div([html.Button('Back', id='param-to-data', className='back-button'),
+                    html.Button('Next', id='param-to-model', className='next-button')], id='nav-buttons')
+                ], className='page-with-side-bar')
+            ], className='vertical-page')
         ], id='parameters_layout', style={'display': 'none'}),
 
         #Model
         html.Div([
             html.Div([
-                dcc.RadioItems([
-                    {
-                    "label":[
-                        html.Div("R description")
-                    ],
-                    "value": 'R',
-                    },{
-                    "label":[
-                        html.Div("I description")
-                    ],
-                    "value": 'I',
-                    },{
-                    "label":[
-                        html.Div("A description")
-                    ],
-                    "value": 'A',
-                    },
-                ], value='R', inline=False, id="wizard-model-input-radio-items"),
-                html.Div(
-                    style = {
-                        'height': '50px',
-                        'width' : '50px',
-                        'background-color': '#FF0000'
-                        },
-                    id = "wizard-model-output-view"
-                ),
-            ], id="css-radio-items"),
-            html.Div([
-                dcc.RadioItems([
-                    {
-                    "label":[
-                        html.Img(),
-                        html.Div("link to image1")
-                    ],
-                    "value": 'color1',
-                    },{
-                    "label":[
-                        html.Img(),
-                        html.Div("link to image2")
-                    ],
-                    "value": 'color2',
-                    },{
-                    "label":[
-                        html.Img(),
-                        html.Div("link to image3")
-                    ],
-                    "value": 'color3',
-                    },
-                ], value='color1', inline=False, id="wizard-model-input-radio-items-color"),
-            ], id="css-radio-items"),
+                html.Div([
+                    html.Div(className="progress-bar", children=[
+                        html.Div(className="progress-step", children=[
+                            html.Div(className="step-circle"),
+                            html.Div("Data", className="step-label")
+                        ]),
+                        html.Div(className="progress-line"),
+                        html.Div(className="progress-step", children=[
+                            html.Div(className="step-circle"),
+                            html.Div("Parameters", className="step-label")
+                        ]),
+                        html.Div(className="progress-line"),
+                        html.Div(className="progress-step", children=[
+                            html.Div(className="step-circle blue-circle"),
+                            html.Div("Model", className="step-label")
+                        ]),
+                    ])
+                ], className='side-bar'),
+                html.Div([
+                    html.Div([
+                        dcc.RadioItems([
+                            {
+                            "label":[
+                                html.Div("R description")
+                            ],
+                            "value": 'R',
+                            },{
+                            "label":[
+                                html.Div("I description")
+                            ],
+                            "value": 'I',
+                            },{
+                            "label":[
+                                html.Div("A description")
+                            ],
+                            "value": 'A',
+                            },
+                        ], value='R', inline=False, id="wizard-model-input-radio-items"),
+                        html.Div(
+                            style = {
+                                'height': '50px',
+                                'width' : '50px',
+                                'background-color': '#FF0000'
+                                },
+                            id = "wizard-model-output-view"
+                        ),
+                    ], id="css-radio-items"),
+                    html.Div([
+                        dcc.RadioItems([
+                            {
+                            "label":[
+                                html.Img(),
+                                html.Div("link to image1")
+                            ],
+                            "value": 'color1',
+                            },{
+                            "label":[
+                                html.Img(),
+                                html.Div("link to image2")
+                            ],
+                            "value": 'color2',
+                            },{
+                            "label":[
+                                html.Img(),
+                                html.Div("link to image3")
+                            ],
+                            "value": 'color3',
+                            },
+                        ], value='color1', inline=False, id="wizard-model-input-radio-items-color"),
+                    ], id="css-radio-items"),
+            ], className='page-with-side-bar', id='model-content'),
             #https://dash.plotly.com/dash-core-components/radioitems
+            html.Div([
             html.Button('Back', id='model-to-param', className='back-button'),
-            html.Button(dcc.Link('Finish', href='/main_dash_layout'), className='finish-button')
+            dcc.Link(html.Button('Finish', className='finish-button'), href='/main_dash_layout')], id='nav-buttons')
+            ], className='vertical-page')
         ], id='model_layout', style={'display': 'none'})
     ])
 
@@ -200,7 +268,7 @@ def update_wizard_data_output_data(contents_data, enter_del, delimiter, enter_se
             parse_file_wizard_data_data(c, n, d, deli, dec) for c, n, d, deli, dec  in
             zip([contents_data], [name_data], [date_data], [delimiter], [decimal])]  
                 
-        remove = html.Button(id='wizard_data_input_remove-data-button', children='Remove')
+        remove = html.Button(id='wizard_data_input_remove-data-button', className='remove-button', children='Remove')
 
         return child, child, name_data, remove, {'display':'block'}
     else:
@@ -219,6 +287,7 @@ def remove_file_wizard_data_data_file(n):
         return no_update
 
     child =  [
+        html.Div('Upload data'),
             dcc.Upload(
                 id='wizard-data-input-upload-data',
                 children=html.Div([
@@ -247,7 +316,7 @@ def update_wizard_data_output_params(contents_params, name_params, date_params):
             parse_file_wizard_data_params(c, n, d) for c, n, d in
             zip([contents_params], [name_params], [date_params])]
         
-        remove = html.Button(id='wizard_data_input_remove-params-button', children='Remove')
+        remove = html.Button(id='wizard_data_input_remove-params-button', className='remove-button', children='Remove')
         return child, name_params, remove
     else:
         raise PreventUpdate
@@ -263,6 +332,7 @@ def remove_file_wizard_data_params_file(n):
         return no_update
 
     child = [
+            html.Div('Upload data'),
             dcc.Store(id='wizard_state_stored-params', data=None),
             dcc.Upload(
                 id='wizard-data-input-upload-params',
