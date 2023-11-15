@@ -847,9 +847,13 @@ def return_toggle_switch(id, o):
 #==============================================================
 
 def main_dash_layout():
+    global data
     objectives = ['max', 'max', 'min', 'max', 'min', 'min', 'min', 'max']
-    buses = msdt.MSDTransformer(msdt.RTOPSIS, 'gurobi')
-    buses.fit_transform(data, None, objectives,  None)
+    data = data.set_index(data.columns[0])
+    buses = msdt.MSDTransformer(msdt.RTOPSIS)
+    criteria_params = list(params_g[0].keys())
+    params = pd.DataFrame.from_dict(params_g).set_index(criteria_params[0])
+    buses.fit_transform(data, params['weight'].to_list(), params['objective'].to_list(),  None)
     return html.Div(children=[
         html.Div(id='wizard-data'),
         dcc.Tabs(children=[
@@ -877,7 +881,7 @@ def display_parameters(a):
     global params_g
     params = params_g
 
-    params_labels = ['weight', 'expert-min', 'expert-max', 'objective']
+    params_labels = ['criterion', 'weight', 'expert-min', 'expert-max', 'objective']
     columns = return_columns_wizard_parameters_params_table(params_labels)
     df = pd.DataFrame.from_dict(params)
 
@@ -910,7 +914,7 @@ def ranking_vizualization(buses):
 
     alternative_names = df.index.tolist()
     for alternative in alternative_names:
-        df['Rank'][alternative] = buses.ranked_alternatives.index(alternative) + 1
+        df['Rank'][alternative] = buses._ranked_alternatives.index(alternative) + 1
 
 
     df.index.rename('Name', inplace=True)
@@ -918,7 +922,7 @@ def ranking_vizualization(buses):
     return html.Div(children=[
         dcc.Graph(
             id = 'vizualization',
-            figure = buses.plot()
+            figure = buses.plot(plot_name = "Vizualization")
         ),
         dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns], sort_action='native')
     ])
@@ -928,7 +932,7 @@ def improvement_actions(buses):
     buses_g = buses
     return html.Div(children=[
         html.Div(id = 'viz', children = ranking_vizualization(buses), style = {
-            'width' : '60%'
+            'width' : '80%'
         }),
         html.Div(children=[
             dcc.Dropdown(id = 'choose-method', options=[
@@ -953,7 +957,7 @@ def improvement_actions(buses):
             html.Button('aply', id = 'aply-button', n_clicks=0),
             html.Div(id = 'improvement-result', children=None)
         ], style={
-            'width' : '40%',
+            'width' : '20%',
         })
     ], style={
         'display': 'flex'
@@ -1091,11 +1095,11 @@ def vizualization_change(n, alternative_to_imptove):
 
         alternative_names = df.index.tolist()
         for alternative in alternative_names:
-            df['Rank'][alternative] = buses_g.ranked_alternatives.index(alternative) + 1
+            df['Rank'][alternative] = buses_g._ranked_alternatives.index(alternative) + 1
 
         df.index.rename('Name', inplace=True)
         df.reset_index(inplace=True)
-        a = buses_g.plot()
+        a = buses_g.plot(plot_name = "Vizualization")
         return html.Div(children=[
             dcc.Graph(
                 id = 'vizualization',
