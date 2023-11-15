@@ -393,7 +393,7 @@ def parse_file_wizard_data_params(contents, filename, date):
     try:
         if filename.endswith('.json'):
             content_dict = json.loads(decoded)
-            global params-g
+            global params_g
             params_g = content_dict
         else:
             return "Please upload a file with the .json extension"
