@@ -358,7 +358,8 @@ def parse_file_wizard_data_data(contents, filename, date, delimiter, dec):
             # Assume that the user uploaded a CSV file
             df = pd.read_csv(
                 io.StringIO(decoded.decode('utf-8')), sep = delimiter, decimal = dec)
-            global data = df
+            global data 
+            data = df
         elif filename.endswith('.xls'):
             # Assume that the user uploaded an excel file
             df = pd.read_excel(io.BytesIO(decoded))
