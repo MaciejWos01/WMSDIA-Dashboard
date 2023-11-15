@@ -240,6 +240,13 @@ def wizard():
         ], id='model_layout', style={'display': 'none'})
     ])
 
+@app.callback(Output('model-to-param', 'value'),
+              Input('wizard-model-input-radio-items', 'value'))
+def get_agg_fn(agg):
+    global agg_g
+    agg_g = agg
+    return 'Back'
+
 
 @app.callback(Output('wizard-data-output-parsed-data-before', 'children', allow_duplicate=True),
               Output('wizard-data-output-parsed-data-after', 'children', allow_duplicate=True),
@@ -662,6 +669,8 @@ def edit_title_wizard_data_after_submit(click, text):
 def edit_title_wizard_data_after_submit(enter, text):
     
     if enter and text:
+        global title
+        title = text
         return html.Div([
             html.Div(text, id='wizard-data-input-title')
             ])
@@ -850,7 +859,13 @@ def main_dash_layout():
     global data
     objectives = ['max', 'max', 'min', 'max', 'min', 'min', 'min', 'max']
     data = data.set_index(data.columns[0])
-    buses = msdt.MSDTransformer(msdt.RTOPSIS)
+    if agg_g == 'R':
+        buses = msdt.MSDTransformer(msdt.RTOPSIS)
+    elif agg_g == 'A':
+        buses = msdt.MSDTransformer(msdt.ATOPSIS)
+    else:
+        buses = msdt.MSDTransformer(msdt.ITOPSIS)
+    
     criteria_params = list(params_g[0].keys())
     params = pd.DataFrame.from_dict(params_g).set_index(criteria_params[0])
     buses.fit_transform(data, params['weight'].to_list(), params['objective'].to_list(),  None)
@@ -922,7 +937,7 @@ def ranking_vizualization(buses):
     return html.Div(children=[
         dcc.Graph(
             id = 'vizualization',
-            figure = buses.plot(plot_name = "Vizualization")
+            figure = buses.plot(plot_name = title)
         ),
         dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns], sort_action='native')
     ])
@@ -1099,7 +1114,7 @@ def vizualization_change(n, alternative_to_imptove):
 
         df.index.rename('Name', inplace=True)
         df.reset_index(inplace=True)
-        a = buses_g.plot(plot_name = "Vizualization")
+        a = buses_g.plot(plot_name = title)
         return html.Div(children=[
             dcc.Graph(
                 id = 'vizualization',
