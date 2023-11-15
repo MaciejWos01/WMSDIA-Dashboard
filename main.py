@@ -22,6 +22,9 @@ import dash_mantine_components as dmc
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUMEN, dbc.icons.FONT_AWESOME])
 
+global title
+title = "project_title"
+
 def header():
     return dbc.Row([
         dbc.Col(dcc.Link(html.I(className="fa fa-home fa-2x", id="css-home-icon"), href='/'), width="auto"),
@@ -957,16 +960,14 @@ def improvement_actions(buses):
             value = 'improvement_mean',
             clearable = False
             ),
-            dcc.Input(
+            html.Div(children =['alternative to improve:', dcc.Input(
                 id = 'alternative-to-improve',
-                type = 'text',
-                placeholder = 'alternative to improve'
-            ),
-            dcc.Input(
+                type = 'text'
+            )]),
+            html.Div(children = ['alternative to overcame:', dcc.Input(
                 id = 'alternative-to-overcame',
-                type = 'text',
-                placeholder = 'alternative to overcame'
-            ),
+                type = 'text'
+            )]),
             html.Button('advanced settings', id='advanced-settings', n_clicks=0),
             html.Div(id = 'advanced-content', children = None),
             html.Button('aply', id = 'aply-button', n_clicks=0),
@@ -991,82 +992,68 @@ def set_advanced_settings(value, n_clicks):
         is_hidden = 'visible'
     if value == 'improvement_mean':
         return html.Div(children=[
-            dcc.Input(
-            type = 'number',
-            placeholder = 'improvement ratio'
-            ),
-            dcc.Input(
-            type = 'text',
-            placeholder = 'allow std'
-            )
+            html.Div(children=['improvement ratio:', dcc.Input(
+            type = 'number'
+            )]),
+            html.Div(children=['allow std:', dcc.Input(
+            type = 'text'
+            )])
         ], style={
             'visibility' : is_hidden,
         })
     elif value == 'improvement_features':
         return html.Div(children=[
-            dcc.Input(
-            type = 'number',
-            placeholder = 'improvement ratio'
-            ),
-            dcc.Input(
-            type = 'text',
-            placeholder = 'features to change'
-            ),
-            dcc.Input(
-            type = 'text',
-            placeholder = 'boundary values'
-            )
+            html.Div(children=['improvement ratio:', dcc.Input(
+            type = 'number'
+            )]),
+            html.Div(children=['features to change:', dcc.Input(
+            type = 'text'
+            )]),
+            html.Div(children=['boundary values:', dcc.Input(
+            type = 'text'
+            )])
         ], style={
             'visibility' : is_hidden,
         })
     elif value == 'improvement_genetic':
-        return html.Div(children=[
-            dcc.Input(
-            type = 'number',
-            placeholder = 'improvement ratio'
-            ),
-            dcc.Input(
-            type = 'text',
-            placeholder = 'features to change'
-            ),
-            dcc.Input(
-            type = 'text',
-            placeholder = 'boundary values'
-            ),
-            dcc.Input(
-            type = 'text',
-            placeholder = 'allow deterioration'
-            ),
-            dcc.Input(
-            type = 'text',
-            placeholder = 'popsize'
-            ),
-            dcc.Input(
-            type = 'text',
-            placeholder = 'generations'
-            )
+        return html.Div(children = [
+            html.Div(children=['improvement ratio:', dcc.Input(
+            type = 'number'
+            )]),
+            html.Div(children=['features to change:', dcc.Input(
+            type = 'text'
+            )]),
+            html.Div(children=['boundary values:', dcc.Input(
+            type = 'text'
+            )]),
+            html.Div(children=['allow deterioration:', dcc.Input(
+            type = 'text'
+            )]),
+            html.Div(children=['popsize:', dcc.Input(
+            type = 'text'
+            )]),
+            html.Div(children=['generations:', dcc.Input(
+            type = 'text'
+            )])
         ], style={
             'visibility' : is_hidden,
         })
     elif value == 'improvement_single_feature':
         return html.Div(children=[
-            dcc.Input(
-            type = 'number',
-            placeholder = 'improvement ratio'
-            ),
-            dcc.Input(
-            type = 'text',
-            placeholder = 'feature to change'
-            )
+            html.Div(children=['improvement ratio:', dcc.Input(
+            type = 'number'
+            )]),
+            html.Div(children=['feature to change:', dcc.Input(
+            type = 'text'
+            )])
         ], style={
             'visibility' : is_hidden,
         })
     elif value == 'improvement_std':
         return html.Div(children=[
-            dcc.Input(
-            type = 'number',
-            placeholder = 'improvement ratio'
-            )
+            html.Div(children=['improvement ratio:', dcc.Input(
+            type = 'number'
+            )])
         ], style={
             'visibility' : is_hidden,
         })
