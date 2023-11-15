@@ -127,9 +127,12 @@ def wizard():
                 ], className='side-bar'),
                 html.Div([
                     html.Div([
-                        html.Div("project_title", id='wizard-data-input-title'),
-                        #html.Button(id='wizard-data-input-title-button', children='title')
-                    ], id='wizard-data-after-submit-output-project-title'),
+                        html.Div([
+                            html.Div("project_title", id='wizard-data-input-title'),
+                            #html.Button(id='wizard-data-input-title-button', children='title')
+                        ], id='wizard-data-after-submit-output-project-title'),
+                        html.I(className="fa fa-pen-to-square", id="css-edit-icon"),
+                    ], className="css-project-title"),
                     html.Div(id='wizard-data-output-parsed-data-after'),
                     html.Div(html.Button('Next', id='data-to-param', className='next-button'), id='nav-buttons')
                 ], className='page-with-side-bar')], className='vertical-page')
@@ -188,61 +191,49 @@ def wizard():
                 ], className='side-bar'),
                 html.Div([
                     html.Div([
-                        dcc.RadioItems([
-                            {
-                            "label":[
-                                html.Div("R description")
-                            ],
-                            "value": 'R',
-                            },{
-                            "label":[
-                                html.Div("I description")
-                            ],
-                            "value": 'I',
-                            },{
-                            "label":[
-                                html.Div("A description")
-                            ],
-                            "value": 'A',
-                            },
-                        ], value='R', inline=False, id="wizard-model-input-radio-items"),
-                        html.Div(
-                            style = {
-                                'height': '50px',
-                                'width' : '50px',
-                                'background-color': '#FF0000'
+                        html.Div([
+                            html.Div("Choose aggregation function:"),
+                            dcc.RadioItems([
+                                {
+                                "label":[
+                                    html.Span("R: Based on distance from the ideal and anti-ideal solution", className="css-radio-item"),
+                                    html.Div(html.Img(src="assets/plotR.png", id="plot-r-img"))
+                                ],
+                                "value": 'R',
+                                },{
+                                "label":[
+                                    html.Span("I: Based on distance from the ideal solution", className="css-radio-item"),
+                                    html.Div(html.Img(src="assets/plotI.png", id="plot-i-img"))
+                                ],
+                                "value": 'I',
+                                },{
+                                "label":[
+                                    html.Span("A: Based on distance from the anti-ideal solution", className="css-radio-item"),
+                                    html.Div(html.Img(src="assets/plotA.png", id="plot-a-img"))
+                                ],
+                                "value": 'A',
                                 },
-                            id = "wizard-model-output-view"
-                        ),
-                    ], id="css-radio-items"),
+                            ], value='R', id="wizard-model-input-radio-items"),
+                        ], className="css-radio-items"),
+                        html.Div([
+                            html.Div("Choose colorscale for plot:"),
+                            dcc.Dropdown(
+                                options=[
+                                    {'label': 'jet', 'value': 'jet'},
+                                    {'label': 'delta', 'value': 'delta'},
+                                    {'label': 'curl', 'value': 'curl'},
+                                ],
+                                value='jet',
+                                clearable=False,
+                                id="wizard-model-input-dropdown-color"),
+                        ], className="css-radio-items"),
+                    ], id='model-content'),
+                    #https://dash.plotly.com/dash-core-components/radioitems
                     html.Div([
-                        dcc.RadioItems([
-                            {
-                            "label":[
-                                html.Img(),
-                                html.Div("link to image1")
-                            ],
-                            "value": 'color1',
-                            },{
-                            "label":[
-                                html.Img(),
-                                html.Div("link to image2")
-                            ],
-                            "value": 'color2',
-                            },{
-                            "label":[
-                                html.Img(),
-                                html.Div("link to image3")
-                            ],
-                            "value": 'color3',
-                            },
-                        ], value='color1', inline=False, id="wizard-model-input-radio-items-color"),
-                    ], id="css-radio-items"),
-            ], className='page-with-side-bar', id='model-content'),
-            #https://dash.plotly.com/dash-core-components/radioitems
-            html.Div([
-            html.Button('Back', id='model-to-param', className='back-button'),
-            dcc.Link(html.Button('Finish', className='finish-button'), href='/main_dash_layout')], id='nav-buttons')
+                        html.Button('Back', id='model-to-param', className='back-button'),
+                        dcc.Link(html.Button('Finish', className='finish-button'), href='/main_dash_layout')
+                    ], id='nav-buttons')
+                ], className='page-with-side-bar')
             ], className='vertical-page')
         ], id='model_layout', style={'display': 'none'})
     ])
@@ -388,15 +379,6 @@ def parse_file_wizard_data_data(contents, filename, date, delimiter, dec):
         #html.Button(id="wizard_data_input_submit-button", children="Submit", n_clicks=0),
         #html.Button('Submit', id='submit-button', n_clicks=0),
         dcc.Store(id='wizard_state_stored-data', data=df.to_dict('records')),
-
-        html.Hr(),  # horizontal line
-
-        # For debugging, display the raw contents provided by the web browser
-        html.Div('Raw Content'),
-        html.Pre(contents[0:200] + '...', style={
-            'whiteSpace': 'pre-wrap',
-            'wordBreak': 'break-all'
-        })
     ])
 
 
@@ -417,13 +399,6 @@ def parse_file_wizard_data_params(contents, filename, date):
     
     return html.Div([
         dcc.Store(id='wizard_state_stored-params', data=content_dict),
-
-        # For debugging, display the raw contents provided by the web browser
-        html.Div('Raw Content'),
-        html.Pre(contents[0:200] + '...', style={
-            'whiteSpace': 'pre-wrap',
-            'wordBreak': 'break-all'
-        })
     ])
 
 
@@ -603,7 +578,7 @@ def submit(n_clicks, data, params):
         ),
         html.Div("Set all to Min/Max"),
         dcc.Dropdown(['-', 'min', 'max'], '-', id = 'wizard-parameters-input-objectives-dropdown', clearable=False),
-        ])
+        ], className='params-content')
         return (data_preview, data_table, params_table, {'display': 'none'}, {'display': 'block'}, {'display': 'none'}, {'display': 'none'})
     else:
         return no_update, no_update, no_update, no_update, no_update, no_update, no_update
@@ -882,7 +857,7 @@ def main_dash_layout():
             dcc.Tab(label='Improvement actions', children=[
                 improvement_actions()
             ]),
-            dcc.Tab(label='analisis of parameters', children=[
+            dcc.Tab(label='Analysis of parameters', children=[
                 model_setter()
             ])
         ])
