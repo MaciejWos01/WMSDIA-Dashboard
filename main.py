@@ -19,6 +19,7 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import dash_mantine_components as dmc
+import plotly.graph_objects as go
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUMEN, dbc.icons.FONT_AWESOME])
 
