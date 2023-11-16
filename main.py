@@ -134,12 +134,14 @@ def wizard():
                 html.Div([
                     html.Div([
                         html.Div([
-                            html.Div("project_title", id='wizard-data-input-title'),
-                            #html.Button(id='wizard-data-input-title-button', children='title')
-                        ], id='wizard-data-after-submit-output-project-title'),
-                        html.I(className="fa fa-pen-to-square", id="css-edit-icon"),
-                    ], className="css-project-title"),
-                    html.Div(id='wizard-data-output-parsed-data-after'),
+                            html.Div([
+                                html.Div("project_title", id='wizard-data-input-title'),
+                                #html.Button(id='wizard-data-input-title-button', children='title')
+                            ], id='wizard-data-after-submit-output-project-title'),
+                            html.I(className="fa fa-pen-to-square", id="css-edit-icon"),
+                        ], className="css-project-title"),
+                        html.Div(id='wizard-data-output-parsed-data-after'),
+                    ], id='data-content'),
                     html.Div(html.Button('Next', id='data-to-param', className='next-button'), id='nav-buttons')
                 ], className='page-with-side-bar')], className='vertical-page')
         ], id='data_layout', style={'display': 'none'}),
@@ -224,14 +226,11 @@ def wizard():
                         html.Div([
                             html.Div("Choose colorscale for plot:"),
                             dcc.Dropdown(
-                                options=[
-                                    {'label': 'jet', 'value': 'jet'},
-                                    {'label': 'delta', 'value': 'delta'},
-                                    {'label': 'curl', 'value': 'curl'},
-                                ],
+                                options=px.colors.named_colorscales(),
                                 value='jet',
                                 clearable=False,
                                 id="wizard-model-input-dropdown-color"),
+                            dcc.Graph(id='color-preview-output')
                         ], className="css-radio-items"),
                     ], id='model-content'),
                     #https://dash.plotly.com/dash-core-components/radioitems
@@ -243,6 +242,24 @@ def wizard():
             ], className='vertical-page')
         ], id='model_layout', style={'display': 'none'})
     ])
+
+@app.callback(
+    Output("color-preview-output", "figure"), 
+    Input("wizard-model-input-dropdown-color", "value"))
+def change_colorscale(scale):
+    trace = go.Heatmap(z=np.linspace(0, 1, 1000).reshape(1, -1),
+                    showscale=False)
+
+    layout = go.Layout(
+        height=50,
+        margin=dict(l=0, r=0, t=0, b=0),
+        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+        clickmode='none'
+    )
+    trace['colorscale'] = scale
+    fig = {'data': [trace], 'layout': layout}
+    return fig
 
 @app.callback(Output('model-to-param', 'value'),
               Input('wizard-model-input-radio-items', 'value'),
@@ -974,9 +991,9 @@ def improvement_actions(buses):
                 options = ids
             )]),
             html.Div(id = 'conditional-settings'),
-            html.Button('advanced settings', id='advanced-settings', n_clicks=0),
+            html.Button('Advanced settings', id='advanced-settings', n_clicks=0),
             html.Div(id = 'advanced-content', children = None),
-            html.Button('apply', id = 'aply-button', n_clicks=0),
+            html.Button('Apply', id = 'apply-button', n_clicks=0),
             html.Div(id = 'improvement-result', children=None)
         ], style={
             'width' : '30%',
@@ -1105,7 +1122,7 @@ def set_advanced_settings(value, n_clicks):
 
 @app.callback(
     Output('improvement_genetic-result', 'children'),
-    [Input('aply-button', 'n_clicks')],
+    [Input('apply-button', 'n_clicks')],
     #Input('alternative-to-improve', 'value'),
     #Input('alternative-to-overcame', 'value'),
     State('alternative-to-improve', 'value'),
@@ -1137,7 +1154,7 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
 
 @app.callback(
     Output('improvement_features-result', 'children'),
-    [Input('aply-button', 'n_clicks')],
+    [Input('apply-button', 'n_clicks')],
     #Input('alternative-to-improve', 'value'),
     #Input('alternative-to-overcame', 'value'),
     State('alternative-to-improve', 'value'),
@@ -1161,7 +1178,7 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
 
 @app.callback(
     Output('improvement_mean-result', 'children'),
-    [Input('aply-button', 'n_clicks')],
+    [Input('apply-button', 'n_clicks')],
     #Input('alternative-to-improve', 'value'),
     #Input('alternative-to-overcame', 'value'),
     State('alternative-to-improve', 'value'),
@@ -1188,7 +1205,7 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
 
 @app.callback(
     Output('improvement_std-result', 'children'),
-    [Input('aply-button', 'n_clicks')],
+    [Input('apply-button', 'n_clicks')],
     #Input('alternative-to-improve', 'value'),
     #Input('alternative-to-overcame', 'value'),
     State('alternative-to-improve', 'value'),
@@ -1210,7 +1227,7 @@ def improvement_std_results(n, alternative_to_imptove, alternative_to_overcame, 
 '''
 @app.callback(
     Output('improvement-result', 'children'),
-    [Input('aply-button', 'n_clicks')],
+    [Input('apply-button', 'n_clicks')],
     #Input('alternative-to-improve', 'value'),
     #Input('alternative-to-overcame', 'value'),
     State('alternative-to-improve', 'value'),
@@ -1233,7 +1250,7 @@ def improvement_results(n, alternative_to_imptove, alternative_to_overcame, feat
 
 @app.callback(
     Output('viz', 'children'),
-    [Input('aply-button', 'n_clicks')],
+    [Input('apply-button', 'n_clicks')],
     #Input('alternative-to-improve', 'value'),
     State(component_id='alternative-to-improve', component_property='value'),
     prevent_initial_call = True
