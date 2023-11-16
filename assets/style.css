@@ -1,6 +1,16 @@
+:root {
+    --main: #006288;
+    --dark: #004963;
+    --light: #00A6D6;
+    --light2: #33B8E7;
+    --other: #FF7F50;
+    --grey: #CCCCCC;
+    --white: #FFFFFF;
+  }
+
 #css-header {
     display: flex;
-    background-color: #006288;
+    background-color: var(--main);
     justify-content: space-between;
     align-items: center;
     padding: 10px;
@@ -9,19 +19,19 @@
 #css-home-icon,
 #css-info-icon {
     margin: 0 20px;
-    color: white;
+    color: var(--white);
 }
 
 #css-header-title {
     flex: 1;
     text-align: center;
     margin: 0;
-    color: white;
+    color: var(--white);
 }
 
 #css-footer {
     display: flex;
-    background-color: #006288;
+    background-color: var(--main);
     justify-content: space-between;
     align-items: center;
     padding: 10px;
@@ -30,7 +40,7 @@
 
 #css-github-icon {
     margin: 0 20px;
-    color: white;
+    color: var(--white);
 }
 
 #css-logo-img {
@@ -40,8 +50,8 @@
 }
 
 .big-button {
-    color: white;
-    background-color: #61d0ff;
+    color: var(--white);
+    background-color: var(--light);
     border-radius: 10px;
     text-align: center;
     font-size: 24px;
@@ -52,7 +62,7 @@
 }
 
 .big-button:hover {
-    background-color: #4bb9e8;
+    background-color: var(--light2);
 }
 
 .button-container {
@@ -64,7 +74,7 @@
     width: 100%;
     height: 60px;
     line-height: 60px;
-    border: 2px dashed #61d0ff;
+    border: 2px dashed var(--light);
     border-radius: 5px;
     text-align: center;
     margin: 10px 0;
@@ -74,7 +84,7 @@
 
 #wizard-data-input-upload-data:hover,
 #wizard-data-input-upload-params:hover {
-    border-color: #4bb9e8;
+    border-color: var(--light2);
 }
 
 #css-layout {
@@ -84,7 +94,7 @@
     min-height: 100vh;
     width: 100%;
     position: relative;
-    overflow-x: hidden;
+    overflow-x: auto;
 }
 
 #page-content {
@@ -102,14 +112,14 @@
 }
 
 .dash-tab--selected {
-    background-color: #61d0ff;
-    color: white !important;
+    background-color: var(--light);
+    color: var(--grey) !important;
 }
 
 .dash-tab {
-    background-color: #006288;
-    color: white !important;
-    border: 1px solid #61d0ff;
+    background-color: var(--main);
+    color: var(--grey) !important;
+    border: 1px solid var(--light);
     border-radius: 5px;
     margin-right: 5px;
     cursor: pointer;
@@ -117,18 +127,20 @@
 }
 
 .dash-tab:hover {
-    background-color: #4bb9e8;
+    background-color: var(--light2);
 }
 
 #input-container {
     flex-grow: 1;
     margin: 10px;
+    order: 2;
 }
 
 #wizard-data-input-remove-upload-data,
 #wizard-data-input-remove-upload-params {
     flex-grow: 2;
     margin: 10px;
+    order: 1;
 }
 
 #input-upload-container {
@@ -154,9 +166,12 @@
 .back-button,
 .next-button,
 .finish-button,
-.remove-button {
-    color: white;
-    background-color: #61d0ff;
+.remove-button,
+#apply-button,
+#advanced-settings,
+#json-download-button {
+    color: var(--white);
+    background-color: var(--light);
     border-radius: 5px;
     text-align: center;
     font-size: 16px;
@@ -170,8 +185,11 @@
 .back-button:hover,
 .next-button:hover,
 .finish-button:hover,
-.remove-button:hover {
-    background-color: #4bb9e8;
+.remove-button:hover,
+#apply-button:hover,
+#advanced-settings:hover,
+#json-download-button:hover {
+    background-color: var(--light2);
 }
 
 /* PROGRESS BAR */
@@ -193,12 +211,12 @@
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background-color: #757676;
+    background-color: var(--grey);
     margin-bottom: 5px;
 }
 
 .blue-circle {
-    background-color: #006288;
+    background-color: var(--main);
 }
 
 .step-label {
@@ -209,7 +227,7 @@
 .progress-line {
     width: 2px;
     height: 50px;
-    background-color: #ccc;
+    background-color: var(--grey);
     margin-bottom: 10px;
 }
 
@@ -234,6 +252,13 @@
 #model-content {
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+}
+
+#data-content {
+    display: flex;
+    flex-direction: column;
     justify-content: space-between;
     width: 100%;
 }
@@ -270,7 +295,7 @@
 .css-project-title {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
 }
 
