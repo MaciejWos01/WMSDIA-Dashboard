@@ -244,9 +244,12 @@ def wizard():
     ])
 
 @app.callback(Output('model-to-param', 'value'),
-              Input('wizard-model-input-radio-items', 'value'))
-def get_agg_fn(agg):
+              Input('wizard-model-input-radio-items', 'value'),
+              Input('wizard-model-input-dropdown-color', 'value'))
+def get_agg_fn(agg, colour):
     global agg_g
+    global colour_g
+    colour_g = colour
     agg_g = agg
     return 'Back'
 
@@ -940,7 +943,7 @@ def ranking_vizualization(buses):
     return html.Div(children=[
         dcc.Graph(
             id = 'vizualization',
-            figure = buses.plot(plot_name = title)
+            figure = buses.plot(plot_name = title, color = colour_g)
         ),
         dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns], sort_action='native')
     ])
@@ -948,9 +951,10 @@ def ranking_vizualization(buses):
 def improvement_actions(buses):
     global buses_g
     buses_g = buses
+    ids = buses_g.X_new.index
     return html.Div(children=[
         html.Div(id = 'viz', children = ranking_vizualization(buses), style = {
-            'width' : '80%'
+            'width' : '70%'
         }),
         html.Div(children=[
             dcc.Dropdown(id = 'choose-method', options=[
@@ -960,24 +964,61 @@ def improvement_actions(buses):
             value = 'improvement_mean',
             clearable = False
             ),
-            html.Div(children =['alternative to improve:', dcc.Input(
+            html.Div(children =['alternative to improve:', dcc.Dropdown(
                 id = 'alternative-to-improve',
-                type = 'text'
+                options = ids
             )]),
-            html.Div(children = ['alternative to overcame:', dcc.Input(
+            html.Div(children = ['alternative to overcame:', dcc.Dropdown(
                 id = 'alternative-to-overcame',
-                type = 'text'
+                options = ids
             )]),
+            html.Div(id = 'conditional-settings'),
             html.Button('advanced settings', id='advanced-settings', n_clicks=0),
             html.Div(id = 'advanced-content', children = None),
-            html.Button('aply', id = 'aply-button', n_clicks=0),
+            html.Button('apply', id = 'aply-button', n_clicks=0),
             html.Div(id = 'improvement-result', children=None)
         ], style={
-            'width' : '20%',
+            'width' : '30%',
         })
     ], style={
         'display': 'flex'
     })
+
+@app.callback(Output('improvement-result', 'children'),
+              Input('choose-method', 'value'))
+def improvement_result_setup(value):
+    name = value +'-result'
+    return html.Div(id = name)
+
+@app.callback(
+        Output('conditional-settings', 'children'),
+        Input('choose-method', 'value')
+)
+def set_conditional_settings(value):
+    features = buses_g.X_new.columns[:-3]
+    if value =='improvement_features':
+        return html.Div(children = [
+            'features to change:',
+            dcc.Dropdown(
+                id = 'features-to-change',
+                options = features,
+                multi = True)
+        ])
+    elif value == 'improvement_genetic':
+        return html.Div(children = [
+            'features to change:',
+            dcc.Dropdown(
+                id = 'features-to-change',
+                options = features,
+                multi = True)
+        ])
+    elif value == 'improvement_single_feature':
+        return html.Div(children = [
+            'feature to change:',
+            dcc.Dropdown(
+                id = 'feature-to-change',
+                options = features)
+        ])
 
 @app.callback(
     Output('advanced-content', 'children'),
@@ -993,10 +1034,12 @@ def set_advanced_settings(value, n_clicks):
     if value == 'improvement_mean':
         return html.Div(children=[
             html.Div(children=['improvement ratio:', dcc.Input(
-            type = 'number'
+            type = 'number',
+            id='improvement-ratio'
             )]),
             html.Div(children=['allow std:', dcc.Input(
-            type = 'text'
+            type = 'text',
+            id='allow-std'
             )])
         ], style={
             'visibility' : is_hidden,
@@ -1004,13 +1047,12 @@ def set_advanced_settings(value, n_clicks):
     elif value == 'improvement_features':
         return html.Div(children=[
             html.Div(children=['improvement ratio:', dcc.Input(
-            type = 'number'
-            )]),
-            html.Div(children=['features to change:', dcc.Input(
-            type = 'text'
+            type = 'number',
+            id='improvement-ratio'
             )]),
             html.Div(children=['boundary values:', dcc.Input(
-            type = 'text'
+            type = 'text',
+            id='boundary-values'
             )])
         ], style={
             'visibility' : is_hidden,
@@ -1018,22 +1060,24 @@ def set_advanced_settings(value, n_clicks):
     elif value == 'improvement_genetic':
         return html.Div(children = [
             html.Div(children=['improvement ratio:', dcc.Input(
-            type = 'number'
-            )]),
-            html.Div(children=['features to change:', dcc.Input(
-            type = 'text'
+            type = 'number',
+            id='improvement-ratio'
             )]),
             html.Div(children=['boundary values:', dcc.Input(
-            type = 'text'
+            type = 'text',
+            id='boundary-values'
             )]),
             html.Div(children=['allow deterioration:', dcc.Input(
-            type = 'text'
+            type = 'text',
+            id='allow-deterioration'
             )]),
             html.Div(children=['popsize:', dcc.Input(
-            type = 'text'
+            type = 'text',
+            id='popsize'
             )]),
             html.Div(children=['generations:', dcc.Input(
-            type = 'text'
+            type = 'text',
+            id='generations'
             )])
         ], style={
             'visibility' : is_hidden,
@@ -1041,10 +1085,8 @@ def set_advanced_settings(value, n_clicks):
     elif value == 'improvement_single_feature':
         return html.Div(children=[
             html.Div(children=['improvement ratio:', dcc.Input(
-            type = 'number'
-            )]),
-            html.Div(children=['feature to change:', dcc.Input(
-            type = 'text'
+            type = 'number',
+            id='improvement-ratio'
             )])
         ], style={
             'visibility' : is_hidden,
@@ -1052,12 +1094,119 @@ def set_advanced_settings(value, n_clicks):
     elif value == 'improvement_std':
         return html.Div(children=[
             html.Div(children=['improvement ratio:', dcc.Input(
-            type = 'number'
+            type = 'number',
+            id='improvement-ratio'
             )])
         ], style={
             'visibility' : is_hidden,
         })
 
+
+@app.callback(
+    Output('improvement_genetic-result', 'children'),
+    [Input('aply-button', 'n_clicks')],
+    #Input('alternative-to-improve', 'value'),
+    #Input('alternative-to-overcame', 'value'),
+    State('alternative-to-improve', 'value'),
+    State('alternative-to-overcame', 'value'),
+    State('improvement-ratio', 'value'),
+    State('features-to-change', 'value'),
+    State('boundary-values', 'value'),
+    State('allow-deterioration', 'value'),
+    State('popsize', 'value'),
+    State('generations', 'value'),
+    State('choose-method', 'value'),
+    prevent_initial_call = True
+)
+def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame, improvement_ratio, features_to_change, boundary_values, allow_deterioration, popsize, generations, method):    
+    if n>0:
+        if improvement_ratio is None:
+            improvement_ratio = 0.000001
+        if allow_deterioration is None:
+            allow_deterioration = False
+        else:
+            allow_deterioration = bool(allow_deterioration)
+        if generations is None:
+            generations = 200
+        global improvement
+        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, features_to_change = features_to_change, boundary_values = boundary_values, allow_deterioration = allow_deterioration, popsize = popsize, n_generations = generations)
+        return dash_table.DataTable(improvement.to_dict('records'), [{"name": i, "id": i} for i in improvement.columns])
+    else:
+        raise PreventUpdate
+
+@app.callback(
+    Output('improvement_features-result', 'children'),
+    [Input('aply-button', 'n_clicks')],
+    #Input('alternative-to-improve', 'value'),
+    #Input('alternative-to-overcame', 'value'),
+    State('alternative-to-improve', 'value'),
+    State('alternative-to-overcame', 'value'),
+    State('improvement-ratio', 'value'),
+    State('features-to-change', 'value'),
+    State('boundary-values', 'value'),
+    State('choose-method', 'value'),
+    prevent_initial_call = True
+)
+def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame, improvement_ratio, features_to_change, boundary_values, method):    
+    if n>0:
+        if improvement_ratio is None:
+            improvement_ratio = 0.000001
+        global improvement
+        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, features_to_change = features_to_change, boundary_values = boundary_values)
+        return dash_table.DataTable(improvement.to_dict('records'), [{"name": i, "id": i} for i in improvement.columns])
+    else:
+        raise PreventUpdate
+    
+
+@app.callback(
+    Output('improvement_mean-result', 'children'),
+    [Input('aply-button', 'n_clicks')],
+    #Input('alternative-to-improve', 'value'),
+    #Input('alternative-to-overcame', 'value'),
+    State('alternative-to-improve', 'value'),
+    State('alternative-to-overcame', 'value'),
+    State('improvement-ratio', 'value'),
+    State('allow-std', 'value'),
+    State('choose-method', 'value'),
+    prevent_initial_call = True
+)
+def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame, improvement_ratio, allow_std, method):    
+    if n>0:
+        if improvement_ratio is None:
+            improvement_ratio = 0.000001
+        if allow_std is None:
+            allow_std = False
+        else:
+            allow_std = bool(allow_std)
+        global improvement
+        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, allow_std = allow_std)
+        return dash_table.DataTable(improvement.to_dict('records'), [{"name": i, "id": i} for i in improvement.columns])
+    else:
+        raise PreventUpdate
+    
+
+@app.callback(
+    Output('improvement_std-result', 'children'),
+    [Input('aply-button', 'n_clicks')],
+    #Input('alternative-to-improve', 'value'),
+    #Input('alternative-to-overcame', 'value'),
+    State('alternative-to-improve', 'value'),
+    State('alternative-to-overcame', 'value'),
+    State('improvement-ratio', 'value'),
+    State('choose-method', 'value'),
+    prevent_initial_call = True
+)
+def improvement_std_results(n, alternative_to_imptove, alternative_to_overcame, improvement_ratio, method):    
+    if n>0:
+        if improvement_ratio is None:
+            improvement_ratio = 0.000001
+        global improvement
+        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio)
+        return dash_table.DataTable(improvement.to_dict('records'), [{"name": i, "id": i} for i in improvement.columns])
+    else:
+        raise PreventUpdate
+
+'''
 @app.callback(
     Output('improvement-result', 'children'),
     [Input('aply-button', 'n_clicks')],
@@ -1065,10 +1214,13 @@ def set_advanced_settings(value, n_clicks):
     #Input('alternative-to-overcame', 'value'),
     State('alternative-to-improve', 'value'),
     State('alternative-to-overcame', 'value'),
+    State('features-to-change', 'value'),
+    State('improvement-ratio', 'value'),
     State('choose-method', 'value'),
     prevent_initial_call = True
 )
-def improvement_results(n, alternative_to_imptove, alternative_to_overcame, method):
+def improvement_results(n, alternative_to_imptove, alternative_to_overcame, features_to_change,improvement_ratio, method):
+    print(features_to_change)
     
     if n>0:
         global improvement
@@ -1076,7 +1228,7 @@ def improvement_results(n, alternative_to_imptove, alternative_to_overcame, meth
         return dash_table.DataTable(improvement.to_dict('records'), [{"name": i, "id": i} for i in improvement.columns])
     else:
         raise PreventUpdate
-
+'''
 
 @app.callback(
     Output('viz', 'children'),
@@ -1101,7 +1253,7 @@ def vizualization_change(n, alternative_to_imptove):
 
         df.index.rename('Name', inplace=True)
         df.reset_index(inplace=True)
-        a = buses_g.plot(plot_name = title)
+        a = buses_g.plot(plot_name = title, color = colour_g)
         return html.Div(children=[
             dcc.Graph(
                 id = 'vizualization',
