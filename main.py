@@ -902,7 +902,7 @@ def main_dash_layout():
             dcc.Tab(label='Improvement actions', children=[
                 improvement_actions(buses)
             ]),
-            dcc.Tab(label='analisis of parameters', children=[
+            dcc.Tab(label='Analysis of parameters', children=[
                 model_setter()
             ])
         ])
@@ -926,7 +926,7 @@ def display_parameters(a):
 
     return html.Div(children=[
         dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns]),
-        html.Button('download', id='json-download-button'),
+        html.Button('Download', id='json-download-button'),
         dcc.Download(id='json-download')
     ])
 
