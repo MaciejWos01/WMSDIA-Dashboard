@@ -24,7 +24,7 @@ import plotly.graph_objects as go
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUMEN, dbc.icons.FONT_AWESOME])
 
 global title
-title = "project_title"
+title = "TOPSIS vizualization"
 
 def header():
     return dbc.Row([
@@ -884,11 +884,11 @@ def main_dash_layout():
     objectives = ['max', 'max', 'min', 'max', 'min', 'min', 'min', 'max']
     data = data.set_index(data.columns[0])
     if agg_g == 'R':
-        buses = msdt.MSDTransformer(msdt.RTOPSIS)
+        buses = msdt.MSDTransformer(msdt.RTOPSIS, 'gurobi')
     elif agg_g == 'A':
-        buses = msdt.MSDTransformer(msdt.ATOPSIS)
+        buses = msdt.MSDTransformer(msdt.ATOPSIS, 'gurobi')
     else:
-        buses = msdt.MSDTransformer(msdt.ITOPSIS)
+        buses = msdt.MSDTransformer(msdt.ITOPSIS, 'gurobi')
     
     criteria_params = list(params_g[0].keys())
     params = pd.DataFrame.from_dict(params_g).set_index(criteria_params[0])
