@@ -99,9 +99,11 @@ def wizard():
                     ], id = 'wizard-data-input-remove-upload-params'),
                 ], id="input-upload-container"),
 
-            html.Div(id='wizard-data-output-parsed-data-before'),
-            html.Div(id='wizard-data-output-parsed-params'),
-            html.Div(id='data-preview'),
+            html.Div([
+                html.Div(id='wizard-data-output-parsed-data-before'),
+                html.Div(id='wizard-data-output-parsed-params'),
+                html.Div(id='data-preview')
+                ], id='data-preview-content'),
             html.Div(id='data-table', style={'display': 'none'}),
             #html.Div(id='wizard_data_input_submit-button'),
             #html.Div(id='wizard_data_input_submit-button')
@@ -403,11 +405,10 @@ def parse_file_wizard_data_data(contents, filename, date, delimiter, dec):
         ])
 
     return html.Div([
-        html.Hr(),
-
         dash_table.DataTable(
             data=df.to_dict('records'),
             columns=[{'name': i, 'id': i} for i in df.columns],
+            style_cell={'textAlign': 'left'},
             page_size=8
         ),
         #html.Button("Submit", id='wizard_data_input_submit-button'),
@@ -567,6 +568,7 @@ def submit(n_clicks, data, params):
         data_preview = dash_table.DataTable(
             data=data,
             columns=[{'name': i, 'id': i} for i in data[0].keys()],
+            style_cell={'textAlign': 'left'},
             page_size=8
         )
         data_table = dcc.Store(id='wizard_state_stored-data', data=data)
@@ -601,6 +603,7 @@ def submit(n_clicks, data, params):
         dash_table.DataTable(
             id = 'wizard-parameters-input-parameters-table',
             columns = columns,
+            style_cell={'textAlign': 'left'},
             data = data_params,
             editable = True,
             dropdown={
@@ -786,6 +789,7 @@ def update_table_wizard_parameters(timestamp, objectives_val, data, params, para
         dash_table.DataTable(
             id = 'wizard-parameters-input-parameters-table',
             columns = columns,
+            style_cell={'textAlign': 'left'},
             data = params,
             editable = True,
             dropdown={
@@ -924,8 +928,8 @@ def display_parameters(a):
     columns = return_columns_wizard_parameters_params_table(params_labels)
     df = pd.DataFrame.from_dict(params)
 
-    return html.Div(children=[
-        dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns]),
+    return html.Div(id = 'aop-tab', className = 'tab', children=[
+        dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns], style_cell={'textAlign': 'left'}),
         html.Button('Download', id='json-download-button'),
         dcc.Download(id='json-download')
     ])
@@ -958,35 +962,35 @@ def ranking_vizualization(buses):
 
     df.index.rename('Name', inplace=True)
     df.reset_index(inplace=True)
-    return html.Div(children=[
+    return html.Div(id = 'rv-tab', className = 'tab', children=[
         dcc.Graph(
             id = 'vizualization',
             figure = buses.plot(plot_name = title, color = colour_g)
         ),
-        dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns], sort_action='native')
+        dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns], style_cell={'textAlign': 'left'}, sort_action='native')
     ])
 
 def improvement_actions(buses):
     global buses_g
     buses_g = buses
     ids = buses_g.X_new.index
-    return html.Div(children=[
-        html.Div(id = 'viz', children = ranking_vizualization(buses), style = {
-            'width' : '70%'
-        }),
-        html.Div(children=[
-            dcc.Dropdown(id = 'choose-method', options=[
-                {'label':method,'value':method}
-                for method in ['improvement_mean', 'improvement_std', 'improvement_features', 'improvement_genetic', 'improvement_single_feature']
-            ],
-            value = 'improvement_mean',
-            clearable = False
-            ),
-            html.Div(children =['alternative to improve:', dcc.Dropdown(
+    return html.Div(id = 'ia-tab', className = 'tab', children=[
+        html.Div(id = 'viz', children = ranking_vizualization(buses)),
+        html.Div(id = 'ia-options', children=[
+            html.Div(children = ['Improvement action:', 
+                dcc.Dropdown(id = 'choose-method', options=[
+                    {'label':method,'value':method}
+                    for method in ['improvement_mean', 'improvement_std', 'improvement_features', 'improvement_genetic', 'improvement_single_feature']
+                ],
+                value = 'improvement_mean',
+                clearable = False
+                ),
+            ]),
+            html.Div(children =['Alternative to improve:', dcc.Dropdown(
                 id = 'alternative-to-improve',
                 options = ids
             )]),
-            html.Div(children = ['alternative to overcame:', dcc.Dropdown(
+            html.Div(children = ['Alternative to overcome:', dcc.Dropdown(
                 id = 'alternative-to-overcame',
                 options = ids
             )]),
@@ -995,12 +999,8 @@ def improvement_actions(buses):
             html.Div(id = 'advanced-content', children = None),
             html.Button('Apply', id = 'apply-button', n_clicks=0),
             html.Div(id = 'improvement-result', children=None)
-        ], style={
-            'width' : '30%',
-        })
-    ], style={
-        'display': 'flex'
-    })
+        ])
+    ])
 
 @app.callback(Output('improvement-result', 'children'),
               Input('choose-method', 'value'))
@@ -1148,7 +1148,7 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
             generations = 200
         global improvement
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, features_to_change = features_to_change, boundary_values = boundary_values, allow_deterioration = allow_deterioration, popsize = popsize, n_generations = generations)
-        return dash_table.DataTable(improvement.to_dict('records'), [{"name": i, "id": i} for i in improvement.columns])
+        return dash_table.DataTable(improvement.to_dict('records'), [{"name": i, "id": i} for i in improvement.columns], style_cell={'textAlign': 'left'})
     else:
         raise PreventUpdate
 
@@ -1171,7 +1171,7 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
             improvement_ratio = 0.000001
         global improvement
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, features_to_change = features_to_change, boundary_values = boundary_values)
-        return dash_table.DataTable(improvement.to_dict('records'), [{"name": i, "id": i} for i in improvement.columns])
+        return dash_table.DataTable(improvement.to_dict('records'), [{"name": i, "id": i} for i in improvement.columns], style_cell={'textAlign': 'left'})
     else:
         raise PreventUpdate
     
@@ -1198,7 +1198,7 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
             allow_std = bool(allow_std)
         global improvement
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, allow_std = allow_std)
-        return dash_table.DataTable(improvement.to_dict('records'), [{"name": i, "id": i} for i in improvement.columns])
+        return dash_table.DataTable(improvement.to_dict('records'), [{"name": i, "id": i} for i in improvement.columns], style_cell={'textAlign': 'left'},)
     else:
         raise PreventUpdate
     
@@ -1220,7 +1220,7 @@ def improvement_std_results(n, alternative_to_imptove, alternative_to_overcame, 
             improvement_ratio = 0.000001
         global improvement
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio)
-        return dash_table.DataTable(improvement.to_dict('records'), [{"name": i, "id": i} for i in improvement.columns])
+        return dash_table.DataTable(improvement.to_dict('records'), [{"name": i, "id": i} for i in improvement.columns], style_cell={'textAlign': 'left'})
     else:
         raise PreventUpdate
 
@@ -1277,7 +1277,7 @@ def vizualization_change(n, alternative_to_imptove):
                 id = 'vizualization',
                 figure = buses_g.plot2(alternative_to_imptove, improvement)
             ),
-            dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns], sort_action='native')
+            dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns], sort_action='native', style_cell={'textAlign': 'left'})
         ])
     else:
         raise PreventUpdate
