@@ -1055,7 +1055,7 @@ def set_conditional_settings(value):
     features = buses_g.X_new.columns[:-3]
     if value =='improvement_features':
         return html.Div(children = [
-            'features to change:',
+            'Features to change:',
             dcc.Dropdown(
                 id = 'features-to-change',
                 options = features,
@@ -1063,7 +1063,7 @@ def set_conditional_settings(value):
         ])
     elif value == 'improvement_genetic':
         return html.Div(children = [
-            'features to change:',
+            'Features to change:',
             dcc.Dropdown(
                 id = 'features-to-change',
                 options = features,
@@ -1090,11 +1090,11 @@ def set_advanced_settings(value, n_clicks):
         is_hidden = 'visible'
     if value == 'improvement_mean':
         return html.Div(children=[
-            html.Div(children=['improvement ratio:', dcc.Input(
+            html.Div(children=['Improvement ratio: ', dcc.Input(
             type = 'number',
             id='improvement-ratio'
             )]),
-            html.Div(children=['allow std:', dcc.Input(
+            html.Div([html.Div('Allow std: '), dcc.Input(
             type = 'text',
             id='allow-std'
             )])
@@ -1103,11 +1103,11 @@ def set_advanced_settings(value, n_clicks):
         })
     elif value == 'improvement_features':
         return html.Div(children=[
-            html.Div(children=['improvement ratio:', dcc.Input(
+            html.Div(children=['Improvement ratio: ', dcc.Input(
             type = 'number',
             id='improvement-ratio'
             )]),
-            html.Div(children=['boundary values:', dcc.Input(
+            html.Div(children=['Boundary values: ', dcc.Input(
             type = 'text',
             id='boundary-values'
             )])
@@ -1116,23 +1116,24 @@ def set_advanced_settings(value, n_clicks):
         })
     elif value == 'improvement_genetic':
         return html.Div(children = [
-            html.Div(children=['improvement ratio:', dcc.Input(
+            html.Div(children=['Improvement ratio: ', dcc.Input(
             type = 'number',
             id='improvement-ratio'
             )]),
-            html.Div(children=['boundary values:', dcc.Input(
+            html.Div(children=['Boundary values: ', dcc.Input(
             type = 'text',
             id='boundary-values'
             )]),
-            html.Div(children=['allow deterioration:', dcc.Input(
+            html.Div(children=['Allow deterioration: ', dcc.Input(
             type = 'text',
             id='allow-deterioration'
             )]),
-            html.Div(children=['popsize:', dcc.Input(
+            html.Div([html.Div('Popsize: '), dcc.Input(
             type = 'text',
             id='popsize'
             )]),
-            html.Div(children=['generations:', dcc.Input(
+            html.Div([html.Div('Generations: '), 
+                dcc.Input(
             type = 'text',
             id='generations'
             )])
@@ -1141,7 +1142,7 @@ def set_advanced_settings(value, n_clicks):
         })
     elif value == 'improvement_single_feature':
         return html.Div(children=[
-            html.Div(children=['improvement ratio:', dcc.Input(
+            html.Div(children=['Improvement ratio: ', dcc.Input(
             type = 'number',
             id='improvement-ratio'
             )])
@@ -1150,10 +1151,10 @@ def set_advanced_settings(value, n_clicks):
         })
     elif value == 'improvement_std':
         return html.Div(children=[
-            html.Div(children=['improvement ratio:', dcc.Input(
-            type = 'number',
-            id='improvement-ratio'
-            )])
+            html.Div([
+                html.Div('Improvement ratio: '), 
+                dcc.Input(type = 'number', id='improvement-ratio')
+            ])
         ], style={
             'visibility' : is_hidden,
         })
