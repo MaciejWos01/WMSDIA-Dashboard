@@ -1105,7 +1105,8 @@ def set_advanced_settings(value, n_clicks):
         return html.Div(children=[
             html.Div(children=['Improvement ratio: ', dcc.Input(
             type = 'number',
-            id='improvement-ratio'
+            id='improvement-ratio',
+            value=0.000001
             )]),
             html.Div(children=['Boundary values: ', dcc.Input(
             type = 'text',
@@ -1205,13 +1206,14 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
     State('choose-method', 'value'),
     prevent_initial_call = True
 )
-def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame, improvement_ratio, features_to_change, boundary_values, method):    
+def improvement_features_results(n, alternative_to_imptove, alternative_to_overcame, improvement_ratio, features_to_change, boundary_values, method):    
     if n>0:
         if improvement_ratio is None:
             improvement_ratio = 0.000001
         global improvement
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, features_to_change = features_to_change, boundary_values = boundary_values)
-        return dash_table.DataTable(improvement.to_dict('records'), [{"name": i, "id": i} for i in improvement.columns], style_cell={'textAlign': 'left'})
+        rounded_improvement = improvement.applymap(formating)
+        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
     else:
         raise PreventUpdate
     
