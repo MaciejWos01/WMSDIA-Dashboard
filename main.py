@@ -46,7 +46,7 @@ def home_layout():
             dcc.Link(html.Button('Load your dataset using WIZARD', className='big-button'), href='/wizard'),
             dcc.Link(html.Button('Experiment with ready dataset', className='big-button'), href='/main_dash_layout'),
         ], className='button-container')
-    ])
+    ], id='home-page')
 
 #==============================================================
 #   WIZARD
@@ -59,56 +59,80 @@ def wizard():
         html.Div([
             html.Div([
                 html.Div([
-                    html.Div('Decimal:'),
-                    dcc.Input(id='wizard-data-input-decimal',
-                                type = 'text',
-                                placeholder='.',
-                                minLength=0,
-                                maxLength=1),
-                    html.Div('Delimiter:'),
-                    dcc.Input(id='wizard-data-input-delimiter',
-                                type = 'text',
-                                placeholder=',',
-                                minLength=0,
-                                maxLength=1),
-                    ], id='input-container'),
+                    html.Div(className="progress-bar", children=[
+                        html.Div(className="progress-step", children=[
+                            html.Div(className="step-circle blue-circle"),
+                            html.Div("Upload", className="step-label")
+                        ]),
+                        html.Div(className="progress-line"),
+                        html.Div(className="progress-step", children=[
+                            html.Div(className="step-circle"),
+                            html.Div("Data", className="step-label")
+                        ]),
+                        html.Div(className="progress-line"),
+                        html.Div(className="progress-step", children=[
+                            html.Div(className="step-circle"),
+                            html.Div("Parameters", className="step-label")
+                        ]),
+                        html.Div(className="progress-line"),
+                        html.Div(className="progress-step", children=[
+                            html.Div(className="step-circle"),
+                            html.Div("Model", className="step-label")
+                        ]),
+                    ])
+                ], className='side-bar'),
                 html.Div([
-                    html.Div('Upload data'),
-                    dcc.Store(id='wizard_state_stored-data', data=None),
-                    dcc.Upload(
-                        id='wizard-data-input-upload-data',
-                        children=html.Div([
-                            'Drag and Drop or Select Files'
-                        ], id = 'wizard-data-output-upload-data-filename'),
-                        multiple=False
-                    ),
-                    html.Div(id='wizard-data-input-remove-data'),
-                    ], id = 'wizard-data-input-remove-upload-data'),
+                    html.Div([
+                        html.Div([
+                            html.Div('Decimal:'),
+                            dcc.Input(id='wizard-data-input-decimal',
+                                        type = 'text',
+                                        placeholder='.',
+                                        minLength=0,
+                                        maxLength=1),
+                            html.Div('Delimiter:'),
+                            dcc.Input(id='wizard-data-input-delimiter',
+                                        type = 'text',
+                                        placeholder=',',
+                                        minLength=0,
+                                        maxLength=1),
+                            ], id='input-container'),
+                        html.Div([
+                            html.Div('Upload data'),
+                            dcc.Store(id='wizard_state_stored-data', data=None),
+                            dcc.Upload(
+                                id='wizard-data-input-upload-data',
+                                children=html.Div([
+                                    'Drag and Drop or Select Files'
+                                ], id = 'wizard-data-output-upload-data-filename'),
+                                multiple=False
+                            ),
+                            html.Div(id='wizard-data-input-remove-data'),
+                            ], id = 'wizard-data-input-remove-upload-data'),
 
-                html.Div([
-                    html.Div('Upload parameters'),
-                    dcc.Store(id='wizard_state_stored-params', data=None),
-                    dcc.Upload(
-                        id='wizard-data-input-upload-params',
-                        children=html.Div([
-                            'Drag and Drop or Select Files'
-                        ], id = 'wizard-data-output-upload-params-filename'),
-                        multiple=False
-                    ),
-                    html.Div(id='wizard-data-input-remove-params'),
-                    ], id = 'wizard-data-input-remove-upload-params'),
-                ], id="input-upload-container"),
+                        html.Div([
+                            html.Div('Upload parameters'),
+                            dcc.Store(id='wizard_state_stored-params', data=None),
+                            dcc.Upload(
+                                id='wizard-data-input-upload-params',
+                                children=html.Div([
+                                    'Drag and Drop or Select Files'
+                                ], id = 'wizard-data-output-upload-params-filename'),
+                                multiple=False
+                            ),
+                            html.Div(id='wizard-data-input-remove-params'),
+                            ], id = 'wizard-data-input-remove-upload-params'),
+                    ], id="input-upload-container"),
 
-            html.Div([
-                html.Div(id='wizard-data-output-parsed-data-before'),
-                html.Div(id='wizard-data-output-parsed-params'),
-                html.Div(id='data-preview')
-                ], id='data-preview-content'),
-            html.Div(id='data-table', style={'display': 'none'}),
-            #html.Div(id='wizard_data_input_submit-button'),
-            #html.Div(id='wizard_data_input_submit-button')
-            #html.Button("Submit", id='wizard_data_input_submit-button', n_clicks=0, style={'display':'none'})
-            html.Div(html.Button("Submit", id='wizard_data_input_submit-button', className='submit-button', style={'display':'none'}), id='nav-buttons')
+                    html.Div([
+                        html.Div(id='wizard-data-output-parsed-data-before'),
+                        html.Div(id='wizard-data-output-parsed-params'),
+                        html.Div(id='data-preview')
+                    ], id='data-preview-content'),
+                    html.Div(id='data-table', style={'display': 'none'}),
+                    html.Div(html.Button("Submit", id='wizard_data_input_submit-button', className='submit-button', style={'display':'none'}), id='nav-buttons')
+                ], className='page-with-side-bar')
+            ], className='vertical-page')
         ], id='data_upload_layout', style={'display': 'block'}),
 
 
@@ -117,6 +141,11 @@ def wizard():
             html.Div([
                 html.Div([
                     html.Div(className="progress-bar", children=[
+                        html.Div(className="progress-step", children=[
+                            html.Div(className="step-circle"),
+                            html.Div("Upload", className="step-label")
+                        ]),
+                        html.Div(className="progress-line"),
                         html.Div(className="progress-step", children=[
                             html.Div(className="step-circle blue-circle"),
                             html.Div("Data", className="step-label")
@@ -155,6 +184,11 @@ def wizard():
                     html.Div(className="progress-bar", children=[
                         html.Div(className="progress-step", children=[
                             html.Div(className="step-circle"),
+                            html.Div("Upload", className="step-label")
+                        ]),
+                        html.Div(className="progress-line"),
+                        html.Div(className="progress-step", children=[
+                            html.Div(className="step-circle"),
                             html.Div("Data", className="step-label")
                         ]),
                         html.Div(className="progress-line"),
@@ -183,6 +217,11 @@ def wizard():
             html.Div([
                 html.Div([
                     html.Div(className="progress-bar", children=[
+                        html.Div(className="progress-step", children=[
+                            html.Div(className="step-circle"),
+                            html.Div("Upload", className="step-label")
+                        ]),
+                        html.Div(className="progress-line"),
                         html.Div(className="progress-step", children=[
                             html.Div(className="step-circle"),
                             html.Div("Data", className="step-label")
