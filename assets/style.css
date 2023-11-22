@@ -320,7 +320,12 @@
 }
 
 #css-edit-icon {
-    margin: 20px;
+    margin: 10px;
+    color: var(--main);
+}
+
+.fa-solid.fa-question.fa-xs {
+    margin: 10px;
     color: var(--main);
 }
 
@@ -349,4 +354,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.css-help {
+    display: flex;
+    flex-direction: row;
 }

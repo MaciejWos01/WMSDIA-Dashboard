@@ -84,13 +84,27 @@ def wizard():
                 html.Div([
                     html.Div([
                         html.Div([
-                            html.Div('Decimal:'),
+                            html.Div([
+                                html.Div('Decimal:'),
+                                html.I(className="fa-solid fa-question fa-xs", id='decimal-help'),
+                                dbc.Tooltip(
+                                    "Enter decimal point in your dataset",
+                                    target="decimal-help",
+                                ),
+                            ], className='css-help'),
                             dcc.Input(id='wizard-data-input-decimal',
                                         type = 'text',
                                         placeholder='.',
                                         minLength=0,
                                         maxLength=1),
-                            html.Div('Delimiter:'),
+                            html.Div([
+                                html.Div('Delimiter:'),
+                                html.I(className="fa-solid fa-question fa-xs", id='delimiter-help'),
+                                dbc.Tooltip(
+                                    "Enter delimiter in your dataset",
+                                    target="delimiter-help",
+                                ),
+                            ], className='css-help'),
                             dcc.Input(id='wizard-data-input-delimiter',
                                         type = 'text',
                                         placeholder=',',
@@ -98,7 +112,7 @@ def wizard():
                                         maxLength=1),
                             ], id='input-container'),
                         html.Div([
-                            html.Div('Upload data'),
+                            html.Div('Upload data:'),
                             dcc.Store(id='wizard_state_stored-data', data=None),
                             dcc.Upload(
                                 id='wizard-data-input-upload-data',
@@ -111,7 +125,7 @@ def wizard():
                             ], id = 'wizard-data-input-remove-upload-data'),
 
                         html.Div([
-                            html.Div('Upload parameters'),
+                            html.Div('Upload parameters (optional):'),
                             dcc.Store(id='wizard_state_stored-params', data=None),
                             dcc.Upload(
                                 id='wizard-data-input-upload-params',
