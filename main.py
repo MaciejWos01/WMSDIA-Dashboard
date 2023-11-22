@@ -284,6 +284,7 @@ def wizard():
         ], id='model_layout', style={'display': 'none'})
     ])
 
+
 @app.callback(
     Output("color-preview-output", "figure"), 
     Input("wizard-model-input-dropdown-color", "value"))
@@ -302,6 +303,7 @@ def change_colorscale(scale):
     fig = {'data': [trace], 'layout': layout}
     return fig
 
+
 @app.callback(Output('model-to-param', 'value'),
               Input('wizard-model-input-radio-items', 'value'),
               Input('wizard-model-input-dropdown-color', 'value'))
@@ -318,6 +320,7 @@ def get_agg_fn(agg, colour):
               Output('wizard-data-output-upload-data-filename', 'children'),
               Output('wizard-data-input-remove-data', 'children', allow_duplicate=True),
               Output('wizard_data_input_submit-button', 'style', allow_duplicate=True),
+              Output('wizard-data-input-title', 'children', allow_duplicate=True),
               Input('wizard-data-input-upload-data', 'contents'),
               Input('wizard-data-input-delimiter', 'n_submit'),
               State('wizard-data-input-delimiter', 'value'),
@@ -334,8 +337,9 @@ def update_wizard_data_output_data(contents_data, enter_del, delimiter, enter_se
             zip([contents_data], [name_data], [date_data], [delimiter], [decimal])]  
                 
         remove = html.Button(id='wizard_data_input_remove-data-button', className='remove-button', children='Remove')
+        project_title = name_data.split('.')[0]
 
-        return child, child, name_data, remove, {'display':'block'}
+        return child, child, name_data, remove, {'display':'block'}, project_title
     else:
         raise PreventUpdate
 
@@ -587,7 +591,8 @@ def fill_parameters_wizard_parameters_params(params, df, param_keys):
         objectives = list(params[param_keys[4]].values())
 
         return weights, mins, maxs, objectives
-    
+
+
 @app.callback([Output('data-preview', 'children'),
               Output('data-table', 'children', allow_duplicate=True),
               Output('wizard-parameters-output-params-table', 'children', allow_duplicate=True),
@@ -661,7 +666,8 @@ def submit(n_clicks, data, params):
         return (data_preview, data_table, params_table, {'display': 'none'}, {'display': 'block'}, {'display': 'none'}, {'display': 'none'})
     else:
         return no_update, no_update, no_update, no_update, no_update, no_update, no_update
-    
+
+
 @app.callback([Output('data_upload_layout', 'style', allow_duplicate=True),
               Output('data_layout', 'style', allow_duplicate=True),
               Output('parameters_layout', 'style', allow_duplicate=True),
@@ -673,6 +679,7 @@ def button_data_params(n_clicks):
         return ({'display': 'none'}, {'display': 'none'}, {'display': 'block'}, {'display': 'none'})
     else:
         return no_update, no_update, no_update, no_update
+
 
 @app.callback([Output('data_upload_layout', 'style', allow_duplicate=True),
               Output('data_layout', 'style', allow_duplicate=True),
@@ -686,6 +693,7 @@ def button_params_data(n_clicks):
     else:
         return no_update, no_update, no_update, no_update
 
+
 @app.callback([Output('data_upload_layout', 'style', allow_duplicate=True),
               Output('data_layout', 'style', allow_duplicate=True),
               Output('parameters_layout', 'style', allow_duplicate=True),
@@ -697,6 +705,7 @@ def button_params_model(n_clicks):
         return ({'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'block'})
     else:
         return no_update, no_update, no_update, no_update
+
 
 @app.callback([Output('data_upload_layout', 'style', allow_duplicate=True),
               Output('data_layout', 'style', allow_duplicate=True),
