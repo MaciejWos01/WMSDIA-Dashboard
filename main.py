@@ -3,6 +3,7 @@ import json
 import io
 #import datetime
 
+import csv
 import time
 import MSDTransformer as msdt
 import dash
@@ -416,6 +417,11 @@ def remove_file_wizard_data_params_file(n):
     remove = None
     return child, table, remove
 
+def get_delimiter(data):
+    sniffer = csv.Sniffer()
+    data = data.decode('utf-8')
+    delimiter = sniffer.sniff(data).delimiter
+    return delimiter
 
 def parse_file_wizard_data_data(contents, filename, date, delimiter, dec):
     
@@ -424,7 +430,7 @@ def parse_file_wizard_data_data(contents, filename, date, delimiter, dec):
     decoded = base64.b64decode(content_string)
     
     if not delimiter:
-        delimiter = ','
+        delimiter = get_delimiter(decoded)
 
     if not dec:
         dec = '.'
