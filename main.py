@@ -21,7 +21,7 @@ import numpy as np
 import plotly.express as px
 import dash_mantine_components as dmc
 import plotly.graph_objects as go
-import plotly.express as px
+import matplotlib.pyplot as plt
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUMEN, dbc.icons.FONT_AWESOME])
 
@@ -1112,7 +1112,9 @@ def improvement_actions(buses):
             html.Button('Advanced settings', id='advanced-settings', n_clicks=0),
             html.Div(id = 'advanced-content', children = None),
             html.Button('Apply', id = 'apply-button', n_clicks=0),
-            html.Div(id = 'improvement-result', children=None)
+            html.Div(id = 'improvement-result', children=None),
+            html.Button('download raport', id = 'download-raport', n_clicks=0),
+            html.Div(id = 'download-placeholder')
         ])
     ])
 
@@ -1261,6 +1263,8 @@ def set_advanced_settings(value, n_clicks):
     prevent_initial_call = True
 )
 def improvement_genetic_results(n, alternative_to_imptove, alternative_to_overcame, improvement_ratio, features_to_change, boundary_values, allow_deterioration, popsize, generations, method):    
+    global proceed
+    proceed = False
     if n>0:
         if boundary_values is not None:
             boundary_values = boundary_values.split(',')
@@ -1278,8 +1282,10 @@ def improvement_genetic_results(n, alternative_to_imptove, alternative_to_overca
         #rounded_improvement = improvement.apply(formating)
         #rounded_improvement = [row.applymap(formating) for index, row in improvement.iterrows()]
         rounded_improvement = improvement.apply(np.vectorize(formating))
+        proceed = True
         return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
     else:
+        proceed = True
         raise PreventUpdate
 
 @app.callback(
@@ -1296,6 +1302,8 @@ def improvement_genetic_results(n, alternative_to_imptove, alternative_to_overca
     prevent_initial_call = True
 )
 def improvement_features_results(n, alternative_to_imptove, alternative_to_overcame, improvement_ratio, features_to_change, boundary_values, method):    
+    global proceed
+    proceed = False
     if boundary_values is not None:
         boundary_values = boundary_values.split(',')
         boundary_values = [float(x) for x in boundary_values]
@@ -1305,8 +1313,10 @@ def improvement_features_results(n, alternative_to_imptove, alternative_to_overc
         global improvement
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, features_to_change = features_to_change, boundary_values = boundary_values)
         rounded_improvement = improvement.applymap(formating)
+        proceed = True
         return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
     else:
+        proceed = True
         raise PreventUpdate
     
 @app.callback(
@@ -1322,14 +1332,18 @@ def improvement_features_results(n, alternative_to_imptove, alternative_to_overc
     prevent_initial_call = True
 )
 def improvement_feature_results(n, alternative_to_imptove, alternative_to_overcame, improvement_ratio, feature_to_change, method):    
+    global proceed
+    proceed = False
     if n>0:
         if improvement_ratio is None:
             improvement_ratio = 0.000001
         global improvement
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, feature_to_change = feature_to_change)
         rounded_improvement = improvement.applymap(formating)
+        proceed = True
         return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
     else:
+        proceed = True
         raise PreventUpdate
     
 
@@ -1346,13 +1360,18 @@ def improvement_feature_results(n, alternative_to_imptove, alternative_to_overca
     prevent_initial_call = True
 )
 def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame, improvement_ratio, allow_std, method):    
+    global proceed
+    proceed = False
     if n>0:
         if improvement_ratio is None:
             improvement_ratio = 0.000001
         if allow_std is None:
             allow_std = False
         else:
-            allow_std = bool(allow_std)
+            if allow_std == 'True':
+                allow_std = True
+            else:
+                allow_std = False
         global improvement
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, allow_std = allow_std)
         rounded_improvement = improvement.applymap(formating)
@@ -1368,13 +1387,16 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
                     {data.to_html()}
                     <h1>parameters</h1>
                     {params.to_html()}
+                    <img src='chart.png' width="700">
                 </body>
             </html>
         '''
         with open('html_report.html', 'w') as f:
             f.write(raport)
+        proceed = True
         return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'},)
     else:
+        proceed = True
         raise PreventUpdate
     
 
@@ -1390,14 +1412,18 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
     prevent_initial_call = True
 )
 def improvement_std_results(n, alternative_to_imptove, alternative_to_overcame, improvement_ratio, method):    
+    global proceed
+    proceed = False
     if n>0:
         if improvement_ratio is None:
             improvement_ratio = 0.000001
         global improvement
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio)
         rounded_improvement = improvement.applymap(formating)
+        proceed = True
         return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
     else:
+        proceed = True
         raise PreventUpdate
 
 '''
@@ -1432,7 +1458,11 @@ def improvement_results(n, alternative_to_imptove, alternative_to_overcame, feat
     prevent_initial_call = True
 )
 def vizualization_change(n, alternative_to_imptove):
-    time.sleep(1)
+    time.sleep(0.5)
+    while True:
+        if proceed:
+            break
+        time.sleep(0.5)
     if n>0:
         df = buses_g.X_new.sort_values('AggFn', ascending = False).applymap(formating)
 
@@ -1447,11 +1477,13 @@ def vizualization_change(n, alternative_to_imptove):
 
         df.index.rename('Name', inplace=True)
         df.reset_index(inplace=True)
-        a = buses_g.plot(plot_name = title, color = colour_g)
+        #a = buses_g.plot(plot_name = title, color = colour_g)
+        fig = buses_g.plot2(alternative_to_imptove, improvement)
+        fig.write_image("chart.png")
         return html.Div(children=[
             dcc.Graph(
                 id = 'vizualization',
-                figure = buses_g.plot2(alternative_to_imptove, improvement)
+                figure = fig
             ),
             dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns], sort_action='native', style_cell={'textAlign': 'left'})
         ])
