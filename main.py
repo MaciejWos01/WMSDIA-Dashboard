@@ -21,6 +21,7 @@ import numpy as np
 import plotly.express as px
 import dash_mantine_components as dmc
 import plotly.graph_objects as go
+import plotly.express as px
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUMEN, dbc.icons.FONT_AWESOME])
 
@@ -45,7 +46,7 @@ def home_layout():
     return html.Div(children=[
         html.Div([
             dcc.Link(html.Button('Load your dataset using WIZARD', className='big-button'), href='/wizard'),
-            dcc.Link(html.Button('Experiment with ready dataset', className='big-button'), href='/main_dash_layout'),
+            dcc.Link(html.Button('Experiment with ready dataset', className='big-button'), href='/main_dash_layout2'),
         ], className='button-container')
     ], id='home-page')
 
@@ -957,9 +958,23 @@ def return_toggle_switch(id, o):
 #   PLAYGROUND
 #==============================================================
 
+def main_dash_layout2():
+    global data
+    data = pd.read_csv('bus.csv', sep = ';')
+    f = open('bus_params.json')
+    params = json.load(f)
+    params = pd.DataFrame.from_dict(params)
+    params = params.to_dict('records')
+    global params_g
+    params_g = params
+    global agg_g
+    agg_g = 'R'
+    global colour_g
+    colour_g = 'jet'
+    return main_dash_layout()
+
 def main_dash_layout():
     global data
-    objectives = ['max', 'max', 'min', 'max', 'min', 'min', 'min', 'max']
     data = data.set_index(data.columns[0])
     if agg_g == 'R':
         buses = msdt.MSDTransformer(msdt.RTOPSIS, 'gurobi')
@@ -1036,13 +1051,38 @@ def ranking_vizualization(buses):
 
     df.index.rename('Name', inplace=True)
     df.reset_index(inplace=True)
+    fig = buses.plot(plot_name = title, color = colour_g)
+    fig.update_layout(clickmode='event+select')
     return html.Div(id = 'rv-tab', className = 'tab', children=[
         dcc.Graph(
             id = 'vizualization',
-            figure = buses.plot(plot_name = title, color = colour_g)
+            figure = fig
         ),
-        dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns], style_cell={'textAlign': 'left'}, sort_action='native')
+        dash_table.DataTable(
+            df.to_dict('records'),
+            [{"name": i, "id": i} for i in df.columns],
+            style_cell={'textAlign': 'left'},
+            sort_action='native',
+            id = 'datatable'),
+        html.Div(id = 'selected-data')
     ])
+
+'''
+@app.callback(
+    Output('selected-data', 'children'),
+    Input('vizualization', 'selectedData'))
+def display_selected_data(selectedData):
+    print(selectedData)
+    return json.dumps(selectedData, indent=2)
+'''
+'''
+@app.callback(
+    Output('selected-data', 'children'),
+    Input('vizualization', 'clickData'))
+def display_click_data(clickData):
+    print(clickData)
+    return json.dumps(clickData, indent=2)
+'''
 
 def improvement_actions(buses):
     global buses_g
@@ -1127,11 +1167,13 @@ def set_advanced_settings(value, n_clicks):
         return html.Div(children=[
             html.Div(children=['Improvement ratio: ', dcc.Input(
             type = 'number',
-            id='improvement-ratio'
+            id='improvement-ratio',
+            value = 0.000001
             )]),
             html.Div([html.Div('Allow std: '), dcc.Input(
             type = 'text',
-            id='allow-std'
+            id='allow-std',
+            value = 'False'
             )])
         ], style={
             'visibility' : is_hidden,
@@ -1154,7 +1196,8 @@ def set_advanced_settings(value, n_clicks):
         return html.Div(children = [
             html.Div(children=['Improvement ratio: ', dcc.Input(
             type = 'number',
-            id='improvement-ratio'
+            id='improvement-ratio',
+            value = 0.000001
             )]),
             html.Div(children=['Boundary values: ', dcc.Input(
             type = 'text',
@@ -1162,16 +1205,18 @@ def set_advanced_settings(value, n_clicks):
             )]),
             html.Div(children=['Allow deterioration: ', dcc.Input(
             type = 'text',
-            id='allow-deterioration'
+            id='allow-deterioration',
+            value = 'False'
             )]),
             html.Div([html.Div('Popsize: '), dcc.Input(
-            type = 'text',
+            type = 'number',
             id='popsize'
             )]),
             html.Div([html.Div('Generations: '), 
                 dcc.Input(
-            type = 'text',
-            id='generations'
+            type = 'number',
+            id='generations',
+            value = 200
             )])
         ], style={
             'visibility' : is_hidden,
@@ -1180,7 +1225,8 @@ def set_advanced_settings(value, n_clicks):
         return html.Div(children=[
             html.Div(children=['Improvement ratio: ', dcc.Input(
             type = 'number',
-            id='improvement-ratio'
+            id='improvement-ratio',
+            value = 0.000001
             )])
         ], style={
             'visibility' : is_hidden,
@@ -1188,9 +1234,11 @@ def set_advanced_settings(value, n_clicks):
     elif value == 'improvement_std':
         return html.Div(children=[
             html.Div([
-                html.Div('Improvement ratio: '), 
-                dcc.Input(type = 'number', id='improvement-ratio')
-            ])
+                html.Div('Improvement ratio: '), dcc.Input(
+                    type = 'number',
+                    id='improvement-ratio',
+                    value = 0.000001
+            )])
         ], style={
             'visibility' : is_hidden,
         })
@@ -1212,8 +1260,11 @@ def set_advanced_settings(value, n_clicks):
     State('choose-method', 'value'),
     prevent_initial_call = True
 )
-def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame, improvement_ratio, features_to_change, boundary_values, allow_deterioration, popsize, generations, method):    
+def improvement_genetic_results(n, alternative_to_imptove, alternative_to_overcame, improvement_ratio, features_to_change, boundary_values, allow_deterioration, popsize, generations, method):    
     if n>0:
+        if boundary_values is not None:
+            boundary_values = boundary_values.split(',')
+            boundary_values = [float(x) for x in boundary_values]
         if improvement_ratio is None:
             improvement_ratio = 0.000001
         if allow_deterioration is None:
@@ -1223,8 +1274,11 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
         if generations is None:
             generations = 200
         global improvement
-        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, features_to_change = features_to_change, boundary_values = boundary_values, allow_deterioration = allow_deterioration, popsize = popsize, n_generations = generations)
-        return dash_table.DataTable(improvement.to_dict('records'), [{"name": i, "id": i} for i in improvement.columns], style_cell={'textAlign': 'left'})
+        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, features_to_change = features_to_change, boundary_values = boundary_values, allow_deterioration = allow_deterioration, popsize = popsize, n_generations = generations)[:10]
+        #rounded_improvement = improvement.apply(formating)
+        #rounded_improvement = [row.applymap(formating) for index, row in improvement.iterrows()]
+        rounded_improvement = improvement.apply(np.vectorize(formating))
+        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
     else:
         raise PreventUpdate
 
@@ -1242,11 +1296,37 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
     prevent_initial_call = True
 )
 def improvement_features_results(n, alternative_to_imptove, alternative_to_overcame, improvement_ratio, features_to_change, boundary_values, method):    
+    if boundary_values is not None:
+        boundary_values = boundary_values.split(',')
+        boundary_values = [float(x) for x in boundary_values]
     if n>0:
         if improvement_ratio is None:
             improvement_ratio = 0.000001
         global improvement
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, features_to_change = features_to_change, boundary_values = boundary_values)
+        rounded_improvement = improvement.applymap(formating)
+        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
+    else:
+        raise PreventUpdate
+    
+@app.callback(
+    Output('improvement_single_feature-result', 'children'),
+    [Input('apply-button', 'n_clicks')],
+    #Input('alternative-to-improve', 'value'),
+    #Input('alternative-to-overcame', 'value'),
+    State('alternative-to-improve', 'value'),
+    State('alternative-to-overcame', 'value'),
+    State('improvement-ratio', 'value'),
+    State('feature-to-change', 'value'),
+    State('choose-method', 'value'),
+    prevent_initial_call = True
+)
+def improvement_feature_results(n, alternative_to_imptove, alternative_to_overcame, improvement_ratio, feature_to_change, method):    
+    if n>0:
+        if improvement_ratio is None:
+            improvement_ratio = 0.000001
+        global improvement
+        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, feature_to_change = feature_to_change)
         rounded_improvement = improvement.applymap(formating)
         return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
     else:
@@ -1275,7 +1355,25 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
             allow_std = bool(allow_std)
         global improvement
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, allow_std = allow_std)
-        return dash_table.DataTable(improvement.to_dict('records'), [{"name": i, "id": i} for i in improvement.columns], style_cell={'textAlign': 'left'},)
+        rounded_improvement = improvement.applymap(formating)
+        criteria_params = list(params_g[0].keys())
+        params = pd.DataFrame.from_dict(params_g).set_index(criteria_params[0])
+        raport = f'''
+            <html>
+                <head>
+                    <title>Topsis Improvement Actions Raport</title>
+                </head>
+                <body>
+                    <h1>Dataset</h1>
+                    {data.to_html()}
+                    <h1>parameters</h1>
+                    {params.to_html()}
+                </body>
+            </html>
+        '''
+        with open('html_report.html', 'w') as f:
+            f.write(raport)
+        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'},)
     else:
         raise PreventUpdate
     
@@ -1297,7 +1395,8 @@ def improvement_std_results(n, alternative_to_imptove, alternative_to_overcame, 
             improvement_ratio = 0.000001
         global improvement
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio)
-        return dash_table.DataTable(improvement.to_dict('records'), [{"name": i, "id": i} for i in improvement.columns], style_cell={'textAlign': 'left'})
+        rounded_improvement = improvement.applymap(formating)
+        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
     else:
         raise PreventUpdate
 
@@ -1384,6 +1483,8 @@ def display_page(pathname):
         return wizard()
     elif pathname == '/main_dash_layout':
         return main_dash_layout()
+    elif pathname == '/main_dash_layout2':
+        return main_dash_layout2()
     else:
         return '404 - Page not found'
 
