@@ -220,9 +220,13 @@ def wizard():
                 ], className='side-bar'),
                 html.Div([
                     html.Div(id='wizard-parameters-output-params-table'),
-                    html.Div(id = 'wizard-parameters-output-warning', children = ''),
                     html.Div([html.Button('Back', id='param-to-data', className='back-button'),
-                    html.Button('Next', id='param-to-model', className='next-button')], id='nav-buttons')
+                    html.Button('Next', id='param-to-model', className='next-button')], id='nav-buttons'),
+
+                    dbc.Modal([
+                        dbc.ModalHeader("Warning"),
+                        dbc.ModalBody(id='warning-modal-body')
+                    ], id='warning-modal', size='sm', centered=True)
                 ], className='page-with-side-bar')
             ], className='vertical-page')
         ], id='parameters_layout', style={'display': 'none'}),
@@ -788,6 +792,7 @@ def check_updated_params_wizard_parameters(df_data, df_params, param_keys):
     upper_bound = df_data.max()
 
 
+
     for lower, upper, mini, maxi in zip(lower_bound[1:], upper_bound[1:], df_params[param_keys[2]], df_params[param_keys[3]]):
         if mini > maxi:
             warnings.append("Min value must be lower or equal than max value")
@@ -802,13 +807,12 @@ def check_updated_params_wizard_parameters(df_data, df_params, param_keys):
 
 
 def parse_warning(warning):
-    return html.Div([
-        warning
-    ])
+    return warning
 
 #Approach 2 - iterate through whole table
 @app.callback(Output('wizard-parameters-output-params-table', 'children'),
-              Output('wizard-parameters-output-warning', 'children'),
+              Output('warning-modal-body', 'children'),
+              Output('warning-modal', 'is_open'),
               Input('wizard-parameters-input-parameters-table', 'data_timestamp'),
               Input('wizard-parameters-input-objectives-dropdown', 'value'),
               State('wizard_state_stored-data','data'),
@@ -832,8 +836,10 @@ def update_table_wizard_parameters(timestamp, objectives_val, data, params, para
     if warnings:
         children = [parse_warning(warning) for warning in warnings]
         params = params_previous
+        is_open = True
     else:
         children = html.Div([])
+        is_open = False
 
     if params_previous:
         df_params_prev = pd.DataFrame.from_dict(params_previous).set_index(criteria_params[0])
@@ -872,7 +878,7 @@ def update_table_wizard_parameters(timestamp, objectives_val, data, params, para
         ),
         html.Div("Set all to Min/Max"),
         dcc.Dropdown(['-', 'min', 'max'], objectives_val, id = 'wizard-parameters-input-objectives-dropdown', clearable=False),
-    ]), children
+    ]), warnings, is_open
 
 
 @app.callback(Output('wizard-model-output-view', 'children'),
