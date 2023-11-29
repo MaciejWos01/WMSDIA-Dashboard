@@ -787,23 +787,26 @@ def check_updated_params_wizard_parameters(df_data, df_params, param_keys):
         "column": "",
         "row_id": -1
     }
+    df_criteria = df_data.drop(columns=df_data.columns[0], axis=1, inplace=False)
+    criteria = df_criteria.columns.values.tolist()
 
     #weights
     if (df_params[param_keys[1]] < 0).any():
 
         for id, val in enumerate(df_params[param_keys[1]]):
             if val < 0:
-                warning['text'] = "Weight must be a non-negative number\n"
+                warning['text'] = "Weight must be a non-negative number.\n"
                 warning['value'] = val
                 warning['column'] = param_keys[1]
-                warning['row_id'] = id
+                warning['row_id'] = criteria[id]
 
                 warnings.append(warning)
 
     if df_params[param_keys[1]].sum() == 0:
-        warning['text'] = "At least one weight must be greater than 0\n"
-        warning['value'] = val
+        warning['text'] = "At least one weight must be greater than 0.\n"
+        warning['value'] = 0
         warning['column'] = param_keys[1]
+        warning['row_id'] = "each"
 
         warnings.append(warning)
 
@@ -815,24 +818,24 @@ def check_updated_params_wizard_parameters(df_data, df_params, param_keys):
 
     for id, (lower, upper, mini, maxi) in enumerate(zip(lower_bound[1:], upper_bound[1:], df_params[param_keys[2]], df_params[param_keys[3]])):
         if mini > maxi:
-            warning['text'] = "Min value must be lower or equal than max value\n"
+            warning['text'] = "Min value must be lower or equal than max value (" + str(mini) + ").\n"
             warning['value'] = mini
             warning['column'] = param_keys[2]
-            warning['row_id'] = id
+            warning['row_id'] = criteria[id]
             warnings.append(warning)
         
         if lower < mini:
-            warning['text'] = "Min value must be lower or equal than the minimal value of given criterion\n"
+            warning['text'] = "Min value must be lower or equal than the minimal value of given criterion (" + str(lower) + ").\n"
             warning['value'] = mini
             warning['column'] = param_keys[2]
-            warning['row_id'] = id
+            warning['row_id'] = criteria[id]
             warnings.append(warning)
 
         if upper > maxi:
-            warning['text'] = "Max value must be greater or equal than the maximal value of given criterion\n"
+            warning['text'] = "Max value must be greater or equal than the maximal value of given criterion (" + str(upper) + ").\n"
             warning['value'] = maxi
             warning['column'] = param_keys[2]
-            warning['row_id'] = id
+            warning['row_id'] = criteria[id]
             warnings.append(warning)
     
     #return list(set(warnings))
@@ -844,8 +847,9 @@ def parse_warning(warning):
     #print(warning['value'])
     #print(warning['column'])
     #print(warning['row_id'])
+    warning2 = warning['text'] + "\n" + "You entered " + "'" + str(warning['value']) + "'" + " in " + "'" + str(warning['column']) + "' column" + " in " + "'" + str(warning['row_id']) + "' row" + ".\n" + "Changes were not applied."
 
-    return warning['text']
+    return warning2
 
 #Approach 2 - iterate through whole table
 @app.callback(Output('wizard-parameters-output-params-table', 'children'),
