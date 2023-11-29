@@ -45,8 +45,11 @@ def footer():
 def home_layout():
     return html.Div(children=[
         html.Div([
-            dcc.Link(html.Button('Load your dataset using WIZARD', className='big-button'), href='/wizard'),
-            dcc.Link(html.Button('Experiment with ready dataset', className='big-button'), href='/main_dash_layout2'),
+            html.H3('Welcome to WMSD-Transformer!'),
+            html.Div('You can start your experiment using wizard'),
+            dcc.Link(html.Button('Start WIZARD', className='big-button'), href='/wizard'),
+            html.Div('Or find out what this project is about using our example'),
+            dcc.Link(html.Button('Experiment with ready dataset', className='medium-button'), href='/main_dash_layout2'),
         ], className='button-container')
     ], id='home-page')
 
@@ -84,6 +87,11 @@ def wizard():
                     ])
                 ], className='side-bar'),
                 html.Div([
+                    html.Div([
+                        html.Div('Here you can upload your csv file with data and see its preview', className='info'),
+                        html.Div('You can also upload parameters file if you already have one or set them later', className='info'),
+                        html.Div('If your dataset is not displaying correctly (e.g. whole table is in one column) try to change decimal point or delimiter', className='info'),
+                    ], className='info-container'),
                     html.Div([
                         html.Div([
                             html.Div([
@@ -180,6 +188,9 @@ def wizard():
                 ], className='side-bar'),
                 html.Div([
                     html.Div([
+                        html.Div('On this page you can view your dataset and set the title for your project', className='info'),
+                    ], className ='info-container'),
+                    html.Div([
                         html.Div([
                             html.Div([
                                 html.Div("project_title", id='wizard-data-input-title'),
@@ -220,6 +231,9 @@ def wizard():
                     ])
                 ], className='side-bar'),
                 html.Div([
+                    html.Div([
+                        html.Div('Now you can view and edit your previously uploaded parameters or automatically generated ones based on dataset values', className='info'),
+                    ], className ='info-container'),
                     html.Div(id='wizard-parameters-output-params-table'),
                     html.Div([html.Button('Back', id='param-to-data', className='back-button'),
                     html.Button('Next', id='param-to-model', className='next-button')], id='nav-buttons'),
@@ -259,6 +273,10 @@ def wizard():
                     ])
                 ], className='side-bar'),
                 html.Div([
+                    html.Div([
+                        html.Div('Here you can select which aggregation function you want to use in TOPSIS ranking', className='info'),
+                        html.Div('Additionally you can change the colorscale for your plots', className='info'),
+                    ], className ='info-container'),
                     html.Div([
                         html.Div([
                             html.Div("Choose aggregation function:"),
@@ -314,6 +332,7 @@ def change_colorscale(scale):
 
     layout = go.Layout(
         height=50,
+        width=500,
         margin=dict(l=0, r=0, t=0, b=0),
         xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
         yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),

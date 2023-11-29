@@ -53,7 +53,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 100px;
+    padding: 50px;
 }
 
 .big-button {
@@ -62,8 +62,20 @@
     border-radius: 10px;
     text-align: center;
     font-size: 24px;
-    padding: 50px 50px;
+    padding: 30px 30px;
     margin: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.medium-button {
+    color: var(--white);
+    background-color: var(--light);
+    border-radius: 10px;
+    text-align: center;
+    font-size: 12px;
+    padding: 10px 10px;
+    margin: 10px;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
@@ -73,6 +85,8 @@
 }
 
 .button-container {
+    display: flex;
+    flex-direction: column;
     text-align: center;
 }
 
@@ -359,4 +373,25 @@
 .css-help {
     display: flex;
     flex-direction: row;
+}
+
+.info-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.info {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--grey);
+    text-align: left;
+    line-height: 1.4;
+    background-color: var(--light);
+    border: 1px solid var(--light2);
+    padding: 10px;
+    margin-bottom: 20px;    
+    transition: background-color 0.3s ease-in-out;
+    border-radius: 10px;
 }
