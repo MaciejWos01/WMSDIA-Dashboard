@@ -1050,12 +1050,21 @@ def main_dash_layout():
         html.Div(id='wizard-data'),
         dcc.Tabs(children=[
             dcc.Tab(label='Ranking vizualiazation', children=[
+                html.Div([
+                    html.Div('Here is shown your normalized dataset and dataset wizualization in WMSD', className='info')
+                ], className='info-container'),
                 ranking_vizualization(buses)
             ]),
             dcc.Tab(label='Improvement actions', children=[
+                html.Div([
+                    html.Div('You can use selectio of methods to check necesery improvement in chosen alternative to overrank other alternative, and than download a raport', className='info')
+                ], className='info-container'),
                 improvement_actions(buses)
             ]),
             dcc.Tab(label='Analysis of parameters', children=[
+                html.Div([
+                    html.Div('Here you can analize and download previously set parameters', className='info')
+                ], className='info-container'),
                 model_setter()
             ])
         ])
@@ -1121,7 +1130,7 @@ def ranking_vizualization(buses):
         dash_table.DataTable(
             df.to_dict('records'),
             [{"name": i, "id": i} for i in df.columns],
-            style_cell={'textAlign': 'left'},
+            style_cell={'textAlign': 'right'},
             sort_action='native',
             id = 'datatable'),
         html.Div(id = 'selected-data')
@@ -1178,6 +1187,17 @@ def improvement_actions(buses):
         ])
     ])
 
+@app.callback(
+        Output('download-raport', 'n_clicks'),
+        Input('download-raport', 'n_clicks')
+)
+def report_generation(n):
+    if n == 1:
+        write_raport()
+        return 0
+    else:
+        return 0
+
 @app.callback(Output('improvement-result', 'children'),
               Input('choose-method', 'value'))
 def improvement_result_setup(value):
@@ -1189,18 +1209,19 @@ def improvement_result_setup(value):
         Input('choose-method', 'value')
 )
 def set_conditional_settings(value):
-    features = buses_g.X_new.columns[:-3]
+    features = list(buses_g.X_new.columns[:-3])
+    print(features)
     if value =='improvement_features':
         return html.Div(children = [
-            'Features to change:',
+            'Features to change (features that you allov to change):',
             dcc.Dropdown(
                 id = 'features-to-change',
-                options = features,
+                options = features + ['all'],
                 multi = True)
         ])
     elif value == 'improvement_genetic':
         return html.Div(children = [
-            'Features to change:',
+            'Features to change (features that you allov to change):',
             dcc.Dropdown(
                 id = 'features-to-change',
                 options = features,
@@ -1208,11 +1229,21 @@ def set_conditional_settings(value):
         ])
     elif value == 'improvement_single_feature':
         return html.Div(children = [
-            'feature to change:',
+            'feature to change (one feature that you allov to change):',
             dcc.Dropdown(
                 id = 'feature-to-change',
                 options = features)
         ])
+
+@app.callback(
+        Output('features-to-change', 'value'),
+        Input('features-to-change', 'value')
+)
+def all_values(value):
+    if value is not None and 'all' in value:
+        return list(buses_g.X_new.columns[:-3])
+    else:
+        return value
 
 @app.callback(
     Output('advanced-content', 'children'),
@@ -1227,12 +1258,12 @@ def set_advanced_settings(value, n_clicks):
         is_hidden = 'visible'
     if value == 'improvement_mean':
         return html.Div(children=[
-            html.Div(children=['Improvement ratio: ', dcc.Input(
+            html.Div(children=['Improvement ratio (maximum value allowed to be bettrr than desired alternative): ', dcc.Input(
             type = 'number',
             id='improvement-ratio',
             value = 0.000001
             )]),
-            html.Div([html.Div('Allow std: '), dcc.Input(
+            html.Div([html.Div('Allow std (True if you allow change in std, False otherwaise): '), dcc.Input(
             type = 'text',
             id='allow-std',
             value = 'False'
@@ -1242,12 +1273,12 @@ def set_advanced_settings(value, n_clicks):
         })
     elif value == 'improvement_features':
         return html.Div(children=[
-            html.Div(children=['Improvement ratio: ', dcc.Input(
+            html.Div(children=['Improvement ratio: (maximum value allowed to be bettrr than desired alternative)', dcc.Input(
             type = 'number',
             id='improvement-ratio',
             value=0.000001
             )]),
-            html.Div(children=['Boundary values: ', dcc.Input(
+            html.Div(children=['Boundary values (maximum values of chosen features to be acheaved, equal amount as features to change): ', dcc.Input(
             type = 'text',
             id='boundary-values'
             )])
@@ -1256,25 +1287,25 @@ def set_advanced_settings(value, n_clicks):
         })
     elif value == 'improvement_genetic':
         return html.Div(children = [
-            html.Div(children=['Improvement ratio: ', dcc.Input(
+            html.Div(children=['Improvement ratio(maximum value allowed to be bettrr than desired alternative): ', dcc.Input(
             type = 'number',
             id='improvement-ratio',
             value = 0.000001
             )]),
-            html.Div(children=['Boundary values: ', dcc.Input(
+            html.Div(children=['Boundary values (maximum values of chosen features to be acheaved, equal amount as features to change): ', dcc.Input(
             type = 'text',
             id='boundary-values'
             )]),
-            html.Div(children=['Allow deterioration: ', dcc.Input(
+            html.Div(children=['Allow deterioration (True if you allow deterioration, False otherwise): ', dcc.Input(
             type = 'text',
             id='allow-deterioration',
             value = 'False'
             )]),
-            html.Div([html.Div('Popsize: '), dcc.Input(
+            html.Div([html.Div('Popsize (population size for genetic algorythm): '), dcc.Input(
             type = 'number',
             id='popsize'
             )]),
-            html.Div([html.Div('Generations: '), 
+            html.Div([html.Div('Generations (number of generations in genetic algorythm): '), 
                 dcc.Input(
             type = 'number',
             id='generations',
@@ -1285,7 +1316,7 @@ def set_advanced_settings(value, n_clicks):
         })
     elif value == 'improvement_single_feature':
         return html.Div(children=[
-            html.Div(children=['Improvement ratio: ', dcc.Input(
+            html.Div(children=['Improvement ratio (maximum value allowed to be bettrr than desired alternative): ', dcc.Input(
             type = 'number',
             id='improvement-ratio',
             value = 0.000001
@@ -1296,7 +1327,7 @@ def set_advanced_settings(value, n_clicks):
     elif value == 'improvement_std':
         return html.Div(children=[
             html.Div([
-                html.Div('Improvement ratio: '), dcc.Input(
+                html.Div('Improvement ratio (maximum value allowed to be bettrr than desired alternative): '), dcc.Input(
                     type = 'number',
                     id='improvement-ratio',
                     value = 0.000001
@@ -1342,6 +1373,8 @@ def improvement_genetic_results(n, alternative_to_imptove, alternative_to_overca
         #rounded_improvement = improvement.apply(formating)
         #rounded_improvement = [row.applymap(formating) for index, row in improvement.iterrows()]
         rounded_improvement = improvement.apply(np.vectorize(formating))
+        global improvement_parameters
+        improvement_parameters = {'parameters':['method', 'alternative_to_imptove', 'alternative_to_overcame', 'improvement_ratio', 'features_to_change', 'boundary_values', 'allow_deterioration', 'popsize', 'generations'], 'values':[method, alternative_to_imptove, alternative_to_overcame, improvement_ratio, features_to_change, boundary_values, allow_deterioration, popsize, generations]}
         proceed = True
         return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
     else:
@@ -1374,6 +1407,8 @@ def improvement_features_results(n, alternative_to_imptove, alternative_to_overc
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, features_to_change = features_to_change, boundary_values = boundary_values)
         rounded_improvement = improvement.applymap(formating)
         proceed = True
+        global improvement_parameters
+        improvement_parameters = {'parameters':['method','alternative_to_imptove','alternative_to_overcame', 'improvement_ratio','features_to_change','boundary_values'], 'values':[method,alternative_to_imptove,alternative_to_overcame, improvement_ratio,features_to_change,boundary_values]}
         return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
     else:
         proceed = True
@@ -1401,6 +1436,8 @@ def improvement_feature_results(n, alternative_to_imptove, alternative_to_overca
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, feature_to_change = feature_to_change)
         rounded_improvement = improvement.applymap(formating)
         proceed = True
+        global improvement_parameters
+        improvement_parameters = {'parameters':['method','alternative_to_imptove','alternative_to_overcame', 'improvement_ratio','feature_to_change'], 'valurs':[method,alternative_to_imptove,alternative_to_overcame, improvement_ratio,feature_to_change]}
         return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
     else:
         proceed = True
@@ -1435,30 +1472,40 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
         global improvement
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, allow_std = allow_std)
         rounded_improvement = improvement.applymap(formating)
-        criteria_params = list(params_g[0].keys())
-        params = pd.DataFrame.from_dict(params_g).set_index(criteria_params[0])
-        raport = f'''
-            <html>
-                <head>
-                    <title>Topsis Improvement Actions Raport</title>
-                </head>
-                <body>
-                    <h1>Dataset</h1>
-                    {data.to_html()}
-                    <h1>parameters</h1>
-                    {params.to_html()}
-                    <img src='chart.png' width="700">
-                </body>
-            </html>
-        '''
-        with open('html_report.html', 'w') as f:
-            f.write(raport)
         proceed = True
+        global improvement_parameters
+        improvement_parameters = {'parameters':['method','alternative_to_imptove','alternative_to_overcame','improvement_ratio','allow_std'], 'values':[method, alternative_to_imptove,alternative_to_overcame,improvement_ratio,allow_std]}
+        write_raport()
         return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'},)
     else:
         proceed = True
         raise PreventUpdate
     
+def write_raport():
+    criteria_params = list(params_g[0].keys())
+    params = pd.DataFrame.from_dict(params_g).set_index(criteria_params[0])
+    raport = f'''
+        <html>
+            <head>
+                <title>Topsis Improvement Actions Raport</title>
+            </head>
+            <body>
+                <h1>{title}</h1>
+                <p>Data used in experiment</p>
+                {data.to_html()}
+                <p>data parameters used in experiment</p>
+                {params.to_html()}
+                <p>wizualization of performed improvement</p>
+                <img src='chart.png' width="100%">
+                <p>values necesary to improve</p>
+                {improvement.to_html()}
+                <p>parameters of improvement algorythm</p>
+                {pd.DataFrame.from_dict(improvement_parameters).to_html()}
+            </body>
+        </html>
+    '''
+    with open('html_report.html', 'w') as f:
+        f.write(raport)
 
 @app.callback(
     Output('improvement_std-result', 'children'),
@@ -1481,6 +1528,8 @@ def improvement_std_results(n, alternative_to_imptove, alternative_to_overcame, 
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio)
         rounded_improvement = improvement.applymap(formating)
         proceed = True
+        global improvement_parameters
+        improvement_parameters = {'parameters':['method', 'alternative_to_imptove', 'alternative_to_overcame','improvement_ratio'], 'values':[method, alternative_to_imptove, alternative_to_overcame,improvement_ratio]}
         return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
     else:
         proceed = True
