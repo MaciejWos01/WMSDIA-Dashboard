@@ -1412,7 +1412,7 @@ def improvement_features_results(n, alternative_to_imptove, alternative_to_overc
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, features_to_change = features_to_change, boundary_values = boundary_values)
         rounded_improvement = improvement.applymap(formating)
         proceed = True
-        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
+        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
     else:
         proceed = True
         raise PreventUpdate
@@ -1439,7 +1439,7 @@ def improvement_feature_results(n, alternative_to_imptove, alternative_to_overca
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, feature_to_change = feature_to_change)
         rounded_improvement = improvement.applymap(formating)
         proceed = True
-        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
+        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
     else:
         proceed = True
         raise PreventUpdate
@@ -1492,7 +1492,7 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
         with open('html_report.html', 'w') as f:
             f.write(raport)
         proceed = True
-        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'},)
+        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
     else:
         proceed = True
         raise PreventUpdate
@@ -1519,7 +1519,7 @@ def improvement_std_results(n, alternative_to_imptove, alternative_to_overcame, 
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio)
         rounded_improvement = improvement.applymap(formating)
         proceed = True
-        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
+        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
     else:
         proceed = True
         raise PreventUpdate
@@ -1547,6 +1547,32 @@ def improvement_results(n, alternative_to_imptove, alternative_to_overcame, feat
     else:
         raise PreventUpdate
 '''
+
+def write_raport():
+    criteria_params = list(params_g[0].keys())
+    params = pd.DataFrame.from_dict(params_g).set_index(criteria_params[0])
+    raport = f'''
+        <html>
+            <head>
+                <title>Topsis Improvement Actions Raport</title>
+            </head>
+            <body>
+                <h1>{title}</h1>
+                <p>Data used in experiment</p>
+                {data.to_html()}
+                <p>data parameters used in experiment</p>
+                {params.to_html()}
+                <p>wizualization of performed improvement</p>
+                <img src='chart.png' width="100%">
+                <p>values necesary to improve</p>
+                {improvement.to_html()}
+                <p>parameters of improvement algorythm</p>
+                {pd.DataFrame.from_dict(improvement_parameters).to_html()}
+            </body>
+        </html>
+    '''
+    with open('html_report.html', 'w') as f:
+        f.write(raport)
 
 @app.callback(
     Output('viz', 'children'),

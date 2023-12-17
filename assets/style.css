@@ -386,8 +386,7 @@
 
 .info {
     font-size: 16px;
-    font-weight: bold;
-    color: var(--grey);
+    color: var(--white);
     text-align: left;
     line-height: 1.4;
     background-color: var(--light);
