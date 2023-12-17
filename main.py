@@ -1037,11 +1037,11 @@ def main_dash_layout():
     global data
     data = data.set_index(data.columns[0])
     if agg_g == 'R':
-        buses = msdt.MSDTransformer(msdt.RTOPSIS, 'gurobi')
+        buses = msdt.MSDTransformer(msdt.RTOPSIS, 'scip')
     elif agg_g == 'A':
-        buses = msdt.MSDTransformer(msdt.ATOPSIS, 'gurobi')
+        buses = msdt.MSDTransformer(msdt.ATOPSIS, 'scip')
     else:
-        buses = msdt.MSDTransformer(msdt.ITOPSIS, 'gurobi')
+        buses = msdt.MSDTransformer(msdt.ITOPSIS, 'scip')
     
     criteria_params = list(params_g[0].keys())
     params = pd.DataFrame.from_dict(params_g).set_index(criteria_params[0])
@@ -1049,7 +1049,7 @@ def main_dash_layout():
     return html.Div(children=[
         html.Div(id='wizard-data'),
         dcc.Tabs(children=[
-            dcc.Tab(label='Ranking vizualiazation', children=[
+            dcc.Tab(label='Ranking visualization', children=[
                 ranking_vizualization(buses)
             ]),
             dcc.Tab(label='Improvement actions', children=[
@@ -1118,12 +1118,13 @@ def ranking_vizualization(buses):
             id = 'vizualization',
             figure = fig
         ),
-        dash_table.DataTable(
+        dash_table.DataTable (
             df.to_dict('records'),
             [{"name": i, "id": i} for i in df.columns],
-            style_cell={'textAlign': 'left'},
+            style_cell={'textAlign': 'right'},
             sort_action='native',
-            id = 'datatable'),
+            id = 'datatable',
+            style_table={'overflowX': 'auto'}),
         html.Div(id = 'selected-data')
     ])
 
@@ -1149,33 +1150,37 @@ def improvement_actions(buses):
     buses_g = buses
     ids = buses_g.X_new.index
     return html.Div(id = 'ia-tab', className = 'tab', children=[
-        html.Div(id = 'viz', children = ranking_vizualization(buses)),
-        html.Div(id = 'ia-options', children=[
-            html.Div(children = ['Improvement action:', 
-                dcc.Dropdown(id = 'choose-method', options=[
-                    {'label':method,'value':method}
-                    for method in ['improvement_mean', 'improvement_std', 'improvement_features', 'improvement_genetic', 'improvement_single_feature']
-                ],
-                value = 'improvement_mean',
-                clearable = False
-                ),
-            ]),
-            html.Div(children =['Alternative to improve:', dcc.Dropdown(
-                id = 'alternative-to-improve',
-                options = ids
-            )]),
-            html.Div(children = ['Alternative to overcome:', dcc.Dropdown(
-                id = 'alternative-to-overcame',
-                options = ids
-            )]),
-            html.Div(id = 'conditional-settings'),
-            html.Button('Advanced settings', id='advanced-settings', n_clicks=0),
-            html.Div(id = 'advanced-content', children = None),
-            html.Button('Apply', id = 'apply-button', n_clicks=0),
-            html.Div(id = 'improvement-result', children=None),
-            html.Button('download raport', id = 'download-raport', n_clicks=0),
-            html.Div(id = 'download-placeholder')
-        ])
+        dbc.Container([
+            html.Div(id = 'viz', children = ranking_vizualization(buses)),
+            html.Div([
+                html.Div(id = 'ia-options', children=[
+                    html.Div(children = ['Improvement action:', 
+                        dcc.Dropdown(id = 'choose-method', options=[
+                            {'label':method,'value':method}
+                            for method in ['improvement_mean', 'improvement_std', 'improvement_features', 'improvement_genetic', 'improvement_single_feature']
+                        ],
+                        value = 'improvement_mean',
+                        clearable = False
+                        ),
+                    ]),
+                    html.Div(children =['Alternative to improve:', dcc.Dropdown(
+                        id = 'alternative-to-improve',
+                        options = ids
+                    )]),
+                    html.Div(children = ['Alternative to overcome:', dcc.Dropdown(
+                        id = 'alternative-to-overcame',
+                        options = ids
+                    )]),
+                    html.Div(id = 'conditional-settings'),
+                    html.Button('Advanced settings', id='advanced-settings', n_clicks=0),
+                    html.Div(id = 'advanced-content', children = None),
+                    html.Button('Apply', id = 'apply-button', n_clicks=0),
+                    html.Div(id = 'improvement-result', children=None),
+                    html.Button('Download report', id = 'download-raport', n_clicks=0),
+                    html.Div(id = 'download-placeholder')
+                ])
+            ], id='ia-options-content')
+        ], id='ia-tab-content')
     ])
 
 @app.callback(Output('improvement-result', 'children'),
@@ -1343,7 +1348,7 @@ def improvement_genetic_results(n, alternative_to_imptove, alternative_to_overca
         #rounded_improvement = [row.applymap(formating) for index, row in improvement.iterrows()]
         rounded_improvement = improvement.apply(np.vectorize(formating))
         proceed = True
-        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
+        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
     else:
         proceed = True
         raise PreventUpdate
@@ -1374,7 +1379,7 @@ def improvement_features_results(n, alternative_to_imptove, alternative_to_overc
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, features_to_change = features_to_change, boundary_values = boundary_values)
         rounded_improvement = improvement.applymap(formating)
         proceed = True
-        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
+        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
     else:
         proceed = True
         raise PreventUpdate
@@ -1401,7 +1406,7 @@ def improvement_feature_results(n, alternative_to_imptove, alternative_to_overca
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, feature_to_change = feature_to_change)
         rounded_improvement = improvement.applymap(formating)
         proceed = True
-        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
+        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
     else:
         proceed = True
         raise PreventUpdate
@@ -1454,7 +1459,7 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
         with open('html_report.html', 'w') as f:
             f.write(raport)
         proceed = True
-        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'},)
+        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'},style_table={'overflowX': 'auto'})
     else:
         proceed = True
         raise PreventUpdate
@@ -1481,7 +1486,7 @@ def improvement_std_results(n, alternative_to_imptove, alternative_to_overcame, 
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio)
         rounded_improvement = improvement.applymap(formating)
         proceed = True
-        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
+        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
     else:
         proceed = True
         raise PreventUpdate
@@ -1545,7 +1550,7 @@ def vizualization_change(n, alternative_to_imptove):
                 id = 'vizualization',
                 figure = fig
             ),
-            dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns], sort_action='native', style_cell={'textAlign': 'left'})
+            dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns], sort_action='native', style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
         ])
     else:
         raise PreventUpdate
