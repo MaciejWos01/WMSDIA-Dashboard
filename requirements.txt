@@ -1,0 +1,8 @@
+pandas==1.5.3
+numpy
+plotly==5.17.0
+dash
+dash-bootstrap-components
+dash-daq
+dash-mantine-components==0.12.1
+matplotlib==3.8.0
