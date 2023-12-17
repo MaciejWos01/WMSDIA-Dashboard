@@ -275,7 +275,7 @@ def wizard():
                 html.Div([
                     html.Div([
                         html.Div('Here you can select which aggregation function you want to use in TOPSIS ranking', className='info'),
-                        html.Div('Additionally you can change the colorscale for your plots', className='info'),
+                        html.Div('Additionally you can change the color scale for your plots', className='info'),
                     ], className ='info-container'),
                     html.Div([
                         html.Div([
@@ -303,7 +303,7 @@ def wizard():
                             ], value='R', id="wizard-model-input-radio-items"),
                         ], className="css-radio-items"),
                         html.Div([
-                            html.Div("Choose colorscale for plot:"),
+                            html.Div("Choose color scale for plot:"),
                             dcc.Dropdown(
                                 options=px.colors.named_colorscales(),
                                 value='jet',
@@ -1037,11 +1037,11 @@ def main_dash_layout():
     global data
     data = data.set_index(data.columns[0])
     if agg_g == 'R':
-        buses = msdt.MSDTransformer(msdt.RTOPSIS, 'scip')
+        buses = msdt.MSDTransformer(msdt.RTOPSIS, 'gurobi')
     elif agg_g == 'A':
-        buses = msdt.MSDTransformer(msdt.ATOPSIS, 'scip')
+        buses = msdt.MSDTransformer(msdt.ATOPSIS, 'gurobi')
     else:
-        buses = msdt.MSDTransformer(msdt.ITOPSIS, 'scip')
+        buses = msdt.MSDTransformer(msdt.ITOPSIS, 'gurobi')
     
     criteria_params = list(params_g[0].keys())
     params = pd.DataFrame.from_dict(params_g).set_index(criteria_params[0])
@@ -1049,21 +1049,21 @@ def main_dash_layout():
     return html.Div(children=[
         html.Div(id='wizard-data'),
         dcc.Tabs(children=[
-            dcc.Tab(label='Ranking vizualiazation', children=[
+            dcc.Tab(label='Ranking visualization', children=[
                 html.Div([
-                    html.Div('Here is shown your normalized dataset and dataset wizualization in WMSD', className='info')
+                    html.Div('Here is shown your normalized dataset and dataset visualization in WMSD', className='info')
                 ], className='info-container'),
                 ranking_vizualization(buses)
             ]),
             dcc.Tab(label='Improvement actions', children=[
                 html.Div([
-                    html.Div('You can use selectio of methods to check necesery improvement in chosen alternative to overrank other alternative, and than download a raport', className='info')
+                    html.Div('You can use selector of methods to check necessary improvement in chosen alternative to overrank other alternative, and than download a report', className='info')
                 ], className='info-container'),
                 improvement_actions(buses)
             ]),
             dcc.Tab(label='Analysis of parameters', children=[
                 html.Div([
-                    html.Div('Here you can analize and download previously set parameters', className='info')
+                    html.Div('Here you can analyze and download previously set parameters', className='info')
                 ], className='info-container'),
                 model_setter()
             ])
@@ -1218,7 +1218,7 @@ def set_conditional_settings(value):
     print(features)
     if value =='improvement_features':
         return html.Div(children = [
-            'Features to change (features that you allov to change):',
+            'Features to change (features that you allow to change):',
             dcc.Dropdown(
                 id = 'features-to-change',
                 options = features + ['all'],
@@ -1226,7 +1226,7 @@ def set_conditional_settings(value):
         ])
     elif value == 'improvement_genetic':
         return html.Div(children = [
-            'Features to change (features that you allov to change):',
+            'Features to change (features that you allow to change):',
             dcc.Dropdown(
                 id = 'features-to-change',
                 options = features,
@@ -1234,7 +1234,7 @@ def set_conditional_settings(value):
         ])
     elif value == 'improvement_single_feature':
         return html.Div(children = [
-            'feature to change (one feature that you allov to change):',
+            'feature to change (one feature that you allow to change):',
             dcc.Dropdown(
                 id = 'feature-to-change',
                 options = features)
@@ -1263,12 +1263,12 @@ def set_advanced_settings(value, n_clicks):
         is_hidden = 'visible'
     if value == 'improvement_mean':
         return html.Div(children=[
-            html.Div(children=['Improvement ratio (maximum value allowed to be bettrr than desired alternative): ', dcc.Input(
+            html.Div(children=['Improvement ratio (maximum value allowed to be better than desired alternative): ', dcc.Input(
             type = 'number',
             id='improvement-ratio',
             value = 0.000001
             )]),
-            html.Div([html.Div('Allow std (True if you allow change in std, False otherwaise): '), dcc.Input(
+            html.Div([html.Div('Allow std (True if you allow change in std, False otherwise): '), dcc.Input(
             type = 'text',
             id='allow-std',
             value = 'False'
@@ -1278,12 +1278,12 @@ def set_advanced_settings(value, n_clicks):
         })
     elif value == 'improvement_features':
         return html.Div(children=[
-            html.Div(children=['Improvement ratio: (maximum value allowed to be bettrr than desired alternative)', dcc.Input(
+            html.Div(children=['Improvement ratio: (maximum value allowed to be better than desired alternative)', dcc.Input(
             type = 'number',
             id='improvement-ratio',
             value=0.000001
             )]),
-            html.Div(children=['Boundary values (maximum values of chosen features to be acheaved, equal amount as features to change): ', dcc.Input(
+            html.Div(children=['Boundary values (maximum values of chosen features to be achieved, equal amount as features to change): ', dcc.Input(
             type = 'text',
             id='boundary-values'
             )])
@@ -1292,12 +1292,12 @@ def set_advanced_settings(value, n_clicks):
         })
     elif value == 'improvement_genetic':
         return html.Div(children = [
-            html.Div(children=['Improvement ratio(maximum value allowed to be bettrr than desired alternative): ', dcc.Input(
+            html.Div(children=['Improvement ratio(maximum value allowed to be better than desired alternative): ', dcc.Input(
             type = 'number',
             id='improvement-ratio',
             value = 0.000001
             )]),
-            html.Div(children=['Boundary values (maximum values of chosen features to be acheaved, equal amount as features to change): ', dcc.Input(
+            html.Div(children=['Boundary values (maximum values of chosen features to be achieved, equal amount as features to change): ', dcc.Input(
             type = 'text',
             id='boundary-values'
             )]),
@@ -1306,11 +1306,11 @@ def set_advanced_settings(value, n_clicks):
             id='allow-deterioration',
             value = 'False'
             )]),
-            html.Div([html.Div('Popsize (population size for genetic algorythm): '), dcc.Input(
+            html.Div([html.Div('Popsize (population size for genetic algorithm): '), dcc.Input(
             type = 'number',
             id='popsize'
             )]),
-            html.Div([html.Div('Generations (number of generations in genetic algorythm): '), 
+            html.Div([html.Div('Generations (number of generations in genetic algorithm): '), 
                 dcc.Input(
             type = 'number',
             id='generations',
@@ -1321,7 +1321,7 @@ def set_advanced_settings(value, n_clicks):
         })
     elif value == 'improvement_single_feature':
         return html.Div(children=[
-            html.Div(children=['Improvement ratio (maximum value allowed to be bettrr than desired alternative): ', dcc.Input(
+            html.Div(children=['Improvement ratio (maximum value allowed to be better than desired alternative): ', dcc.Input(
             type = 'number',
             id='improvement-ratio',
             value = 0.000001
@@ -1332,7 +1332,7 @@ def set_advanced_settings(value, n_clicks):
     elif value == 'improvement_std':
         return html.Div(children=[
             html.Div([
-                html.Div('Improvement ratio (maximum value allowed to be bettrr than desired alternative): '), dcc.Input(
+                html.Div('Improvement ratio (maximum value allowed to be better than desired alternative): '), dcc.Input(
                     type = 'number',
                     id='improvement-ratio',
                     value = 0.000001
@@ -1478,7 +1478,7 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
         raport = f'''
             <html>
                 <head>
-                    <title>Topsis Improvement Actions Raport</title>
+                    <title>Topsis Improvement Actions Report</title>
                 </head>
                 <body>
                     <h1>Dataset</h1>
@@ -1554,7 +1554,7 @@ def write_raport():
     raport = f'''
         <html>
             <head>
-                <title>Topsis Improvement Actions Raport</title>
+                <title>Topsis Improvement Actions Report</title>
             </head>
             <body>
                 <h1>{title}</h1>
@@ -1562,11 +1562,11 @@ def write_raport():
                 {data.to_html()}
                 <p>data parameters used in experiment</p>
                 {params.to_html()}
-                <p>wizualization of performed improvement</p>
+                <p>vizualization of performed improvement</p>
                 <img src='chart.png' width="100%">
-                <p>values necesary to improve</p>
+                <p>values necessary to improve</p>
                 {improvement.to_html()}
-                <p>parameters of improvement algorythm</p>
+                <p>parameters of improvement algorithm</p>
                 {pd.DataFrame.from_dict(improvement_parameters).to_html()}
             </body>
         </html>
@@ -1645,4 +1645,4 @@ def display_page(pathname):
         return '404 - Page not found'
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=False)
