@@ -23,7 +23,7 @@ import dash_mantine_components as dmc
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUMEN, dbc.icons.FONT_AWESOME])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUMEN, dbc.icons.FONT_AWESOME], suppress_callback_exceptions=True)
 
 global title
 title = "TOPSIS vizualization"
@@ -455,11 +455,13 @@ def remove_file_wizard_data_params_file(n):
     remove = None
     return child, table, remove
 
+
 def get_delimiter(data):
     sniffer = csv.Sniffer()
     data = data.decode('utf-8')
     delimiter = sniffer.sniff(data).delimiter
     return delimiter
+
 
 def parse_file_wizard_data_data(contents, filename, date, delimiter, dec):
     
