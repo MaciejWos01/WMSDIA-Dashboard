@@ -781,6 +781,17 @@ def button_model_params(n_clicks):
         return no_update, no_update, no_update, no_update
 
 
+def check_title_wizard_data_title(text):
+
+    for c in text:
+        if c.isalnum():
+            continue
+        if c == ' ' or c == '_' or c == '-':
+            continue
+        return False
+    
+    return True
+
 @app.callback(Output('wizard-data-after-submit-output-project-title', 'children', allow_duplicate=True),
              Input('wizard-data-input-title', 'n_clicks'),
              State('wizard-data-input-title', 'children'),
@@ -805,11 +816,14 @@ def edit_title_wizard_data_after_submit(click, text):
 def edit_title_wizard_data_after_submit(enter, text):
     
     if enter and text:
-        global title
-        title = text
-        return html.Div([
-            html.Div(text, id='wizard-data-input-title')
-            ])
+        if check_title_wizard_data_title(text):
+            global title
+            title = text
+            return html.Div([
+                html.Div(text, id='wizard-data-input-title')
+                ])
+        else:
+            print("Prevent update - Allowed characters in title are only english letters, digits and white space (' '), dash ('-') or underscore ('_').")
 
     return no_update
 
