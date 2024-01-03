@@ -663,7 +663,7 @@ def submit(n_clicks, data, params):
         )
         data_table = dcc.Store(id='wizard_state_stored-data', data=data)
         if params is not None and check_parameters_wizard_data_files(data, params, param_keys) == -1:
-            print('Prevent update')
+            print('Prevent update - Wrong parameters format. Make sure that provided params file corresponds to uploaded data file.')
             return no_update, no_update, no_update, no_update, no_update, no_update, no_update
         
         
@@ -684,7 +684,7 @@ def submit(n_clicks, data, params):
                         param_keys[4] : objectives[id]}))
         
         if not data_params:
-            print('Prevent update')
+            print('Prevent update - Wrong data format. Make sure that proper decimal and delimiter separators are set. Data showed in the overview should have a form of a table.')
             return no_update, no_update, no_update, no_update, no_update, no_update, no_update
             
         params_table = html.Div([
