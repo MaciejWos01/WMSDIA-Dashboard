@@ -1644,5 +1644,20 @@ def display_page(pathname):
     else:
         return '404 - Page not found'
 
+def parse_args():
+    from argparse import ArgumentParser
+    from argparse import ArgumentDefaultsHelpFormatter
+
+    parser = ArgumentParser(description="WMSD Dashboard server.", formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.add_argument("--ip", type=str, default="127.0.0.1", help="The IP address the WMSD Dashboard server will listen on.")
+    parser.add_argument("--port", type=int, default=8050, help="The port the WMSD Dashboard server will listen on")
+    parser.add_argument("--solver", type=str, default="scip", help="The nonlinear programming solver used to calculate the upper perimeter of the WMSD space.")
+  
+
+    args = parser.parse_args()
+
+    return args
+
 if __name__ == "__main__":
-    app.run_server(debug=False)
+    args = parse_args()
+    app.run_server(debug=True, host=args.ip, port=args.port)
