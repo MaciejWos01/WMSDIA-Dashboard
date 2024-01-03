@@ -1037,11 +1037,11 @@ def main_dash_layout():
     global data
     data = data.set_index(data.columns[0])
     if agg_g == 'R':
-        buses = msdt.MSDTransformer(msdt.RTOPSIS, 'gurobi')
+        buses = msdt.MSDTransformer(msdt.RTOPSIS, args.solver)
     elif agg_g == 'A':
-        buses = msdt.MSDTransformer(msdt.ATOPSIS, 'gurobi')
+        buses = msdt.MSDTransformer(msdt.ATOPSIS, args.solver)
     else:
-        buses = msdt.MSDTransformer(msdt.ITOPSIS, 'gurobi')
+        buses = msdt.MSDTransformer(msdt.ITOPSIS, args.solver)
     
     criteria_params = list(params_g[0].keys())
     params = pd.DataFrame.from_dict(params_g).set_index(criteria_params[0])
@@ -1652,6 +1652,7 @@ def parse_args():
     parser.add_argument("--ip", type=str, default="127.0.0.1", help="The IP address the WMSD Dashboard server will listen on.")
     parser.add_argument("--port", type=int, default=8050, help="The port the WMSD Dashboard server will listen on")
     parser.add_argument("--solver", type=str, default="scip", help="The nonlinear programming solver used to calculate the upper perimeter of the WMSD space.")
+    parser.add_argument("--debug", type=bool, default=True, help="Turns on debugging option in run_server() method.")
   
 
     args = parser.parse_args()
@@ -1660,4 +1661,4 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
-    app.run_server(debug=True, host=args.ip, port=args.port)
+    app.run_server(debug=args.debug, host=args.ip, port=args.port)
