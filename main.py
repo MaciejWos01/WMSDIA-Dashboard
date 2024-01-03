@@ -464,33 +464,35 @@ def get_delimiter(data):
 
 
 def parse_file_wizard_data_data(contents, filename, date, delimiter, dec):
-    
-    content_type, content_string = contents.split(',')
-
-    decoded = base64.b64decode(content_string)
-    
-    if not delimiter:
-        delimiter = get_delimiter(decoded)
-
-    if not dec:
-        dec = '.'
-        
+            
     try:
-        if filename.endswith('.csv'):
-            # Assume that the user uploaded a CSV file
-            df = pd.read_csv(
-                io.StringIO(decoded.decode('utf-8')), sep = delimiter, decimal = dec)
-            global data 
-            data = df
-        elif filename.endswith('.xls'):
-            # Assume that the user uploaded an excel file
-            df = pd.read_excel(io.BytesIO(decoded))
+        if filename.endswith('.csv') or filename.endswith('.xls'):
+
+            content_type, content_string = contents.split(',')
+
+            decoded = base64.b64decode(content_string)
+    
+            if not delimiter:
+                delimiter = get_delimiter(decoded)
+
+            if not dec:
+                dec = '.'
+
+            if filename.endswith('.csv'):
+                # Assume that the user uploaded a CSV file
+                df = pd.read_csv(
+                    io.StringIO(decoded.decode('utf-8')), sep = delimiter, decimal = dec)
+                global data 
+                data = df
+            elif filename.endswith('.xls'):
+                # Assume that the user uploaded an excel file
+                df = pd.read_excel(io.BytesIO(decoded))
         else:
-            return "Please upload a file with the .csv or .xls extension"
+            return "Prevent update - Please upload a file with the .csv or .xls extension"
     except Exception as e:
         print(e)
         return html.Div([
-            'There was an error processing this file.'
+            'Prevent update - There was an error processing this file.'
         ])
 
     return html.Div([
@@ -517,11 +519,11 @@ def parse_file_wizard_data_params(contents, filename, date):
             global params_g
             params_g = content_dict
         else:
-            return "Please upload a file with the .json extension"
+            return "Prevent update - Please upload a file with the .json extension"
     except Exception as e:
         print(e)
         return html.Div([
-            'There was an error processing this file.'
+            'Prevent update - There was an error processing this file.'
         ])
     
     return html.Div([
@@ -541,42 +543,52 @@ def check_parameters_wizard_data_files(data, params, param_keys):
 
     if param_keys[1] in df_params:
         if len(df_params[param_keys[1]]) != m_criteria:
-            print("Invalid value 'weights'.")
+            if args.debug:
+                print("Invalid value 'weights'.")
             return -1
         if not all(type(item) in [int, float, np.float64] for item in df_params[param_keys[1]]):
-            print("Invalid value 'weights'. Expected numerical value (int or float).")
+            if args.debug:
+                print("Invalid value 'weights'. Expected numerical value (int or float).")
             return -1
         if not all(item >= 0 for item in df_params[param_keys[1]]):
-            print("Invalid value 'weights'. Expected value must be non-negative.")
+            if args.debug:
+                print("Invalid value 'weights'. Expected value must be non-negative.")
             return -1
         if not any(item > 0 for item in df_params[param_keys[1]]):
-            print("Invalid value 'weights'. At least one weight must be positive.")
+            if args.debug:
+                print("Invalid value 'weights'. At least one weight must be positive.")
             return -1
     else:
         return -1
     
     if param_keys[4] in df_params:
         if len(df_params[param_keys[4]]) != m_criteria:
-            print("Invalid value 'objectives'.")
+            if args.debug:
+                print("Invalid value 'objectives'.")
             return -1
         if not all(item in ["min", "max"] for item in df_params[param_keys[4]]):
-            print("Invalid value at 'objectives'. Use 'min', 'max', 'gain', 'cost', 'g' or 'c'.")
+            if args.debug:
+                print("Invalid value at 'objectives'. Use 'min', 'max', 'gain', 'cost', 'g' or 'c'.")
             return -1
     else:
         return -1
     
     if param_keys[2] in df_params and param_keys[3] in df_params:
         if len(df_params[param_keys[2]]) != m_criteria:
-            print("Invalid value at 'expert_range'. Length of should be equal to number of criteria.")
+            if args.debug:
+                print("Invalid value at 'expert_range'. Length of should be equal to number of criteria.")
             return -1
         if len(df_params[param_keys[3]]) != m_criteria:
-            print("Invalid value at 'expert_range'. Length of should be equal to number of criteria.")
+            if args.debug:
+                print("Invalid value at 'expert_range'. Length of should be equal to number of criteria.")
             return -1
         if not all(type(item) in [int, float, np.float64] for item in df_params[param_keys[2]]):
-            print("Invalid value at 'expert_range'. Expected numerical value (int or float).")
+            if args.debug:
+                print("Invalid value at 'expert_range'. Expected numerical value (int or float).")
             return -1
         if not all(type(item) in [int, float, np.float64] for item in df_params[param_keys[3]]):
-            print("Invalid value at 'expert_range'. Expected numerical value (int or float).")
+            if args.debug:
+                print("Invalid value at 'expert_range'. Expected numerical value (int or float).")
             return -1
         
         lower_bound = df_data.min() 
@@ -584,13 +596,16 @@ def check_parameters_wizard_data_files(data, params, param_keys):
 
         for lower, upper, mini, maxi in zip(lower_bound, upper_bound, df_params[param_keys[2]], df_params[param_keys[3]]):
             if mini > maxi:
-                print("Invalid value at 'expert_range'. Minimal value  is bigger then maximal value.")
+                if args.debug:
+                    print("Invalid value at 'expert_range'. Minimal value  is bigger then maximal value.")
                 return -1
             if lower < mini:
-                print("Invalid value at 'expert_range'. All values from original data must be in a range of expert_range.")
+                if args.debug:
+                    print("Invalid value at 'expert_range'. All values from original data must be in a range of expert_range.")
                 return -1
             if upper > maxi:
-                print("Invalid value at 'expert_range'. All values from original data must be in a range of expert_range.")
+                if args.debug:
+                    print("Invalid value at 'expert_range'. All values from original data must be in a range of expert_range.")
                 return -1
     else:
         return -1
@@ -684,7 +699,7 @@ def submit(n_clicks, data, params):
                         param_keys[4] : objectives[id]}))
         
         if not data_params:
-            print('Prevent update - Wrong data format. Make sure that proper decimal and delimiter separators are set. Data showed in the overview should have a form of a table.')
+            print('Prevent update - Wrong data format. Make sure that proper decimal and delimiter separators are set. Data showed in the preview should have a form of a table.')
             return no_update, no_update, no_update, no_update, no_update, no_update, no_update
             
         params_table = html.Div([
@@ -865,9 +880,6 @@ def check_updated_params_wizard_parameters(df_data, df_params, param_keys):
 
 def parse_warning(warning):
 
-    #print(warning['value'])
-    #print(warning['column'])
-    #print(warning['row_id'])
     warning2 = warning['text'] + "\n" + "You entered " + "'" + str(warning['value']) + "'" + " in " + "'" + str(warning['column']) + "' column" + " in " + "'" + str(warning['row_id']) + "' row" + ".\n" + "Changes were not applied."
 
     return warning2
@@ -975,47 +987,6 @@ def show_view_wizard_model(agg):
                 id = "wizard-model-output-view"
             )
     
-
-'''  
-#CHECK PARAMETERS
-
-#Approach 1 - use active cell
-@app.callback( Output('wizard-parameters-output-warning', 'children'),
-              Input('wizard-parameters-input-parameters-table', 'derived_virtual_row_ids'),
-              Input('wizard-parameters-input-parameters-table', 'selected_row_ids'),
-              Input('wizard-parameters-input-parameters-table', 'active_cell'),
-              State('wizard-parameters-input-parameters-table', 'data'))
-def update_table_wizard_parameters(row_ids, selected_row_ids, active_cell, data):
-    #https://community.plotly.com/t/input-validation-in-data-table/24026
-
-    criteria = list(data[0].keys())
-    df = pd.DataFrame.from_dict(data).set_index(criteria[0])
-    print(active_cell)
-
-    warning = "Warning"
-
-    if active_cell:
-        warning = df.iloc[active_cell['row']][active_cell['column_id']]
-
-    return html.Div([
-        warning
-    ])
- 
-'''
-
-'''
-#https://dash.plotly.com/dash-daq/toggleswitch
-def return_toggle_switch(id, o):
-    switch_id = 'switch-' + str(id)
-    objective = True if o == 'max' else False
-    return html.Div([
-        daq.ToggleSwitch(
-            id = switch_id,
-            value = objective
-        )
-    ])
-'''
-
 #==============================================================
 #   PLAYGROUND
 #==============================================================
