@@ -23,7 +23,7 @@ import dash_mantine_components as dmc
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUMEN, dbc.icons.FONT_AWESOME])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUMEN, dbc.icons.FONT_AWESOME], suppress_callback_exceptions=True)
 
 global title
 title = "TOPSIS vizualization"
@@ -275,7 +275,7 @@ def wizard():
                 html.Div([
                     html.Div([
                         html.Div('Here you can select which aggregation function you want to use in TOPSIS ranking', className='info'),
-                        html.Div('Additionally you can change the colorscale for your plots', className='info'),
+                        html.Div('Additionally you can change the color scale for your plots', className='info'),
                     ], className ='info-container'),
                     html.Div([
                         html.Div([
@@ -303,7 +303,7 @@ def wizard():
                             ], value='R', id="wizard-model-input-radio-items"),
                         ], className="css-radio-items"),
                         html.Div([
-                            html.Div("Choose colorscale for plot:"),
+                            html.Div("Choose color scale for plot:"),
                             dcc.Dropdown(
                                 options=px.colors.named_colorscales(),
                                 value='jet',
@@ -455,40 +455,44 @@ def remove_file_wizard_data_params_file(n):
     remove = None
     return child, table, remove
 
+
 def get_delimiter(data):
     sniffer = csv.Sniffer()
     data = data.decode('utf-8')
     delimiter = sniffer.sniff(data).delimiter
     return delimiter
 
+
 def parse_file_wizard_data_data(contents, filename, date, delimiter, dec):
-    
-    content_type, content_string = contents.split(',')
-
-    decoded = base64.b64decode(content_string)
-    
-    if not delimiter:
-        delimiter = get_delimiter(decoded)
-
-    if not dec:
-        dec = '.'
-        
+            
     try:
-        if filename.endswith('.csv'):
-            # Assume that the user uploaded a CSV file
-            df = pd.read_csv(
-                io.StringIO(decoded.decode('utf-8')), sep = delimiter, decimal = dec)
-            global data 
-            data = df
-        elif filename.endswith('.xls'):
-            # Assume that the user uploaded an excel file
-            df = pd.read_excel(io.BytesIO(decoded))
+        if filename.endswith('.csv') or filename.endswith('.xls'):
+
+            content_type, content_string = contents.split(',')
+
+            decoded = base64.b64decode(content_string)
+    
+            if not delimiter:
+                delimiter = get_delimiter(decoded)
+
+            if not dec:
+                dec = '.'
+
+            if filename.endswith('.csv'):
+                # Assume that the user uploaded a CSV file
+                df = pd.read_csv(
+                    io.StringIO(decoded.decode('utf-8')), sep = delimiter, decimal = dec)
+                global data 
+                data = df
+            elif filename.endswith('.xls'):
+                # Assume that the user uploaded an excel file
+                df = pd.read_excel(io.BytesIO(decoded))
         else:
-            return "Please upload a file with the .csv or .xls extension"
+            return "Prevent update - Please upload a file with the .csv or .xls extension"
     except Exception as e:
         print(e)
         return html.Div([
-            'There was an error processing this file.'
+            'Prevent update - There was an error processing this file.'
         ])
 
     return html.Div([
@@ -515,11 +519,11 @@ def parse_file_wizard_data_params(contents, filename, date):
             global params_g
             params_g = content_dict
         else:
-            return "Please upload a file with the .json extension"
+            return "Prevent update - Please upload a file with the .json extension"
     except Exception as e:
         print(e)
         return html.Div([
-            'There was an error processing this file.'
+            'Prevent update - There was an error processing this file.'
         ])
     
     return html.Div([
@@ -539,42 +543,52 @@ def check_parameters_wizard_data_files(data, params, param_keys):
 
     if param_keys[1] in df_params:
         if len(df_params[param_keys[1]]) != m_criteria:
-            print("Invalid value 'weights'.")
+            if args.debug:
+                print("Invalid value 'weights'.")
             return -1
         if not all(type(item) in [int, float, np.float64] for item in df_params[param_keys[1]]):
-            print("Invalid value 'weights'. Expected numerical value (int or float).")
+            if args.debug:
+                print("Invalid value 'weights'. Expected numerical value (int or float).")
             return -1
         if not all(item >= 0 for item in df_params[param_keys[1]]):
-            print("Invalid value 'weights'. Expected value must be non-negative.")
+            if args.debug:
+                print("Invalid value 'weights'. Expected value must be non-negative.")
             return -1
         if not any(item > 0 for item in df_params[param_keys[1]]):
-            print("Invalid value 'weights'. At least one weight must be positive.")
+            if args.debug:
+                print("Invalid value 'weights'. At least one weight must be positive.")
             return -1
     else:
         return -1
     
     if param_keys[4] in df_params:
         if len(df_params[param_keys[4]]) != m_criteria:
-            print("Invalid value 'objectives'.")
+            if args.debug:
+                print("Invalid value 'objectives'.")
             return -1
         if not all(item in ["min", "max"] for item in df_params[param_keys[4]]):
-            print("Invalid value at 'objectives'. Use 'min', 'max', 'gain', 'cost', 'g' or 'c'.")
+            if args.debug:
+                print("Invalid value at 'objectives'. Use 'min', 'max', 'gain', 'cost', 'g' or 'c'.")
             return -1
     else:
         return -1
     
     if param_keys[2] in df_params and param_keys[3] in df_params:
         if len(df_params[param_keys[2]]) != m_criteria:
-            print("Invalid value at 'expert_range'. Length of should be equal to number of criteria.")
+            if args.debug:
+                print("Invalid value at 'expert_range'. Length of should be equal to number of criteria.")
             return -1
         if len(df_params[param_keys[3]]) != m_criteria:
-            print("Invalid value at 'expert_range'. Length of should be equal to number of criteria.")
+            if args.debug:
+                print("Invalid value at 'expert_range'. Length of should be equal to number of criteria.")
             return -1
         if not all(type(item) in [int, float, np.float64] for item in df_params[param_keys[2]]):
-            print("Invalid value at 'expert_range'. Expected numerical value (int or float).")
+            if args.debug:
+                print("Invalid value at 'expert_range'. Expected numerical value (int or float).")
             return -1
         if not all(type(item) in [int, float, np.float64] for item in df_params[param_keys[3]]):
-            print("Invalid value at 'expert_range'. Expected numerical value (int or float).")
+            if args.debug:
+                print("Invalid value at 'expert_range'. Expected numerical value (int or float).")
             return -1
         
         lower_bound = df_data.min() 
@@ -582,13 +596,16 @@ def check_parameters_wizard_data_files(data, params, param_keys):
 
         for lower, upper, mini, maxi in zip(lower_bound, upper_bound, df_params[param_keys[2]], df_params[param_keys[3]]):
             if mini > maxi:
-                print("Invalid value at 'expert_range'. Minimal value  is bigger then maximal value.")
+                if args.debug:
+                    print("Invalid value at 'expert_range'. Minimal value  is bigger then maximal value.")
                 return -1
             if lower < mini:
-                print("Invalid value at 'expert_range'. All values from original data must be in a range of expert_range.")
+                if args.debug:
+                    print("Invalid value at 'expert_range'. All values from original data must be in a range of expert_range.")
                 return -1
             if upper > maxi:
-                print("Invalid value at 'expert_range'. All values from original data must be in a range of expert_range.")
+                if args.debug:
+                    print("Invalid value at 'expert_range'. All values from original data must be in a range of expert_range.")
                 return -1
     else:
         return -1
@@ -661,7 +678,7 @@ def submit(n_clicks, data, params):
         )
         data_table = dcc.Store(id='wizard_state_stored-data', data=data)
         if params is not None and check_parameters_wizard_data_files(data, params, param_keys) == -1:
-            print('Prevent update')
+            print('Prevent update - Wrong parameters format. Make sure that provided params file corresponds to uploaded data file.')
             return no_update, no_update, no_update, no_update, no_update, no_update, no_update
         
         
@@ -682,7 +699,7 @@ def submit(n_clicks, data, params):
                         param_keys[4] : objectives[id]}))
         
         if not data_params:
-            print('Prevent update')
+            print('Prevent update - Wrong data format. Make sure that proper decimal and delimiter separators are set. Data showed in the preview should have a form of a table.')
             return no_update, no_update, no_update, no_update, no_update, no_update, no_update
             
         params_table = html.Div([
@@ -764,6 +781,17 @@ def button_model_params(n_clicks):
         return no_update, no_update, no_update, no_update
 
 
+def check_title_wizard_data_title(text):
+
+    for c in text:
+        if c.isalnum():
+            continue
+        if c == ' ' or c == '_' or c == '-':
+            continue
+        return False
+    
+    return True
+
 @app.callback(Output('wizard-data-after-submit-output-project-title', 'children', allow_duplicate=True),
              Input('wizard-data-input-title', 'n_clicks'),
              State('wizard-data-input-title', 'children'),
@@ -788,11 +816,14 @@ def edit_title_wizard_data_after_submit(click, text):
 def edit_title_wizard_data_after_submit(enter, text):
     
     if enter and text:
-        global title
-        title = text
-        return html.Div([
-            html.Div(text, id='wizard-data-input-title')
-            ])
+        if check_title_wizard_data_title(text):
+            global title
+            title = text
+            return html.Div([
+                html.Div(text, id='wizard-data-input-title')
+                ])
+        else:
+            print("Prevent update - Allowed characters in title are only english letters, digits and white space (' '), dash ('-') or underscore ('_').")
 
     return no_update
 
@@ -863,9 +894,6 @@ def check_updated_params_wizard_parameters(df_data, df_params, param_keys):
 
 def parse_warning(warning):
 
-    #print(warning['value'])
-    #print(warning['column'])
-    #print(warning['row_id'])
     warning2 = warning['text'] + "\n" + "You entered " + "'" + str(warning['value']) + "'" + " in " + "'" + str(warning['column']) + "' column" + " in " + "'" + str(warning['row_id']) + "' row" + ".\n" + "Changes were not applied."
 
     return warning2
@@ -973,47 +1001,6 @@ def show_view_wizard_model(agg):
                 id = "wizard-model-output-view"
             )
     
-
-'''  
-#CHECK PARAMETERS
-
-#Approach 1 - use active cell
-@app.callback( Output('wizard-parameters-output-warning', 'children'),
-              Input('wizard-parameters-input-parameters-table', 'derived_virtual_row_ids'),
-              Input('wizard-parameters-input-parameters-table', 'selected_row_ids'),
-              Input('wizard-parameters-input-parameters-table', 'active_cell'),
-              State('wizard-parameters-input-parameters-table', 'data'))
-def update_table_wizard_parameters(row_ids, selected_row_ids, active_cell, data):
-    #https://community.plotly.com/t/input-validation-in-data-table/24026
-
-    criteria = list(data[0].keys())
-    df = pd.DataFrame.from_dict(data).set_index(criteria[0])
-    print(active_cell)
-
-    warning = "Warning"
-
-    if active_cell:
-        warning = df.iloc[active_cell['row']][active_cell['column_id']]
-
-    return html.Div([
-        warning
-    ])
- 
-'''
-
-'''
-#https://dash.plotly.com/dash-daq/toggleswitch
-def return_toggle_switch(id, o):
-    switch_id = 'switch-' + str(id)
-    objective = True if o == 'max' else False
-    return html.Div([
-        daq.ToggleSwitch(
-            id = switch_id,
-            value = objective
-        )
-    ])
-'''
-
 #==============================================================
 #   PLAYGROUND
 #==============================================================
@@ -1037,11 +1024,11 @@ def main_dash_layout():
     global data
     data = data.set_index(data.columns[0])
     if agg_g == 'R':
-        buses = msdt.MSDTransformer(msdt.RTOPSIS, 'gurobi')
+        buses = msdt.MSDTransformer(msdt.RTOPSIS, args.solver)
     elif agg_g == 'A':
-        buses = msdt.MSDTransformer(msdt.ATOPSIS, 'gurobi')
+        buses = msdt.MSDTransformer(msdt.ATOPSIS, args.solver)
     else:
-        buses = msdt.MSDTransformer(msdt.ITOPSIS, 'gurobi')
+        buses = msdt.MSDTransformer(msdt.ITOPSIS, args.solver)
     
     criteria_params = list(params_g[0].keys())
     params = pd.DataFrame.from_dict(params_g).set_index(criteria_params[0])
@@ -1049,21 +1036,21 @@ def main_dash_layout():
     return html.Div(children=[
         html.Div(id='wizard-data'),
         dcc.Tabs(children=[
-            dcc.Tab(label='Ranking vizualiazation', children=[
+            dcc.Tab(label='Ranking visualization', children=[
                 html.Div([
-                    html.Div('Here is shown your normalized dataset and dataset wizualization in WMSD', className='info')
+                    html.Div('Here is shown your normalized dataset and dataset visualization in WMSD', className='info')
                 ], className='info-container'),
                 ranking_vizualization(buses)
             ]),
             dcc.Tab(label='Improvement actions', children=[
                 html.Div([
-                    html.Div('You can use selectio of methods to check necesery improvement in chosen alternative to overrank other alternative, and than download a raport', className='info')
+                    html.Div('You can use selector of methods to check necessary improvement in chosen alternative to overrank other alternative, and than download a report', className='info')
                 ], className='info-container'),
                 improvement_actions(buses)
             ]),
             dcc.Tab(label='Analysis of parameters', children=[
                 html.Div([
-                    html.Div('Here you can analize and download previously set parameters', className='info')
+                    html.Div('Here you can analyze and download previously set parameters', className='info')
                 ], className='info-container'),
                 model_setter()
             ])
@@ -1127,12 +1114,13 @@ def ranking_vizualization(buses):
             id = 'vizualization',
             figure = fig
         ),
-        dash_table.DataTable(
+        dash_table.DataTable (
             df.to_dict('records'),
             [{"name": i, "id": i} for i in df.columns],
             style_cell={'textAlign': 'right'},
             sort_action='native',
-            id = 'datatable'),
+            id = 'datatable',
+            style_table={'overflowX': 'auto'}),
         html.Div(id = 'selected-data')
     ])
 
@@ -1158,33 +1146,37 @@ def improvement_actions(buses):
     buses_g = buses
     ids = buses_g.X_new.index
     return html.Div(id = 'ia-tab', className = 'tab', children=[
-        html.Div(id = 'viz', children = ranking_vizualization(buses)),
-        html.Div(id = 'ia-options', children=[
-            html.Div(children = ['Improvement action:', 
-                dcc.Dropdown(id = 'choose-method', options=[
-                    {'label':method,'value':method}
-                    for method in ['improvement_mean', 'improvement_std', 'improvement_features', 'improvement_genetic', 'improvement_single_feature']
-                ],
-                value = 'improvement_mean',
-                clearable = False
-                ),
-            ]),
-            html.Div(children =['Alternative to improve:', dcc.Dropdown(
-                id = 'alternative-to-improve',
-                options = ids
-            )]),
-            html.Div(children = ['Alternative to overcome:', dcc.Dropdown(
-                id = 'alternative-to-overcame',
-                options = ids
-            )]),
-            html.Div(id = 'conditional-settings'),
-            html.Button('Advanced settings', id='advanced-settings', n_clicks=0),
-            html.Div(id = 'advanced-content', children = None),
-            html.Button('Apply', id = 'apply-button', n_clicks=0),
-            html.Div(id = 'improvement-result', children=None),
-            html.Button('download raport', id = 'download-raport', n_clicks=0),
-            html.Div(id = 'download-placeholder')
-        ])
+        dbc.Container([
+            html.Div(id = 'viz', children = ranking_vizualization(buses)),
+            html.Div([
+                html.Div(id = 'ia-options', children=[
+                    html.Div(children = ['Improvement action:', 
+                        dcc.Dropdown(id = 'choose-method', options=[
+                            {'label':method,'value':method}
+                            for method in ['improvement_mean', 'improvement_std', 'improvement_features', 'improvement_genetic', 'improvement_single_feature']
+                        ],
+                        value = 'improvement_mean',
+                        clearable = False
+                        ),
+                    ]),
+                    html.Div(children =['Alternative to improve:', dcc.Dropdown(
+                        id = 'alternative-to-improve',
+                        options = ids
+                    )]),
+                    html.Div(children = ['Alternative to overcome:', dcc.Dropdown(
+                        id = 'alternative-to-overcame',
+                        options = ids
+                    )]),
+                    html.Div(id = 'conditional-settings'),
+                    html.Button('Advanced settings', id='advanced-settings', n_clicks=0),
+                    html.Div(id = 'advanced-content', children = None),
+                    html.Button('Apply', id = 'apply-button', n_clicks=0),
+                    html.Div(id = 'improvement-result', children=None),
+                    html.Button('Download report', id = 'download-raport', n_clicks=0),
+                    html.Div(id = 'download-placeholder')
+                ])
+            ], id='ia-options-content')
+        ], id='ia-tab-content')
     ])
 
 @app.callback(
@@ -1213,7 +1205,7 @@ def set_conditional_settings(value):
     print(features)
     if value =='improvement_features':
         return html.Div(children = [
-            'Features to change (features that you allov to change):',
+            'Features to change (features that you allow to change):',
             dcc.Dropdown(
                 id = 'features-to-change',
                 options = features + ['all'],
@@ -1221,7 +1213,7 @@ def set_conditional_settings(value):
         ])
     elif value == 'improvement_genetic':
         return html.Div(children = [
-            'Features to change (features that you allov to change):',
+            'Features to change (features that you allow to change):',
             dcc.Dropdown(
                 id = 'features-to-change',
                 options = features,
@@ -1229,7 +1221,7 @@ def set_conditional_settings(value):
         ])
     elif value == 'improvement_single_feature':
         return html.Div(children = [
-            'feature to change (one feature that you allov to change):',
+            'feature to change (one feature that you allow to change):',
             dcc.Dropdown(
                 id = 'feature-to-change',
                 options = features)
@@ -1263,7 +1255,7 @@ def set_advanced_settings(value, n_clicks):
             id='epsilon',
             value = 0.000001
             )]),
-            html.Div([html.Div('Allow std (True if you allow change in std, False otherwaise): '), dcc.Input(
+            html.Div([html.Div('Allow std (True if you allow change in std, False otherwise): '), dcc.Input(
             type = 'text',
             id='allow-std',
             value = 'False'
@@ -1278,7 +1270,7 @@ def set_advanced_settings(value, n_clicks):
             id='epsilon',
             value=0.000001
             )]),
-            html.Div(children=['Boundary values (maximum values of chosen features to be acheaved, equal amount as features to change): ', dcc.Input(
+            html.Div(children=['Boundary values (maximum values of chosen features to be achieved, equal amount as features to change): ', dcc.Input(
             type = 'text',
             id='boundary-values'
             )])
@@ -1292,7 +1284,7 @@ def set_advanced_settings(value, n_clicks):
             id='epsilon',
             value = 0.000001
             )]),
-            html.Div(children=['Boundary values (maximum values of chosen features to be acheaved, equal amount as features to change): ', dcc.Input(
+            html.Div(children=['Boundary values (maximum values of chosen features to be achieved, equal amount as features to change): ', dcc.Input(
             type = 'text',
             id='boundary-values'
             )]),
@@ -1301,11 +1293,11 @@ def set_advanced_settings(value, n_clicks):
             id='allow-deterioration',
             value = 'False'
             )]),
-            html.Div([html.Div('Popsize (population size for genetic algorythm): '), dcc.Input(
+            html.Div([html.Div('Popsize (population size for genetic algorithm): '), dcc.Input(
             type = 'number',
             id='popsize'
             )]),
-            html.Div([html.Div('Generations (number of generations in genetic algorythm): '), 
+            html.Div([html.Div('Generations (number of generations in genetic algorithm): '), 
                 dcc.Input(
             type = 'number',
             id='generations',
@@ -1376,7 +1368,7 @@ def improvement_genetic_results(n, alternative_to_imptove, alternative_to_overca
         global improvement_parameters
         improvement_parameters = {'parameters':['method', 'alternative_to_imptove', 'alternative_to_overcame', 'epsilon', 'features_to_change', 'boundary_values', 'allow_deterioration', 'popsize', 'generations'], 'values':[method, alternative_to_imptove, alternative_to_overcame, epsilon, features_to_change, boundary_values, allow_deterioration, popsize, generations]}
         proceed = True
-        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
+        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
     else:
         proceed = True
         raise PreventUpdate
@@ -1407,9 +1399,7 @@ def improvement_features_results(n, alternative_to_imptove, alternative_to_overc
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, epsilon, features_to_change = features_to_change, boundary_values = boundary_values)
         rounded_improvement = improvement.applymap(formating)
         proceed = True
-        global improvement_parameters
-        improvement_parameters = {'parameters':['method','alternative_to_imptove','alternative_to_overcame', 'epsilon','features_to_change','boundary_values'], 'values':[method,alternative_to_imptove,alternative_to_overcame, epsilon,features_to_change,boundary_values]}
-        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
+        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
     else:
         proceed = True
         raise PreventUpdate
@@ -1436,9 +1426,7 @@ def improvement_feature_results(n, alternative_to_imptove, alternative_to_overca
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, epsilon, feature_to_change = feature_to_change)
         rounded_improvement = improvement.applymap(formating)
         proceed = True
-        global improvement_parameters
-        improvement_parameters = {'parameters':['method','alternative_to_imptove','alternative_to_overcame', 'epsilon','feature_to_change'], 'valurs':[method,alternative_to_imptove,alternative_to_overcame, epsilon,feature_to_change]}
-        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
+        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
     else:
         proceed = True
         raise PreventUpdate
@@ -1472,40 +1460,30 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
         global improvement
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, epsilon, allow_std = allow_std)
         rounded_improvement = improvement.applymap(formating)
+        criteria_params = list(params_g[0].keys())
+        params = pd.DataFrame.from_dict(params_g).set_index(criteria_params[0])
+        raport = f'''
+            <html>
+                <head>
+                    <title>Topsis Improvement Actions Report</title>
+                </head>
+                <body>
+                    <h1>Dataset</h1>
+                    {data.to_html()}
+                    <h1>parameters</h1>
+                    {params.to_html()}
+                    <img src='chart.png' width="700">
+                </body>
+            </html>
+        '''
+        with open('html_report.html', 'w') as f:
+            f.write(raport)
         proceed = True
-        global improvement_parameters
-        improvement_parameters = {'parameters':['method','alternative_to_imptove','alternative_to_overcame','epsilon','allow_std'], 'values':[method, alternative_to_imptove,alternative_to_overcame,epsilon,allow_std]}
-        write_raport()
-        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'},)
+        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
     else:
         proceed = True
         raise PreventUpdate
     
-def write_raport():
-    criteria_params = list(params_g[0].keys())
-    params = pd.DataFrame.from_dict(params_g).set_index(criteria_params[0])
-    raport = f'''
-        <html>
-            <head>
-                <title>Topsis Improvement Actions Raport</title>
-            </head>
-            <body>
-                <h1>{title}</h1>
-                <p>Data used in experiment</p>
-                {data.to_html()}
-                <p>data parameters used in experiment</p>
-                {params.to_html()}
-                <p>wizualization of performed improvement</p>
-                <img src='chart.png' width="100%">
-                <p>values necesary to improve</p>
-                {improvement.to_html()}
-                <p>parameters of improvement algorythm</p>
-                {pd.DataFrame.from_dict(improvement_parameters).to_html()}
-            </body>
-        </html>
-    '''
-    with open('html_report.html', 'w') as f:
-        f.write(raport)
 
 @app.callback(
     Output('improvement_std-result', 'children'),
@@ -1528,9 +1506,7 @@ def improvement_std_results(n, alternative_to_imptove, alternative_to_overcame, 
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, epsilon)
         rounded_improvement = improvement.applymap(formating)
         proceed = True
-        global improvement_parameters
-        improvement_parameters = {'parameters':['method', 'alternative_to_imptove', 'alternative_to_overcame','epsilon'], 'values':[method, alternative_to_imptove, alternative_to_overcame,epsilon]}
-        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
+        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
     else:
         proceed = True
         raise PreventUpdate
@@ -1558,6 +1534,32 @@ def improvement_results(n, alternative_to_imptove, alternative_to_overcame, feat
     else:
         raise PreventUpdate
 '''
+
+def write_raport():
+    criteria_params = list(params_g[0].keys())
+    params = pd.DataFrame.from_dict(params_g).set_index(criteria_params[0])
+    raport = f'''
+        <html>
+            <head>
+                <title>Topsis Improvement Actions Report</title>
+            </head>
+            <body>
+                <h1>{title}</h1>
+                <p>Data used in experiment</p>
+                {data.to_html()}
+                <p>data parameters used in experiment</p>
+                {params.to_html()}
+                <p>vizualization of performed improvement</p>
+                <img src='chart.png' width="100%">
+                <p>values necessary to improve</p>
+                {improvement.to_html()}
+                <p>parameters of improvement algorithm</p>
+                {pd.DataFrame.from_dict(improvement_parameters).to_html()}
+            </body>
+        </html>
+    '''
+    with open('html_report.html', 'w') as f:
+        f.write(raport)
 
 @app.callback(
     Output('viz', 'children'),
@@ -1594,7 +1596,7 @@ def vizualization_change(n, alternative_to_imptove):
                 id = 'vizualization',
                 figure = fig
             ),
-            dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns], sort_action='native', style_cell={'textAlign': 'left'})
+            dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns], sort_action='native', style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
         ])
     else:
         raise PreventUpdate
@@ -1629,5 +1631,21 @@ def display_page(pathname):
     else:
         return '404 - Page not found'
 
+def parse_args():
+    from argparse import ArgumentParser
+    from argparse import ArgumentDefaultsHelpFormatter
+
+    parser = ArgumentParser(description="WMSD Dashboard server.", formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.add_argument("--ip", type=str, default="127.0.0.1", help="The IP address the WMSD Dashboard server will listen on.")
+    parser.add_argument("--port", type=int, default=8050, help="The port the WMSD Dashboard server will listen on")
+    parser.add_argument("--solver", type=str, default="scip", help="The nonlinear programming solver used to calculate the upper perimeter of the WMSD space.")
+    parser.add_argument("--debug", type=bool, default=True, help="Turns on debugging option in run_server() method.")
+  
+
+    args = parser.parse_args()
+
+    return args
+
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    args = parse_args()
+    app.run_server(debug=args.debug, host=args.ip, port=args.port)

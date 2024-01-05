@@ -198,7 +198,8 @@
 .remove-button,
 #apply-button,
 #advanced-settings,
-#json-download-button {
+#json-download-button,
+#download-raport {
     color: var(--white);
     background-color: var(--light);
     border-radius: 5px;
@@ -217,7 +218,8 @@
 .remove-button:hover,
 #apply-button:hover,
 #advanced-settings:hover,
-#json-download-button:hover {
+#json-download-button:hover,
+#download-raport:hover {
     background-color: var(--light2);
 }
 
@@ -384,8 +386,7 @@
 
 .info {
     font-size: 16px;
-    font-weight: bold;
-    color: var(--grey);
+    color: var(--white);
     text-align: left;
     line-height: 1.4;
     background-color: var(--light);
@@ -394,4 +395,28 @@
     margin-bottom: 20px;    
     transition: background-color 0.3s ease-in-out;
     border-radius: 10px;
+}
+
+#ia-tab-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+}
+
+#viz {
+    display: flex;
+    flex-direction: column;
+    margin: 20px;
+}
+
+#ia-options-content {
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+}
+
+#ia-options {
+    width: 100%;
+    margin: 20px;
 }
