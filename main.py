@@ -1258,9 +1258,9 @@ def set_advanced_settings(value, n_clicks):
         is_hidden = 'visible'
     if value == 'improvement_mean':
         return html.Div(children=[
-            html.Div(children=['Improvement ratio (maximum value allowed to be bettrr than desired alternative): ', dcc.Input(
+            html.Div(children=['epsilon (maximum value allowed to be bettrr than desired alternative): ', dcc.Input(
             type = 'number',
-            id='improvement-ratio',
+            id='epsilon',
             value = 0.000001
             )]),
             html.Div([html.Div('Allow std (True if you allow change in std, False otherwaise): '), dcc.Input(
@@ -1273,9 +1273,9 @@ def set_advanced_settings(value, n_clicks):
         })
     elif value == 'improvement_features':
         return html.Div(children=[
-            html.Div(children=['Improvement ratio: (maximum value allowed to be bettrr than desired alternative)', dcc.Input(
+            html.Div(children=['epsilon: (maximum value allowed to be bettrr than desired alternative)', dcc.Input(
             type = 'number',
-            id='improvement-ratio',
+            id='epsilon',
             value=0.000001
             )]),
             html.Div(children=['Boundary values (maximum values of chosen features to be acheaved, equal amount as features to change): ', dcc.Input(
@@ -1287,9 +1287,9 @@ def set_advanced_settings(value, n_clicks):
         })
     elif value == 'improvement_genetic':
         return html.Div(children = [
-            html.Div(children=['Improvement ratio(maximum value allowed to be bettrr than desired alternative): ', dcc.Input(
+            html.Div(children=['epsilon(maximum value allowed to be bettrr than desired alternative): ', dcc.Input(
             type = 'number',
-            id='improvement-ratio',
+            id='epsilon',
             value = 0.000001
             )]),
             html.Div(children=['Boundary values (maximum values of chosen features to be acheaved, equal amount as features to change): ', dcc.Input(
@@ -1316,9 +1316,9 @@ def set_advanced_settings(value, n_clicks):
         })
     elif value == 'improvement_single_feature':
         return html.Div(children=[
-            html.Div(children=['Improvement ratio (maximum value allowed to be bettrr than desired alternative): ', dcc.Input(
+            html.Div(children=['epsilon (maximum value allowed to be bettrr than desired alternative): ', dcc.Input(
             type = 'number',
-            id='improvement-ratio',
+            id='epsilon',
             value = 0.000001
             )])
         ], style={
@@ -1327,9 +1327,9 @@ def set_advanced_settings(value, n_clicks):
     elif value == 'improvement_std':
         return html.Div(children=[
             html.Div([
-                html.Div('Improvement ratio (maximum value allowed to be bettrr than desired alternative): '), dcc.Input(
+                html.Div('epsilon (maximum value allowed to be bettrr than desired alternative): '), dcc.Input(
                     type = 'number',
-                    id='improvement-ratio',
+                    id='epsilon',
                     value = 0.000001
             )])
         ], style={
@@ -1344,7 +1344,7 @@ def set_advanced_settings(value, n_clicks):
     #Input('alternative-to-overcame', 'value'),
     State('alternative-to-improve', 'value'),
     State('alternative-to-overcame', 'value'),
-    State('improvement-ratio', 'value'),
+    State('epsilon', 'value'),
     State('features-to-change', 'value'),
     State('boundary-values', 'value'),
     State('allow-deterioration', 'value'),
@@ -1353,15 +1353,15 @@ def set_advanced_settings(value, n_clicks):
     State('choose-method', 'value'),
     prevent_initial_call = True
 )
-def improvement_genetic_results(n, alternative_to_imptove, alternative_to_overcame, improvement_ratio, features_to_change, boundary_values, allow_deterioration, popsize, generations, method):    
+def improvement_genetic_results(n, alternative_to_imptove, alternative_to_overcame, epsilon, features_to_change, boundary_values, allow_deterioration, popsize, generations, method):    
     global proceed
     proceed = False
     if n>0:
         if boundary_values is not None:
             boundary_values = boundary_values.split(',')
             boundary_values = [float(x) for x in boundary_values]
-        if improvement_ratio is None:
-            improvement_ratio = 0.000001
+        if epsilon is None:
+            epsilon = 0.000001
         if allow_deterioration is None:
             allow_deterioration = False
         else:
@@ -1369,12 +1369,12 @@ def improvement_genetic_results(n, alternative_to_imptove, alternative_to_overca
         if generations is None:
             generations = 200
         global improvement
-        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, features_to_change = features_to_change, boundary_values = boundary_values, allow_deterioration = allow_deterioration, popsize = popsize, n_generations = generations)[:10]
+        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, epsilon, features_to_change = features_to_change, boundary_values = boundary_values, allow_deterioration = allow_deterioration, popsize = popsize, n_generations = generations)[:10]
         #rounded_improvement = improvement.apply(formating)
         #rounded_improvement = [row.applymap(formating) for index, row in improvement.iterrows()]
         rounded_improvement = improvement.apply(np.vectorize(formating))
         global improvement_parameters
-        improvement_parameters = {'parameters':['method', 'alternative_to_imptove', 'alternative_to_overcame', 'improvement_ratio', 'features_to_change', 'boundary_values', 'allow_deterioration', 'popsize', 'generations'], 'values':[method, alternative_to_imptove, alternative_to_overcame, improvement_ratio, features_to_change, boundary_values, allow_deterioration, popsize, generations]}
+        improvement_parameters = {'parameters':['method', 'alternative_to_imptove', 'alternative_to_overcame', 'epsilon', 'features_to_change', 'boundary_values', 'allow_deterioration', 'popsize', 'generations'], 'values':[method, alternative_to_imptove, alternative_to_overcame, epsilon, features_to_change, boundary_values, allow_deterioration, popsize, generations]}
         proceed = True
         return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
     else:
@@ -1388,27 +1388,27 @@ def improvement_genetic_results(n, alternative_to_imptove, alternative_to_overca
     #Input('alternative-to-overcame', 'value'),
     State('alternative-to-improve', 'value'),
     State('alternative-to-overcame', 'value'),
-    State('improvement-ratio', 'value'),
+    State('epsilon', 'value'),
     State('features-to-change', 'value'),
     State('boundary-values', 'value'),
     State('choose-method', 'value'),
     prevent_initial_call = True
 )
-def improvement_features_results(n, alternative_to_imptove, alternative_to_overcame, improvement_ratio, features_to_change, boundary_values, method):    
+def improvement_features_results(n, alternative_to_imptove, alternative_to_overcame, epsilon, features_to_change, boundary_values, method):    
     global proceed
     proceed = False
     if boundary_values is not None:
         boundary_values = boundary_values.split(',')
         boundary_values = [float(x) for x in boundary_values]
     if n>0:
-        if improvement_ratio is None:
-            improvement_ratio = 0.000001
+        if epsilon is None:
+            epsilon = 0.000001
         global improvement
-        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, features_to_change = features_to_change, boundary_values = boundary_values)
+        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, epsilon, features_to_change = features_to_change, boundary_values = boundary_values)
         rounded_improvement = improvement.applymap(formating)
         proceed = True
         global improvement_parameters
-        improvement_parameters = {'parameters':['method','alternative_to_imptove','alternative_to_overcame', 'improvement_ratio','features_to_change','boundary_values'], 'values':[method,alternative_to_imptove,alternative_to_overcame, improvement_ratio,features_to_change,boundary_values]}
+        improvement_parameters = {'parameters':['method','alternative_to_imptove','alternative_to_overcame', 'epsilon','features_to_change','boundary_values'], 'values':[method,alternative_to_imptove,alternative_to_overcame, epsilon,features_to_change,boundary_values]}
         return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
     else:
         proceed = True
@@ -1421,23 +1421,23 @@ def improvement_features_results(n, alternative_to_imptove, alternative_to_overc
     #Input('alternative-to-overcame', 'value'),
     State('alternative-to-improve', 'value'),
     State('alternative-to-overcame', 'value'),
-    State('improvement-ratio', 'value'),
+    State('epsilon', 'value'),
     State('feature-to-change', 'value'),
     State('choose-method', 'value'),
     prevent_initial_call = True
 )
-def improvement_feature_results(n, alternative_to_imptove, alternative_to_overcame, improvement_ratio, feature_to_change, method):    
+def improvement_feature_results(n, alternative_to_imptove, alternative_to_overcame, epsilon, feature_to_change, method):    
     global proceed
     proceed = False
     if n>0:
-        if improvement_ratio is None:
-            improvement_ratio = 0.000001
+        if epsilon is None:
+            epsilon = 0.000001
         global improvement
-        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, feature_to_change = feature_to_change)
+        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, epsilon, feature_to_change = feature_to_change)
         rounded_improvement = improvement.applymap(formating)
         proceed = True
         global improvement_parameters
-        improvement_parameters = {'parameters':['method','alternative_to_imptove','alternative_to_overcame', 'improvement_ratio','feature_to_change'], 'valurs':[method,alternative_to_imptove,alternative_to_overcame, improvement_ratio,feature_to_change]}
+        improvement_parameters = {'parameters':['method','alternative_to_imptove','alternative_to_overcame', 'epsilon','feature_to_change'], 'valurs':[method,alternative_to_imptove,alternative_to_overcame, epsilon,feature_to_change]}
         return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
     else:
         proceed = True
@@ -1451,17 +1451,17 @@ def improvement_feature_results(n, alternative_to_imptove, alternative_to_overca
     #Input('alternative-to-overcame', 'value'),
     State('alternative-to-improve', 'value'),
     State('alternative-to-overcame', 'value'),
-    State('improvement-ratio', 'value'),
+    State('epsilon', 'value'),
     State('allow-std', 'value'),
     State('choose-method', 'value'),
     prevent_initial_call = True
 )
-def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame, improvement_ratio, allow_std, method):    
+def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame, epsilon, allow_std, method):    
     global proceed
     proceed = False
     if n>0:
-        if improvement_ratio is None:
-            improvement_ratio = 0.000001
+        if epsilon is None:
+            epsilon = 0.000001
         if allow_std is None:
             allow_std = False
         else:
@@ -1470,11 +1470,11 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
             else:
                 allow_std = False
         global improvement
-        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio, allow_std = allow_std)
+        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, epsilon, allow_std = allow_std)
         rounded_improvement = improvement.applymap(formating)
         proceed = True
         global improvement_parameters
-        improvement_parameters = {'parameters':['method','alternative_to_imptove','alternative_to_overcame','improvement_ratio','allow_std'], 'values':[method, alternative_to_imptove,alternative_to_overcame,improvement_ratio,allow_std]}
+        improvement_parameters = {'parameters':['method','alternative_to_imptove','alternative_to_overcame','epsilon','allow_std'], 'values':[method, alternative_to_imptove,alternative_to_overcame,epsilon,allow_std]}
         write_raport()
         return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'},)
     else:
@@ -1514,22 +1514,22 @@ def write_raport():
     #Input('alternative-to-overcame', 'value'),
     State('alternative-to-improve', 'value'),
     State('alternative-to-overcame', 'value'),
-    State('improvement-ratio', 'value'),
+    State('epsilon', 'value'),
     State('choose-method', 'value'),
     prevent_initial_call = True
 )
-def improvement_std_results(n, alternative_to_imptove, alternative_to_overcame, improvement_ratio, method):    
+def improvement_std_results(n, alternative_to_imptove, alternative_to_overcame, epsilon, method):    
     global proceed
     proceed = False
     if n>0:
-        if improvement_ratio is None:
-            improvement_ratio = 0.000001
+        if epsilon is None:
+            epsilon = 0.000001
         global improvement
-        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, improvement_ratio)
+        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, epsilon)
         rounded_improvement = improvement.applymap(formating)
         proceed = True
         global improvement_parameters
-        improvement_parameters = {'parameters':['method', 'alternative_to_imptove', 'alternative_to_overcame','improvement_ratio'], 'values':[method, alternative_to_imptove, alternative_to_overcame,improvement_ratio]}
+        improvement_parameters = {'parameters':['method', 'alternative_to_imptove', 'alternative_to_overcame','epsilon'], 'values':[method, alternative_to_imptove, alternative_to_overcame,epsilon]}
         return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'})
     else:
         proceed = True
@@ -1544,11 +1544,11 @@ def improvement_std_results(n, alternative_to_imptove, alternative_to_overcame, 
     State('alternative-to-improve', 'value'),
     State('alternative-to-overcame', 'value'),
     State('features-to-change', 'value'),
-    State('improvement-ratio', 'value'),
+    State('epsilon', 'value'),
     State('choose-method', 'value'),
     prevent_initial_call = True
 )
-def improvement_results(n, alternative_to_imptove, alternative_to_overcame, features_to_change,improvement_ratio, method):
+def improvement_results(n, alternative_to_imptove, alternative_to_overcame, features_to_change,epsilon, method):
     print(features_to_change)
     
     if n>0:
