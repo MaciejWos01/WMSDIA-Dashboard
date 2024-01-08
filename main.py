@@ -1247,7 +1247,14 @@ def set_conditional_settings(value):
     print(features)
     if value =='improvement_features':
         return html.Div(children = [
-            'Features to change (features that you allow to change):',
+            html.Div([
+                html.Div('Features to change:'),
+                html.I(className="fa-solid fa-question fa-xs", id='features-help'),
+                dbc.Tooltip(
+                    'Features that you allow to change',
+                    target="features-help",
+                ),
+            ], className='css-help'),
             dcc.Dropdown(
                 id = 'features-to-change',
                 options = features + ['all'],
@@ -1255,7 +1262,14 @@ def set_conditional_settings(value):
         ])
     elif value == 'improvement_genetic':
         return html.Div(children = [
-            'Features to change (features that you allow to change):',
+            html.Div([
+                html.Div('Features to change:'),
+                html.I(className="fa-solid fa-question fa-xs", id='features-genetic-help'),
+                dbc.Tooltip(
+                    'Features that you allow to change',
+                    target="features-genetic-help",
+                ),
+            ], className='css-help'),
             dcc.Dropdown(
                 id = 'features-to-change',
                 options = features,
@@ -1263,7 +1277,14 @@ def set_conditional_settings(value):
         ])
     elif value == 'improvement_single_feature':
         return html.Div(children = [
-            'feature to change (one feature that you allow to change):',
+            html.Div([
+                html.Div('Feature to change:'),
+                html.I(className="fa-solid fa-question fa-xs", id='feature-help'),
+                dbc.Tooltip(
+                    'One feature that you allow to change',
+                    target="feature-help",
+                ),
+            ], className='css-help'),
             dcc.Dropdown(
                 id = 'feature-to-change',
                 options = features)
@@ -1292,12 +1313,30 @@ def set_advanced_settings(value, n_clicks):
         is_hidden = 'visible'
     if value == 'improvement_mean':
         return html.Div(children=[
-            html.Div(children=['epsilon (maximum value allowed to be bettrr than desired alternative): ', dcc.Input(
+            html.Div(children=[
+                html.Div([
+                html.Div('Epsilon:'),
+                html.I(className="fa-solid fa-question fa-xs", id='epsilon-help'),
+                dbc.Tooltip(
+                    'Maximum value allowed to be better than desired alternative',
+                    target="epsilon-help",
+                ),
+            ], className='css-help'),
+                dcc.Input(
             type = 'number',
             id='epsilon',
             value = 0.000001
             )]),
-            html.Div([html.Div('Allow std (True if you allow change in std, False otherwise): '), dcc.Input(
+            html.Div([
+                html.Div([
+                html.Div('Allow std:'),
+                html.I(className="fa-solid fa-question fa-xs", id='allow-std-help'),
+                dbc.Tooltip(
+                    'True if you allow change in std, False otherwise',
+                    target="allow-std-help",
+                ),
+            ], className='css-help'),
+                dcc.Input(
             type = 'text',
             id='allow-std',
             value = 'False'
@@ -1307,12 +1346,30 @@ def set_advanced_settings(value, n_clicks):
         })
     elif value == 'improvement_features':
         return html.Div(children=[
-            html.Div(children=['epsilon: (maximum value allowed to be bettrr than desired alternative)', dcc.Input(
+            html.Div(children=[
+                html.Div([
+                html.Div('Epsilon:'),
+                html.I(className="fa-solid fa-question fa-xs", id='epsilon2-help'),
+                dbc.Tooltip(
+                    'Maximum value allowed to be better than desired alternative',
+                    target="epsilon2-help",
+                ),
+            ], className='css-help'),
+                dcc.Input(
             type = 'number',
             id='epsilon',
             value=0.000001
             )]),
-            html.Div(children=['Boundary values (maximum values of chosen features to be achieved, equal amount as features to change): ', dcc.Input(
+            html.Div(children=[
+                html.Div([
+                html.Div('Boundary values:'),
+                html.I(className="fa-solid fa-question fa-xs", id='boundary-values-help'),
+                dbc.Tooltip(
+                    'Maximum values of chosen features to be achieved, equal amount as features to change',
+                    target="boundary-values-help",
+                ),
+            ], className='css-help'),
+                dcc.Input(
             type = 'text',
             id='boundary-values'
             )])
@@ -1321,25 +1378,69 @@ def set_advanced_settings(value, n_clicks):
         })
     elif value == 'improvement_genetic':
         return html.Div(children = [
-            html.Div(children=['epsilon(maximum value allowed to be bettrr than desired alternative): ', dcc.Input(
+            html.Div(children=[
+                html.Div([
+                html.Div('Epsilon:'),
+                html.I(className="fa-solid fa-question fa-xs", id='epsilon3-help'),
+                dbc.Tooltip(
+                    'Maximum value allowed to be better than desired alternative',
+                    target="epsilon3-help",
+                ),
+            ], className='css-help'),
+                dcc.Input(
             type = 'number',
             id='epsilon',
             value = 0.000001
             )]),
-            html.Div(children=['Boundary values (maximum values of chosen features to be achieved, equal amount as features to change): ', dcc.Input(
+            html.Div(children=[
+                html.Div([
+                html.Div('Boundary values:'),
+                html.I(className="fa-solid fa-question fa-xs", id='boundary-values2-help'),
+                dbc.Tooltip(
+                    'Maximum values of chosen features to be achieved, equal amount as features to change',
+                    target="boundary-values2-help",
+                ),
+            ], className='css-help'),
+                dcc.Input(
             type = 'text',
             id='boundary-values'
             )]),
-            html.Div(children=['Allow deterioration (True if you allow deterioration, False otherwise): ', dcc.Input(
+            html.Div(children=[
+                html.Div([
+                html.Div('Allow deterioration:'),
+                html.I(className="fa-solid fa-question fa-xs", id='allow-det-help'),
+                dbc.Tooltip(
+                    'True if you allow deterioration, False otherwise',
+                    target="allow-det-help",
+                ),
+            ], className='css-help'),
+                dcc.Input(
             type = 'text',
             id='allow-deterioration',
             value = 'False'
             )]),
-            html.Div([html.Div('Popsize (population size for genetic algorithm): '), dcc.Input(
+            html.Div([
+                html.Div([
+                html.Div('Popsize:'),
+                html.I(className="fa-solid fa-question fa-xs", id='popsize-help'),
+                dbc.Tooltip(
+                    'Population size for genetic algorithm',
+                    target="popsize-help",
+                ),
+            ], className='css-help'),
+                dcc.Input(
             type = 'number',
             id='popsize'
             )]),
-            html.Div([html.Div('Generations (number of generations in genetic algorithm): '), 
+            html.Div([
+                html.Div([
+                html.Div('Generations:'),
+                html.I(className="fa-solid fa-question fa-xs", id='generations-help'),
+                dbc.Tooltip(
+                    'Number of generations in genetic algorithm',
+                    target="generations-help",
+                ),
+            ], className='css-help'),
                 dcc.Input(
             type = 'number',
             id='generations',
@@ -1350,7 +1451,16 @@ def set_advanced_settings(value, n_clicks):
         })
     elif value == 'improvement_single_feature':
         return html.Div(children=[
-            html.Div(children=['epsilon (maximum value allowed to be bettrr than desired alternative): ', dcc.Input(
+            html.Div(children=[
+                html.Div([
+                html.Div('Epsilon:'),
+                html.I(className="fa-solid fa-question fa-xs", id='epsilon4-help'),
+                dbc.Tooltip(
+                    'Maximum value allowed to be better than desired alternative',
+                    target="epsilon4-help",
+                ),
+            ], className='css-help'),
+                dcc.Input(
             type = 'number',
             id='epsilon',
             value = 0.000001
@@ -1361,7 +1471,15 @@ def set_advanced_settings(value, n_clicks):
     elif value == 'improvement_std':
         return html.Div(children=[
             html.Div([
-                html.Div('epsilon (maximum value allowed to be bettrr than desired alternative): '), dcc.Input(
+                html.Div([
+                html.Div('Epsilon:'),
+                html.I(className="fa-solid fa-question fa-xs", id='epsilon5-help'),
+                dbc.Tooltip(
+                    'Maximum value allowed to be better than desired alternative',
+                    target="epsilon5-help",
+                ),
+            ], className='css-help'),
+                dcc.Input(
                     type = 'number',
                     id='epsilon',
                     value = 0.000001
