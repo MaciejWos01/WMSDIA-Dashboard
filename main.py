@@ -849,8 +849,6 @@ def edit_title_wizard_data_after_submit(click, text):
 @app.callback(Output('wizard-data-after-submit-output-project-title', 'children'),
               Output('warning-data-body', 'children'),
               Output('warning-data', 'is_open'),
-              Output('warning-data-body', 'children'),
-              Output('warning-data', 'is_open'),
              Input('wizard-data-input-type-title', 'n_submit'),
              State('wizard-data-input-type-title', 'value'))
 def edit_title_wizard_data_after_submit(enter, text):
