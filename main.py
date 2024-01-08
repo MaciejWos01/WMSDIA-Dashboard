@@ -486,43 +486,26 @@ def parse_file_wizard_data_data(contents, filename, date, delimiter, dec):
             
     warnings_children = html.Div([])
     is_open = False
+
+    content_type, content_string = contents.split(',')
+    decoded = base64.b64decode(content_string)
+
+    if not delimiter:
+        delimiter = get_delimiter(decoded)
+
+    if not dec:
+        dec = '.'
+
     try:
-        if filename.endswith('.csv') or filename.endswith('.xls'):
-
-            content_type, content_string = contents.split(',')
-
-            decoded = base64.b64decode(content_string)
-            decoded = base64.b64decode(content_string)
-    
-            if not delimiter:
-                delimiter = get_delimiter(decoded)
-            if not delimiter:
-                delimiter = get_delimiter(decoded)
-
-            if not dec:
-                dec = '.'
-
-            if filename.endswith('.csv'):
-                # Assume that the user uploaded a CSV file
-                df = pd.read_csv(
-                    io.StringIO(decoded.decode('utf-8')), sep = delimiter, decimal = dec)
-                global data 
-                data = df
-            elif filename.endswith('.xls'):
-                # Assume that the user uploaded an excel file
-                df = pd.read_excel(io.BytesIO(decoded))
-            if not dec:
-                dec = '.'
-
-            if filename.endswith('.csv'):
-                # Assume that the user uploaded a CSV file
-                df = pd.read_csv(
-                    io.StringIO(decoded.decode('utf-8')), sep = delimiter, decimal = dec)
-                global data 
-                data = df
-            elif filename.endswith('.xls'):
-                # Assume that the user uploaded an excel file
-                df = pd.read_excel(io.BytesIO(decoded))
+        if filename.endswith('.csv'):
+            # Assume that the user uploaded a CSV file
+            df = pd.read_csv(
+                io.StringIO(decoded.decode('utf-8')), sep = delimiter, decimal = dec)
+            global data 
+            data = df
+        elif filename.endswith('.xls'):
+            # Assume that the user uploaded an excel file
+            df = pd.read_excel(io.BytesIO(decoded))
         else:
             #return "Prevent update - Please upload a file with the .csv or .xls extension"
             warnings_children = html.Div(["Please upload a file with the .csv or .xls extension"])
@@ -590,24 +573,16 @@ def check_parameters_wizard_data_files(data, params, param_keys):
         if len(df_params[param_keys[1]]) != m_criteria:
             if args.debug:
                 print("Invalid value 'weights'.")
-            if args.debug:
-                print("Invalid value 'weights'.")
             return -1
         if not all(type(item) in [int, float, np.float64] for item in df_params[param_keys[1]]):
-            if args.debug:
-                print("Invalid value 'weights'. Expected numerical value (int or float).")
             if args.debug:
                 print("Invalid value 'weights'. Expected numerical value (int or float).")
             return -1
         if not all(item >= 0 for item in df_params[param_keys[1]]):
             if args.debug:
                 print("Invalid value 'weights'. Expected value must be non-negative.")
-            if args.debug:
-                print("Invalid value 'weights'. Expected value must be non-negative.")
             return -1
         if not any(item > 0 for item in df_params[param_keys[1]]):
-            if args.debug:
-                print("Invalid value 'weights'. At least one weight must be positive.")
             if args.debug:
                 print("Invalid value 'weights'. At least one weight must be positive.")
             return -1
@@ -618,12 +593,8 @@ def check_parameters_wizard_data_files(data, params, param_keys):
         if len(df_params[param_keys[4]]) != m_criteria:
             if args.debug:
                 print("Invalid value 'objectives'.")
-            if args.debug:
-                print("Invalid value 'objectives'.")
             return -1
         if not all(item in ["min", "max"] for item in df_params[param_keys[4]]):
-            if args.debug:
-                print("Invalid value at 'objectives'. Use 'min', 'max', 'gain', 'cost', 'g' or 'c'.")
             if args.debug:
                 print("Invalid value at 'objectives'. Use 'min', 'max', 'gain', 'cost', 'g' or 'c'.")
             return -1
@@ -634,24 +605,16 @@ def check_parameters_wizard_data_files(data, params, param_keys):
         if len(df_params[param_keys[2]]) != m_criteria:
             if args.debug:
                 print("Invalid value at 'expert_range'. Length of should be equal to number of criteria.")
-            if args.debug:
-                print("Invalid value at 'expert_range'. Length of should be equal to number of criteria.")
             return -1
         if len(df_params[param_keys[3]]) != m_criteria:
-            if args.debug:
-                print("Invalid value at 'expert_range'. Length of should be equal to number of criteria.")
             if args.debug:
                 print("Invalid value at 'expert_range'. Length of should be equal to number of criteria.")
             return -1
         if not all(type(item) in [int, float, np.float64] for item in df_params[param_keys[2]]):
             if args.debug:
                 print("Invalid value at 'expert_range'. Expected numerical value (int or float).")
-            if args.debug:
-                print("Invalid value at 'expert_range'. Expected numerical value (int or float).")
             return -1
         if not all(type(item) in [int, float, np.float64] for item in df_params[param_keys[3]]):
-            if args.debug:
-                print("Invalid value at 'expert_range'. Expected numerical value (int or float).")
             if args.debug:
                 print("Invalid value at 'expert_range'. Expected numerical value (int or float).")
             return -1
@@ -663,18 +626,12 @@ def check_parameters_wizard_data_files(data, params, param_keys):
             if mini > maxi:
                 if args.debug:
                     print("Invalid value at 'expert_range'. Minimal value  is bigger then maximal value.")
-                if args.debug:
-                    print("Invalid value at 'expert_range'. Minimal value  is bigger then maximal value.")
                 return -1
             if lower < mini:
                 if args.debug:
                     print("Invalid value at 'expert_range'. All values from original data must be in a range of expert_range.")
-                if args.debug:
-                    print("Invalid value at 'expert_range'. All values from original data must be in a range of expert_range.")
                 return -1
             if upper > maxi:
-                if args.debug:
-                    print("Invalid value at 'expert_range'. All values from original data must be in a range of expert_range.")
                 if args.debug:
                     print("Invalid value at 'expert_range'. All values from original data must be in a range of expert_range.")
                 return -1
@@ -743,8 +700,6 @@ def submit(n_clicks, data, params):
     param_keys = ['criterion', 'weight', 'expert-min', 'expert-max', 'objective']
     warnings_children = html.Div([])
     is_open = False
-    warnings_children = html.Div([])
-    is_open = False
 
     if n_clicks:
         data_preview = dash_table.DataTable(
@@ -755,10 +710,6 @@ def submit(n_clicks, data, params):
         )
         data_table = dcc.Store(id='wizard_state_stored-data', data=data)
         if params is not None and check_parameters_wizard_data_files(data, params, param_keys) == -1:
-            #print('Prevent update - Wrong parameters format. Make sure that provided params file corresponds to uploaded data file.')
-            warnings_children = html.Div(['Wrong parameters format. Make sure that provided params file corresponds to uploaded data file.'])
-            is_open = True
-            return no_update, no_update, no_update, no_update, no_update, no_update, no_update, warnings_children, is_open
             #print('Prevent update - Wrong parameters format. Make sure that provided params file corresponds to uploaded data file.')
             warnings_children = html.Div(['Wrong parameters format. Make sure that provided params file corresponds to uploaded data file.'])
             is_open = True
@@ -782,10 +733,6 @@ def submit(n_clicks, data, params):
                         param_keys[4] : objectives[id]}))
         
         if not data_params:
-            warnings_children = html.Div(['Wrong data format. Make sure that proper decimal and delimiter separators are set. Data showed in the preview should have a form of a table.'])
-            is_open = True
-            #print('Prevent update - Wrong data format. Make sure that proper decimal and delimiter separators are set. Data showed in the preview should have a form of a table.')
-            return no_update, no_update, no_update, no_update, no_update, no_update, no_update, warnings_children, is_open
             warnings_children = html.Div(['Wrong data format. Make sure that proper decimal and delimiter separators are set. Data showed in the preview should have a form of a table.'])
             is_open = True
             #print('Prevent update - Wrong data format. Make sure that proper decimal and delimiter separators are set. Data showed in the preview should have a form of a table.')
@@ -814,9 +761,7 @@ def submit(n_clicks, data, params):
         dcc.Dropdown(['-', 'min', 'max'], '-', id = 'wizard-parameters-input-objectives-dropdown', clearable=False),
         ], className='params-content')
         return data_preview, data_table, params_table, {'display': 'none'}, {'display': 'block'}, {'display': 'none'}, {'display': 'none'}, warnings_children, is_open
-        return data_preview, data_table, params_table, {'display': 'none'}, {'display': 'block'}, {'display': 'none'}, {'display': 'none'}, warnings_children, is_open
     else:
-        return no_update, no_update, no_update, no_update, no_update, no_update, no_update, warnings_children, is_open
         return no_update, no_update, no_update, no_update, no_update, no_update, no_update, warnings_children, is_open
 
 
@@ -883,17 +828,6 @@ def check_title_wizard_data_title(text):
     
     return True
 
-def check_title_wizard_data_title(text):
-
-    for c in text:
-        if c.isalnum():
-            continue
-        if c == ' ' or c == '_' or c == '-':
-            continue
-        return False
-    
-    return True
-
 @app.callback(Output('wizard-data-after-submit-output-project-title', 'children', allow_duplicate=True),
              Input('wizard-data-input-title', 'n_clicks'),
              State('wizard-data-input-title', 'children'),
@@ -923,8 +857,6 @@ def edit_title_wizard_data_after_submit(enter, text):
     
     warnings_children = html.Div([])
     is_open = False
-    warnings_children = html.Div([])
-    is_open = False
     if enter and text:
         if check_title_wizard_data_title(text):
             global title
@@ -936,18 +868,7 @@ def edit_title_wizard_data_after_submit(enter, text):
             #print("Prevent update - Allowed characters in title are only english letters, digits and white space (' '), dash ('-') or underscore ('_').")
             warnings_children = html.Div(["Allowed characters in title are only english letters, digits and white space (' '), dash ('-') or underscore ('_')."])
             is_open = True
-        if check_title_wizard_data_title(text):
-            global title
-            title = text
-            return html.Div([
-                html.Div(text, id='wizard-data-input-title')
-                ]), warnings_children, is_open
-        else:
-            #print("Prevent update - Allowed characters in title are only english letters, digits and white space (' '), dash ('-') or underscore ('_').")
-            warnings_children = html.Div(["Allowed characters in title are only english letters, digits and white space (' '), dash ('-') or underscore ('_')."])
-            is_open = True
 
-    return no_update, warnings_children, is_open
     return no_update, warnings_children, is_open
 
 
