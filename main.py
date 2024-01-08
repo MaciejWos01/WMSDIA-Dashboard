@@ -154,7 +154,11 @@ def wizard():
                         html.Div(id='data-preview')
                     ], id='data-preview-content'),
                     html.Div(id='data-table', style={'display': 'none'}),
-                    html.Div(html.Button("Submit", id='wizard_data_input_submit-button', className='submit-button', style={'display':'none'}), id='nav-buttons')
+                    html.Div(html.Button("Submit", id='wizard_data_input_submit-button', className='submit-button', style={'display':'none'}), id='nav-buttons'),
+                    dbc.Modal([
+                        dbc.ModalHeader("Warning"),
+                        dbc.ModalBody(id='warning-upload-body')
+                    ], id='warning-upload', size='sm', centered=True)
                 ], className='page-with-side-bar')
             ], className='vertical-page')
         ], id='data_upload_layout', style={'display': 'block'}),
@@ -200,7 +204,11 @@ def wizard():
                         ], className="css-project-title"),
                         html.Div(id='wizard-data-output-parsed-data-after'),
                     ], id='data-content'),
-                    html.Div(html.Button('Next', id='data-to-param', className='next-button'), id='nav-buttons')
+                    html.Div(html.Button('Next', id='data-to-param', className='next-button'), id='nav-buttons'),
+                    dbc.Modal([
+                        dbc.ModalHeader("Warning"),
+                        dbc.ModalBody(id='warning-data-body')
+                    ], id='warning-data', size='sm', centered=True)
                 ], className='page-with-side-bar')], className='vertical-page')
         ], id='data_layout', style={'display': 'none'}),
 
@@ -237,11 +245,10 @@ def wizard():
                     html.Div(id='wizard-parameters-output-params-table'),
                     html.Div([html.Button('Back', id='param-to-data', className='back-button'),
                     html.Button('Next', id='param-to-model', className='next-button')], id='nav-buttons'),
-
                     dbc.Modal([
                         dbc.ModalHeader("Warning"),
-                        dbc.ModalBody(id='warning-modal-body')
-                    ], id='warning-modal', size='sm', centered=True)
+                        dbc.ModalBody(id='warning-parameters-body')
+                    ], id='warning-parameters', size='sm', centered=True)
                 ], className='page-with-side-bar')
             ], className='vertical-page')
         ], id='parameters_layout', style={'display': 'none'}),
@@ -660,7 +667,9 @@ def fill_parameters_wizard_parameters_params(params, df, param_keys):
               Output('data_upload_layout', 'style', allow_duplicate=True),
               Output('data_layout', 'style', allow_duplicate=True),
               Output('parameters_layout', 'style', allow_duplicate=True),
-              Output('model_layout', 'style', allow_duplicate=True)],
+              Output('model_layout', 'style', allow_duplicate=True),
+              Output('warning-upload-body', 'children'),
+              Output('warning-upload', 'is_open')],
               [Input('wizard_data_input_submit-button', 'n_clicks')],
               [State('wizard_state_stored-data', 'data'),
               State('wizard_state_stored-params','data')],
@@ -668,6 +677,8 @@ def fill_parameters_wizard_parameters_params(params, df, param_keys):
 def submit(n_clicks, data, params):
 
     param_keys = ['criterion', 'weight', 'expert-min', 'expert-max', 'objective']
+    warnings_children = html.Div([])
+    is_open = False
 
     if n_clicks:
         data_preview = dash_table.DataTable(
@@ -678,8 +689,10 @@ def submit(n_clicks, data, params):
         )
         data_table = dcc.Store(id='wizard_state_stored-data', data=data)
         if params is not None and check_parameters_wizard_data_files(data, params, param_keys) == -1:
-            print('Prevent update - Wrong parameters format. Make sure that provided params file corresponds to uploaded data file.')
-            return no_update, no_update, no_update, no_update, no_update, no_update, no_update
+            #print('Prevent update - Wrong parameters format. Make sure that provided params file corresponds to uploaded data file.')
+            warnings_children = html.Div(['Wrong parameters format. Make sure that provided params file corresponds to uploaded data file.'])
+            is_open = True
+            return no_update, no_update, no_update, no_update, no_update, no_update, no_update, warnings_children, is_open
         
         
         columns = return_columns_wizard_parameters_params_table(param_keys)
@@ -699,8 +712,10 @@ def submit(n_clicks, data, params):
                         param_keys[4] : objectives[id]}))
         
         if not data_params:
-            print('Prevent update - Wrong data format. Make sure that proper decimal and delimiter separators are set. Data showed in the preview should have a form of a table.')
-            return no_update, no_update, no_update, no_update, no_update, no_update, no_update
+            warnings_children = html.Div(['Wrong data format. Make sure that proper decimal and delimiter separators are set. Data showed in the preview should have a form of a table.'])
+            is_open = True
+            #print('Prevent update - Wrong data format. Make sure that proper decimal and delimiter separators are set. Data showed in the preview should have a form of a table.')
+            return no_update, no_update, no_update, no_update, no_update, no_update, no_update, warnings_children, is_open
             
         params_table = html.Div([
         #https://dash.plotly.com/datatable/editable
@@ -724,9 +739,9 @@ def submit(n_clicks, data, params):
         html.Div("Set all to Min/Max"),
         dcc.Dropdown(['-', 'min', 'max'], '-', id = 'wizard-parameters-input-objectives-dropdown', clearable=False),
         ], className='params-content')
-        return (data_preview, data_table, params_table, {'display': 'none'}, {'display': 'block'}, {'display': 'none'}, {'display': 'none'})
+        return data_preview, data_table, params_table, {'display': 'none'}, {'display': 'block'}, {'display': 'none'}, {'display': 'none'}, warnings_children, is_open
     else:
-        return no_update, no_update, no_update, no_update, no_update, no_update, no_update
+        return no_update, no_update, no_update, no_update, no_update, no_update, no_update, warnings_children, is_open
 
 
 @app.callback([Output('data_upload_layout', 'style', allow_duplicate=True),
@@ -811,21 +826,27 @@ def edit_title_wizard_data_after_submit(click, text):
 
 
 @app.callback(Output('wizard-data-after-submit-output-project-title', 'children'),
+              Output('warning-data-body', 'children'),
+              Output('warning-data', 'is_open'),
              Input('wizard-data-input-type-title', 'n_submit'),
              State('wizard-data-input-type-title', 'value'))
 def edit_title_wizard_data_after_submit(enter, text):
     
+    warnings_children = html.Div([])
+    is_open = False
     if enter and text:
         if check_title_wizard_data_title(text):
             global title
             title = text
             return html.Div([
                 html.Div(text, id='wizard-data-input-title')
-                ])
+                ]), warnings_children, is_open
         else:
-            print("Prevent update - Allowed characters in title are only english letters, digits and white space (' '), dash ('-') or underscore ('_').")
+            #print("Prevent update - Allowed characters in title are only english letters, digits and white space (' '), dash ('-') or underscore ('_').")
+            warnings_children = html.Div(["Allowed characters in title are only english letters, digits and white space (' '), dash ('-') or underscore ('_')."])
+            is_open = True
 
-    return no_update
+    return no_update, warnings_children, is_open
 
 
 def check_updated_params_wizard_parameters(df_data, df_params, param_keys):
@@ -900,8 +921,8 @@ def parse_warning(warning):
 
 #Approach 2 - iterate through whole table
 @app.callback(Output('wizard-parameters-output-params-table', 'children'),
-              Output('warning-modal-body', 'children'),
-              Output('warning-modal', 'is_open'),
+              Output('warning-parameters-body', 'children'),
+              Output('warning-parameters', 'is_open'),
               Input('wizard-parameters-input-parameters-table', 'data_timestamp'),
               Input('wizard-parameters-input-objectives-dropdown', 'value'),
               State('wizard_state_stored-data','data'),
