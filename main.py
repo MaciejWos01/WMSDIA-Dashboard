@@ -5,7 +5,7 @@ import io
 
 import csv
 import time
-import MSDTransformer as msdt
+import WMSDTransformer as wmsdt
 import dash
 from dash import Dash
 from dash import no_update
@@ -31,12 +31,12 @@ title = "TOPSIS vizualization"
 def header():
     return dbc.Row([
         dbc.Col(dcc.Link(html.I(className="fa fa-home fa-2x", id="css-home-icon"), href='/'), width="auto"),
-        dbc.Col(html.H3('MSD Transformer app', id="css-header-title"), width="auto"),
+        dbc.Col(html.H3('WMSD Transformer app', id="css-header-title"), width="auto"),
         dbc.Col(dcc.Link(html.I(className="fa fa-info fa-2x", id="css-info-icon"), href='/information'), width="auto")
     ], id="css-header")
 
 def footer():
-    github_url = "https://github.com/dabrze/topsis-msd-improvement-actions"
+    github_url = "https://github.com/dabrze/topsis-wmsd-improvement-actions"
     return dash.html.Footer(children=[
         html.A(html.I(className="fab fa-github fa-2x", id="css-github-icon"), href=github_url, target="_blank"),
         html.Div(html.Img(src="assets/PP_znak_pełny_RGB.png", id="css-logo-img"), id="css-logo-div")
@@ -1066,11 +1066,11 @@ def main_dash_layout():
     global data
     data = data.set_index(data.columns[0])
     if agg_g == 'R':
-        buses = msdt.MSDTransformer(msdt.RTOPSIS, args.solver)
+        buses = wmsdt.wMSDTransformer(wmsdt.RTOPSIS, args.solver)
     elif agg_g == 'A':
-        buses = msdt.MSDTransformer(msdt.ATOPSIS, args.solver)
+        buses = wmsdt.WMSDTransformer(wmsdt.ATOPSIS, args.solver)
     else:
-        buses = msdt.MSDTransformer(msdt.ITOPSIS, args.solver)
+        buses = wmsdt.WMSDTransformer(wmsdt.ITOPSIS, args.solver)
     
     criteria_params = list(params_g[0].keys())
     params = pd.DataFrame.from_dict(params_g).set_index(criteria_params[0])
@@ -1801,14 +1801,14 @@ def display_page(pathname):
         return '404 - Page not found'
 
 def parse_args():
-    from argparse import ArgumentParser
+    from argparse import ArgumentParser, BooleanOptionalAction
     from argparse import ArgumentDefaultsHelpFormatter
 
     parser = ArgumentParser(description="WMSD Dashboard server.", formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument("--ip", type=str, default="127.0.0.1", help="The IP address the WMSD Dashboard server will listen on.")
     parser.add_argument("--port", type=int, default=8050, help="The port the WMSD Dashboard server will listen on")
-    parser.add_argument("--solver", type=str, default="scip", help="The nonlinear programming solver used to calculate the upper perimeter of the WMSD space.")
-    parser.add_argument("--debug", type=bool, default=True, help="Turns on debugging option in run_server() method.")
+    parser.add_argument("--solver", type=str, default="scip", choices=['scip', 'gurobi'], help="The nonlinear programming solver used to calculate the upper perimeter of the WMSD space.")
+    parser.add_argument('--debug', default=True, action=BooleanOptionalAction, help="Turns on debugging option in run_server() method.")
   
 
     args = parser.parse_args()
