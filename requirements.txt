@@ -1,8 +1,9 @@
-pandas==1.5.3
-numpy
-plotly==5.17.0
+numpy~=1.26.0
+pandas~=1.5
+matplotlib~=3.8.0
+plotly~=5.17.0
 dash
 dash-bootstrap-components
 dash-daq
 dash-mantine-components==0.12.1
-matplotlib==3.8.0
+kaleido==0.2.1
