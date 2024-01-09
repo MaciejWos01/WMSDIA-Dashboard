@@ -31,12 +31,12 @@ title = "TOPSIS vizualization"
 def header():
     return dbc.Row([
         dbc.Col(dcc.Link(html.I(className="fa fa-home fa-2x", id="css-home-icon"), href='/'), width="auto"),
-        dbc.Col(html.H3('WMSD Transformer app', id="css-header-title"), width="auto"),
+        dbc.Col(html.H3(' Transformer app', id="css-header-title"), width="auto"),
         dbc.Col(dcc.Link(html.I(className="fa fa-info fa-2x", id="css-info-icon"), href='/information'), width="auto")
     ], id="css-header")
 
 def footer():
-    github_url = "https://github.com/dabrze/topsis-wmsd-improvement-actions"
+    github_url = "https://github.com/dabrze/topsis-msd-improvement-actions"
     return dash.html.Footer(children=[
         html.A(html.I(className="fab fa-github fa-2x", id="css-github-icon"), href=github_url, target="_blank"),
         html.Div(html.Img(src="assets/PP_znak_pełny_RGB.png", id="css-logo-img"), id="css-logo-div")
@@ -1066,7 +1066,7 @@ def main_dash_layout():
     global data
     data = data.set_index(data.columns[0])
     if agg_g == 'R':
-        buses = wmsdt.wMSDTransformer(wmsdt.RTOPSIS, args.solver)
+        buses = wmsdt.WMSDTransformer(wmsdt.RTOPSIS, args.solver)
     elif agg_g == 'A':
         buses = wmsdt.WMSDTransformer(wmsdt.ATOPSIS, args.solver)
     else:
