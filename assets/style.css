@@ -20,6 +20,7 @@
 #css-info-icon {
     margin: 0 20px;
     color: var(--white);
+    cursor: pointer;
 }
 
 #css-header-title {

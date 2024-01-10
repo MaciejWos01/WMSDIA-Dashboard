@@ -31,8 +31,8 @@ title = "TOPSIS vizualization"
 def header():
     return dbc.Row([
         dbc.Col(dcc.Link(html.I(className="fa fa-home fa-2x", id="css-home-icon"), href='/'), width="auto"),
-        dbc.Col(html.H3(' Transformer app', id="css-header-title"), width="auto"),
-        dbc.Col(dcc.Link(html.I(className="fa fa-info fa-2x", id="css-info-icon"), href='/information'), width="auto")
+        dbc.Col(html.H3('WMSD Transformer app', id="css-header-title"), width="auto"),
+        dbc.Col(html.I(className="fa fa-info fa-2x", id="css-info-icon", n_clicks=0), width="auto")
     ], id="css-header")
 
 def footer():
@@ -52,6 +52,36 @@ def home_layout():
             dcc.Link(html.Button('Experiment with ready dataset', className='medium-button'), href='/main_dash_layout2'),
         ], className='button-container')
     ], id='home-page')
+
+infomodal = dbc.Modal(
+    [
+        dbc.ModalHeader("Information"),
+        dbc.ModalBody("This is the information you want to display.")
+    ],
+    id="info-modal",
+)
+
+@app.callback(
+    Output("info-modal", "is_open", allow_duplicate=True),
+    [Input("css-info-icon", "n_clicks")],
+    [State("info-modal", "is_open")],
+    prevent_initial_call=True,
+)
+def toggle_modal(n, is_open):
+    if n:
+        return not is_open
+    return is_open
+
+@app.callback(
+    Output("info-modal", "is_open", allow_duplicate=True),
+    [Input("close-modal", "n_clicks")],
+    [State("info-modal", "is_open")],
+    prevent_initial_call=True,
+)
+def close_modal(n, is_open):
+    if n:
+        return not is_open
+    return is_open
 
 #==============================================================
 #   WIZARD
@@ -1760,13 +1790,6 @@ def vizualization_change(n, alternative_to_imptove):
         ])
     else:
         raise PreventUpdate
-    
-def information():
-    return html.Div([
-        html.Div('Authors:'),
-        html.Div('Github:'),
-        html.Div('Article:')
-    ])
 
 
 #==============================================================
@@ -1775,6 +1798,7 @@ def information():
 
 app.layout = html.Div(children=[
     header(),
+    infomodal,
     dcc.Location(id='url', refresh=False),
     html.Div(id='page-content'),
     dcc.Store(id='data-store', storage_type='memory'),
@@ -1795,8 +1819,6 @@ def display_page(pathname):
         return main_dash_layout()
     elif pathname == '/main_dash_layout2':
         return main_dash_layout2()
-    elif pathname == '/information':
-        return information()
     else:
         return '404 - Page not found'
 
@@ -1817,4 +1839,7 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
-    app.run_server(debug=args.debug, host=args.ip, port=args.port)
+    if args.port == 443:
+        app.run_server(debug=args.debug, host=args.ip, port=args.port, ssl_context="adhoc")
+    else:
+        app.run_server(debug=args.debug, host=args.ip, port=args.port)
