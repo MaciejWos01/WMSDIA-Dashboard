@@ -1165,7 +1165,7 @@ def formating(f):
     return f'{f:.2f}'
 
 def ranking_vizualization(buses):
-    df = buses.X_new.sort_values('AggFn', ascending = False).applymap(formating)
+    df = buses.X_new.sort_values(agg_g, ascending = False).applymap(formating)
 
     df = df.assign(Rank=None)
     columns = df.columns.tolist()
@@ -1793,7 +1793,7 @@ def vizualization_change(n, alternative_to_imptove):
             break
         time.sleep(0.5)
     if n>0:
-        df = buses_g.X_new.sort_values('AggFn', ascending = False).applymap(formating)
+        df = buses_g.X_new.sort_values(agg_g, ascending = False).applymap(formating)
 
         df = df.assign(Rank=None)
         columns = df.columns.tolist()
