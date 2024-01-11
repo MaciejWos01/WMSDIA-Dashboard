@@ -1370,6 +1370,19 @@ def set_advanced_settings(value, n_clicks):
             type = 'text',
             id='allow-std',
             value = 'False'
+            )]),
+            html.Div(children=[
+                html.Div([
+                html.Div('solutions number:'),
+                html.I(className="fa-solid fa-question fa-xs", id='solutions-number-help'),
+                dbc.Tooltip(
+                    'Number of shown solutions fitting the improvement',
+                    target="solutions-number-help",
+                ),
+            ], className='css-help'),
+                dcc.Input(
+            type = 'number',
+            id='solutions-number'
             )])
         ], style={
             'visibility' : is_hidden,
@@ -1513,6 +1526,19 @@ def set_advanced_settings(value, n_clicks):
                     type = 'number',
                     id='epsilon',
                     value = 0.000001
+            )]),
+            html.Div(children=[
+                html.Div([
+                html.Div('solutions number:'),
+                html.I(className="fa-solid fa-question fa-xs", id='solutions-number2-help'),
+                dbc.Tooltip(
+                    'Number of shown solutions fitting the improvement',
+                    target="solutions-number2-help",
+                ),
+            ], className='css-help'),
+                dcc.Input(
+            type = 'number',
+            id='solutions-number'
             )])
         ], style={
             'visibility' : is_hidden,
@@ -1632,9 +1658,10 @@ def improvement_feature_results(n, alternative_to_imptove, alternative_to_overca
     State('epsilon', 'value'),
     State('allow-std', 'value'),
     State('choose-method', 'value'),
+    State('solutions-number', 'value'),
     prevent_initial_call = True
 )
-def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame, epsilon, allow_std, method):    
+def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame, epsilon, allow_std, method, solutions_number):    
     global proceed
     proceed = False
     if n>0:
@@ -1648,7 +1675,7 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
             else:
                 allow_std = False
         global improvement
-        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, epsilon, allow_std = allow_std)
+        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, epsilon, allow_std = allow_std, solutions_number = solutions_number)
         rounded_improvement = improvement.applymap(formating)
         criteria_params = list(params_g[0].keys())
         params = pd.DataFrame.from_dict(params_g).set_index(criteria_params[0])
@@ -1684,16 +1711,17 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
     State('alternative-to-overcame', 'value'),
     State('epsilon', 'value'),
     State('choose-method', 'value'),
+    State('solutions-number','value'),
     prevent_initial_call = True
 )
-def improvement_std_results(n, alternative_to_imptove, alternative_to_overcame, epsilon, method):    
+def improvement_std_results(n, alternative_to_imptove, alternative_to_overcame, epsilon, method, solutions_number):    
     global proceed
     proceed = False
     if n>0:
         if epsilon is None:
             epsilon = 0.000001
         global improvement
-        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, epsilon)
+        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, epsilon, solutions_number = solutions_number)
         rounded_improvement = improvement.applymap(formating)
         proceed = True
         return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
