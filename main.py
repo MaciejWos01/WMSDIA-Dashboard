@@ -1373,7 +1373,7 @@ def set_advanced_settings(value, n_clicks):
             )]),
             html.Div(children=[
                 html.Div([
-                html.Div('solutions number:'),
+                html.Div('Number of solutions:'),
                 html.I(className="fa-solid fa-question fa-xs", id='solutions-number-help'),
                 dbc.Tooltip(
                     'Number of shown solutions fitting the improvement',
@@ -1529,7 +1529,7 @@ def set_advanced_settings(value, n_clicks):
             )]),
             html.Div(children=[
                 html.Div([
-                html.Div('solutions number:'),
+                html.Div('Number of solutions:'),
                 html.I(className="fa-solid fa-question fa-xs", id='solutions-number2-help'),
                 dbc.Tooltip(
                     'Number of shown solutions fitting the improvement',
@@ -1807,7 +1807,7 @@ def vizualization_change(n, alternative_to_imptove):
         df.index.rename('Name', inplace=True)
         df.reset_index(inplace=True)
         #a = buses_g.plot(plot_name = title, color = colour_g)
-        fig = buses_g.plot2(alternative_to_imptove, improvement)
+        fig = buses_g.plot_improvement(alternative_to_imptove, improvement)
         fig.write_image("chart.png")
         return html.Div(children=[
             dcc.Graph(
