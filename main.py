@@ -1167,9 +1167,10 @@ def formating(f):
     return f'{f:.2f}'
 
 def ranking_vizualization(buses):
-    df = buses.X_new.sort_values(agg_g, ascending = False).applymap(formating)
+    df = buses.X_new.sort_values(agg_g, ascending = False)* np.append(buses_g.weights, [1,1,1])
     #df = buses.X_new.applymap(formating)
-
+    df = df.applymap(formating)
+    
     df = df.assign(Rank=None)
     columns = df.columns.tolist()
     columns = columns[-1:] + columns[:-1]
@@ -1264,7 +1265,6 @@ def improvement_actions(buses):
         prevent_initial_call = True
 )
 def update_alternative(rank):
-    print("q")
     if rank is not None:
         return buses_g._ranked_alternatives[rank-1]
     
@@ -1824,8 +1824,9 @@ def vizualization_change(n, alternative_to_imptove):
             break
         time.sleep(0.5)
     if n>0:
-        df = buses_g.X_new.sort_values(agg_g, ascending = False).applymap(formating)
-        #df = buses_g.X_new.sort_values('AggFn', ascending = False).applymap(formating)
+        df = buses_g.X_new.sort_values(agg_g, ascending = False) * np.append(buses_g.weights, [1,1,1])
+        #df = buses_g.X_new.sort_values('AggFn', ascending = False) * buses_g.weights
+        df = df.applymap(formating)
 
         df = df.assign(Rank=None)
         columns = df.columns.tolist()
