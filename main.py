@@ -1105,6 +1105,8 @@ def main_dash_layout():
     criteria_params = list(params_g[0].keys())
     params = pd.DataFrame.from_dict(params_g).set_index(criteria_params[0])
     buses.fit_transform(data, params['weight'].to_list(), params['objective'].to_list(),  None)
+    global buses_g
+    buses_g = buses
     return html.Div(children=[
         html.Div(id='wizard-data'),
         dcc.Tabs(children=[
@@ -1166,6 +1168,7 @@ def formating(f):
 
 def ranking_vizualization(buses):
     df = buses.X_new.sort_values(agg_g, ascending = False).applymap(formating)
+    #df = buses.X_new.applymap(formating)
 
     df = df.assign(Rank=None)
     columns = df.columns.tolist()
@@ -1239,6 +1242,10 @@ def improvement_actions(buses):
                         id = 'alternative-to-overcame',
                         options = ids
                     )]),
+                    html.Div(children = ['Rank to achive:', dcc.Input(
+                        type = 'number',
+                        id = 'rank-to-achive'
+                    )]),
                     html.Div(id = 'conditional-settings'),
                     html.Button('Advanced settings', id='advanced-settings', n_clicks=0),
                     html.Div(id = 'advanced-content', children = None),
@@ -1250,6 +1257,28 @@ def improvement_actions(buses):
             ], id='ia-options-content')
         ], id='ia-tab-content')
     ])
+
+@app.callback(
+        Output('alternative-to-overcame', 'value'),
+        Input('rank-to-achive', 'value'),
+        prevent_initial_call = True
+)
+def update_alternative(rank):
+    print("q")
+    if rank is not None:
+        return buses_g._ranked_alternatives[rank-1]
+    
+@app.callback(
+        Output('rank-to-achive', 'value'),
+        Input('alternative-to-overcame', 'value'),
+        prevent_initial_call = True
+)
+def update_rank(alternative_to_overcame):
+    if alternative_to_overcame is not None:
+        ranking = buses_g._ranked_alternatives
+        for i in range(len(ranking)):
+            if ranking[i] == alternative_to_overcame:
+                return i+1
 
 @app.callback(
         Output('download-raport', 'n_clicks'),
@@ -1382,7 +1411,8 @@ def set_advanced_settings(value, n_clicks):
             ], className='css-help'),
                 dcc.Input(
             type = 'number',
-            id='solutions-number'
+            id='solutions-number',
+            value = 5
             )])
         ], style={
             'visibility' : is_hidden,
@@ -1538,7 +1568,8 @@ def set_advanced_settings(value, n_clicks):
             ], className='css-help'),
                 dcc.Input(
             type = 'number',
-            id='solutions-number'
+            id='solutions-number',
+            value = 5
             )])
         ], style={
             'visibility' : is_hidden,
@@ -1794,6 +1825,7 @@ def vizualization_change(n, alternative_to_imptove):
         time.sleep(0.5)
     if n>0:
         df = buses_g.X_new.sort_values(agg_g, ascending = False).applymap(formating)
+        #df = buses_g.X_new.sort_values('AggFn', ascending = False).applymap(formating)
 
         df = df.assign(Rank=None)
         columns = df.columns.tolist()
