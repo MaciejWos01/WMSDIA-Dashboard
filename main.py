@@ -1239,14 +1239,16 @@ def improvement_actions(buses):
                         id = 'alternative-to-improve',
                         options = ids
                     )]),
+                    html.Div([
                     html.Div(children = ['Alternative to overcome:', dcc.Dropdown(
                         id = 'alternative-to-overcame',
                         options = ids
-                    )]),
-                    html.Div(children = ['Rank to achive:', dcc.Input(
+                    )], id='con-alternative-to-overcame'),
+                    html.Div(['OR']),
+                    html.Div(children = ['Rank to achieve:', dcc.Input(
                         type = 'number',
                         id = 'rank-to-achive'
-                    )]),
+                    )], id='con-rank-to-achive'),], id='css-alt-or-rank'),
                     html.Div(id = 'conditional-settings'),
                     html.Button('Advanced settings', id='advanced-settings', n_clicks=0),
                     html.Div(id = 'advanced-content', children = None),

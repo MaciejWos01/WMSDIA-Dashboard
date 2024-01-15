@@ -422,3 +422,21 @@
     width: 100%;
     margin: 20px;
 }
+
+#css-alt-or-rank {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+#con-alternative-to-overcame,
+#con-rank-to-achive {
+    width: 40%;
+}
+
+#alternative-to-overcame,
+#rank-to-achive {
+    width: 100%;
+}
