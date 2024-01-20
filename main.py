@@ -126,7 +126,7 @@ def wizard():
                         html.Div([
                             html.Div([
                                 html.Div('Decimal:'),
-                                html.I(className="fa-solid fa-question fa-xs", id='decimal-help'),
+                                html.Div(html.I(className="fa-solid fa-question fa-xs"), id='decimal-help'),
                                 dbc.Tooltip(
                                     "Enter decimal point in your dataset",
                                     target="decimal-help",
@@ -139,7 +139,7 @@ def wizard():
                                         maxLength=1),
                             html.Div([
                                 html.Div('Delimiter:'),
-                                html.I(className="fa-solid fa-question fa-xs", id='delimiter-help'),
+                                html.Div(html.I(className="fa-solid fa-question fa-xs"), id='delimiter-help'),
                                 dbc.Tooltip(
                                     "Enter delimiter in your dataset",
                                     target="delimiter-help",
@@ -1310,7 +1310,7 @@ def set_conditional_settings(value):
         return html.Div(children = [
             html.Div([
                 html.Div('Features to change:'),
-                html.I(className="fa-solid fa-question fa-xs", id='features-help'),
+                html.Div(html.I(className="fa-solid fa-question fa-xs"), id='features-help'),
                 dbc.Tooltip(
                     'Features that you allow to change',
                     target="features-help",
@@ -1325,7 +1325,7 @@ def set_conditional_settings(value):
         return html.Div(children = [
             html.Div([
                 html.Div('Features to change:'),
-                html.I(className="fa-solid fa-question fa-xs", id='features-genetic-help'),
+                html.Div(html.I(className="fa-solid fa-question fa-xs"), id='features-genetic-help'),
                 dbc.Tooltip(
                     'Features that you allow to change',
                     target="features-genetic-help",
@@ -1340,7 +1340,7 @@ def set_conditional_settings(value):
         return html.Div(children = [
             html.Div([
                 html.Div('Feature to change:'),
-                html.I(className="fa-solid fa-question fa-xs", id='feature-help'),
+                html.Div(html.I(className="fa-solid fa-question fa-xs"), id='feature-help'),
                 dbc.Tooltip(
                     'One feature that you allow to change',
                     target="feature-help",
@@ -1377,7 +1377,7 @@ def set_advanced_settings(value, n_clicks):
             html.Div(children=[
                 html.Div([
                 html.Div('Epsilon:'),
-                html.I(className="fa-solid fa-question fa-xs", id='epsilon-help'),
+                html.Div(html.I(className="fa-solid fa-question fa-xs"), id='epsilon-help'),
                 dbc.Tooltip(
                     'Maximum value allowed to be better than desired alternative',
                     target="epsilon-help",
@@ -1391,7 +1391,7 @@ def set_advanced_settings(value, n_clicks):
             html.Div([
                 html.Div([
                 html.Div('Allow std:'),
-                html.I(className="fa-solid fa-question fa-xs", id='allow-std-help'),
+                html.Div(html.I(className="fa-solid fa-question fa-xs"), id='allow-std-help'),
                 dbc.Tooltip(
                     'True if you allow change in std, False otherwise',
                     target="allow-std-help",
@@ -1405,7 +1405,7 @@ def set_advanced_settings(value, n_clicks):
             html.Div(children=[
                 html.Div([
                 html.Div('Number of solutions:'),
-                html.I(className="fa-solid fa-question fa-xs", id='solutions-number-help'),
+                html.Div(html.I(className="fa-solid fa-question fa-xs"), id='solutions-number-help'),
                 dbc.Tooltip(
                     'Number of shown solutions fitting the improvement',
                     target="solutions-number-help",
@@ -1424,7 +1424,7 @@ def set_advanced_settings(value, n_clicks):
             html.Div(children=[
                 html.Div([
                 html.Div('Epsilon:'),
-                html.I(className="fa-solid fa-question fa-xs", id='epsilon2-help'),
+                html.Div(html.I(className="fa-solid fa-question fa-xs"), id='epsilon2-help'),
                 dbc.Tooltip(
                     'Maximum value allowed to be better than desired alternative',
                     target="epsilon2-help",
@@ -1438,7 +1438,7 @@ def set_advanced_settings(value, n_clicks):
             html.Div(children=[
                 html.Div([
                 html.Div('Boundary values:'),
-                html.I(className="fa-solid fa-question fa-xs", id='boundary-values-help'),
+                html.Div(html.I(className="fa-solid fa-question fa-xs"), id='boundary-values-help'),
                 dbc.Tooltip(
                     'Maximum values of chosen features to be achieved, equal amount as features to change',
                     target="boundary-values-help",
@@ -1456,7 +1456,7 @@ def set_advanced_settings(value, n_clicks):
             html.Div(children=[
                 html.Div([
                 html.Div('Epsilon:'),
-                html.I(className="fa-solid fa-question fa-xs", id='epsilon3-help'),
+                html.Div(html.I(className="fa-solid fa-question fa-xs"), id='epsilon3-help'),
                 dbc.Tooltip(
                     'Maximum value allowed to be better than desired alternative',
                     target="epsilon3-help",
@@ -1470,7 +1470,7 @@ def set_advanced_settings(value, n_clicks):
             html.Div(children=[
                 html.Div([
                 html.Div('Boundary values:'),
-                html.I(className="fa-solid fa-question fa-xs", id='boundary-values2-help'),
+                html.Div(html.I(className="fa-solid fa-question fa-xs"), id='boundary-values2-help'),
                 dbc.Tooltip(
                     'Maximum values of chosen features to be achieved, equal amount as features to change',
                     target="boundary-values2-help",
@@ -1483,7 +1483,7 @@ def set_advanced_settings(value, n_clicks):
             html.Div(children=[
                 html.Div([
                 html.Div('Allow deterioration:'),
-                html.I(className="fa-solid fa-question fa-xs", id='allow-det-help'),
+                html.Div(html.I(className="fa-solid fa-question fa-xs"), id='allow-det-help'),
                 dbc.Tooltip(
                     'True if you allow deterioration, False otherwise',
                     target="allow-det-help",
@@ -1497,7 +1497,7 @@ def set_advanced_settings(value, n_clicks):
             html.Div([
                 html.Div([
                 html.Div('Popsize:'),
-                html.I(className="fa-solid fa-question fa-xs", id='popsize-help'),
+                html.Div(html.I(className="fa-solid fa-question fa-xs"), id='popsize-help'),
                 dbc.Tooltip(
                     'Population size for genetic algorithm',
                     target="popsize-help",
@@ -1510,7 +1510,7 @@ def set_advanced_settings(value, n_clicks):
             html.Div([
                 html.Div([
                 html.Div('Generations:'),
-                html.I(className="fa-solid fa-question fa-xs", id='generations-help'),
+                html.Div(html.I(className="fa-solid fa-question fa-xs"), id='generations-help'),
                 dbc.Tooltip(
                     'Number of generations in genetic algorithm',
                     target="generations-help",
@@ -1529,7 +1529,7 @@ def set_advanced_settings(value, n_clicks):
             html.Div(children=[
                 html.Div([
                 html.Div('Epsilon:'),
-                html.I(className="fa-solid fa-question fa-xs", id='epsilon4-help'),
+                html.Div(html.I(className="fa-solid fa-question fa-xs"), id='epsilon4-help'),
                 dbc.Tooltip(
                     'Maximum value allowed to be better than desired alternative',
                     target="epsilon4-help",
@@ -1548,7 +1548,7 @@ def set_advanced_settings(value, n_clicks):
             html.Div([
                 html.Div([
                 html.Div('Epsilon:'),
-                html.I(className="fa-solid fa-question fa-xs", id='epsilon5-help'),
+                html.Div(html.I(className="fa-solid fa-question fa-xs"), id='epsilon5-help'),
                 dbc.Tooltip(
                     'Maximum value allowed to be better than desired alternative',
                     target="epsilon5-help",
@@ -1562,7 +1562,7 @@ def set_advanced_settings(value, n_clicks):
             html.Div(children=[
                 html.Div([
                 html.Div('Number of solutions:'),
-                html.I(className="fa-solid fa-question fa-xs", id='solutions-number2-help'),
+                html.Div(html.I(className="fa-solid fa-question fa-xs"), id='solutions-number2-help'),
                 dbc.Tooltip(
                     'Number of shown solutions fitting the improvement',
                     target="solutions-number2-help",
