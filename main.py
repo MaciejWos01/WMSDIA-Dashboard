@@ -1332,7 +1332,7 @@ def set_conditional_settings(value):
                 ),
             ], className='css-help'),
             dcc.Dropdown(
-                id = 'features-to-change',
+                id = 'features-to-change + ['all']',
                 options = features,
                 multi = True)
         ])
@@ -1597,6 +1597,12 @@ def set_advanced_settings(value, n_clicks):
 def improvement_genetic_results(n, alternative_to_imptove, alternative_to_overcame, epsilon, features_to_change, boundary_values, allow_deterioration, popsize, generations, method):    
     global proceed
     proceed = False
+    global improvement
+    if alternative_to_imptove is None or alternative_to_overcame is None or features_to_change is None:
+        print("Warning Fields: alternative_to_improve, alternative_to_overcome and features_to_change need to be filed")
+        proceed = True
+        improvement = None
+        return None
     if n>0:
         if boundary_values is not None:
             boundary_values = boundary_values.split(',')
@@ -1609,7 +1615,6 @@ def improvement_genetic_results(n, alternative_to_imptove, alternative_to_overca
             allow_deterioration = bool(allow_deterioration)
         if generations is None:
             generations = 200
-        global improvement
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, epsilon, features_to_change = features_to_change, boundary_values = boundary_values, allow_deterioration = allow_deterioration, popsize = popsize, n_generations = generations)[:10]
         #rounded_improvement = improvement.apply(formating)
         #rounded_improvement = [row.applymap(formating) for index, row in improvement.iterrows()]
@@ -1638,13 +1643,18 @@ def improvement_genetic_results(n, alternative_to_imptove, alternative_to_overca
 def improvement_features_results(n, alternative_to_imptove, alternative_to_overcame, epsilon, features_to_change, boundary_values, method):    
     global proceed
     proceed = False
+    global improvement
+    if alternative_to_imptove is None or alternative_to_overcame is None or features_to_change is None:
+        print("Warning Fields: alternative_to_improve, alternative_to_overcome and features_to_change need to be filed")
+        proceed = True
+        improvement = None
+        return None
     if boundary_values is not None:
         boundary_values = boundary_values.split(',')
         boundary_values = [float(x) for x in boundary_values]
     if n>0:
         if epsilon is None:
             epsilon = 0.000001
-        global improvement
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, epsilon, features_to_change = features_to_change, boundary_values = boundary_values)
         rounded_improvement = improvement.applymap(formating)
         proceed = True
@@ -1668,10 +1678,15 @@ def improvement_features_results(n, alternative_to_imptove, alternative_to_overc
 def improvement_feature_results(n, alternative_to_imptove, alternative_to_overcame, epsilon, feature_to_change, method):    
     global proceed
     proceed = False
+    global improvement
+    if alternative_to_imptove is None or alternative_to_overcame is None or features_to_change is None:
+        print("Warning Fields: alternative_to_improve, alternative_to_overcome and feature_to_change need to be filed")
+        proceed = True
+        improvement = None
+        return None
     if n>0:
         if epsilon is None:
             epsilon = 0.000001
-        global improvement
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, epsilon, feature_to_change = feature_to_change)
         rounded_improvement = improvement.applymap(formating)
         proceed = True
@@ -1697,6 +1712,12 @@ def improvement_feature_results(n, alternative_to_imptove, alternative_to_overca
 def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame, epsilon, allow_std, method, solutions_number):    
     global proceed
     proceed = False
+    global improvement
+    if alternative_to_imptove is None or alternative_to_overcame is None or features_to_change is None:
+        print("Warning Fields: alternative_to_improve and alternative_to_overcome need to be filed")
+        proceed = True
+        improvement = None
+        return None
     if n>0:
         if epsilon is None:
             epsilon = 0.000001
@@ -1707,7 +1728,6 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
                 allow_std = True
             else:
                 allow_std = False
-        global improvement
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, epsilon, allow_std = allow_std, solutions_number = solutions_number)
         rounded_improvement = improvement.applymap(formating)
         criteria_params = list(params_g[0].keys())
@@ -1750,10 +1770,15 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
 def improvement_std_results(n, alternative_to_imptove, alternative_to_overcame, epsilon, method, solutions_number):    
     global proceed
     proceed = False
+    global improvement
+    if alternative_to_imptove is None or alternative_to_overcame is None or features_to_change is None:
+        print("Warning Fields: alternative_to_improve and alternative_to_overcome need to be filed")
+        proceed = True
+        improvement = None
+        return None
     if n>0:
         if epsilon is None:
             epsilon = 0.000001
-        global improvement
         improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, epsilon, solutions_number = solutions_number)
         rounded_improvement = improvement.applymap(formating)
         proceed = True
@@ -1842,6 +1867,8 @@ def vizualization_change(n, alternative_to_imptove):
         df.index.rename('Name', inplace=True)
         df.reset_index(inplace=True)
         #a = buses_g.plot(plot_name = title, color = colour_g)
+        if improvement is None:
+            raise PreventUpdate
         fig = buses_g.plot_improvement(alternative_to_imptove, improvement)
         fig.write_image("chart.png")
         return html.Div(children=[
