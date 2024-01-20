@@ -1679,7 +1679,7 @@ def improvement_feature_results(n, alternative_to_imptove, alternative_to_overca
     global proceed
     proceed = False
     global improvement
-    if alternative_to_imptove is None or alternative_to_overcame is None or features_to_change is None:
+    if alternative_to_imptove is None or alternative_to_overcame is None or feature_to_change is None:
         print("Warning Fields: alternative_to_improve, alternative_to_overcome and feature_to_change need to be filed")
         proceed = True
         improvement = None
