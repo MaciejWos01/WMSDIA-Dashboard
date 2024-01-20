@@ -47,9 +47,9 @@ def home_layout():
         html.Div([
             html.H3('Welcome to WMSD-Transformer!'),
             html.Div('You can start your experiment using wizard'),
-            dcc.Link(html.Button('Start WIZARD', className='big-button'), href='/wizard'),
+            html.Div(dcc.Link(html.Button('Start WIZARD', className='big-button'), href='/wizard')),
             html.Div('Or find out what this project is about using our example'),
-            dcc.Link(html.Button('Experiment with ready dataset', className='medium-button'), href='/main_dash_layout2'),
+            html.Div(dcc.Link(html.Button('Experiment with ready dataset', className='medium-button'), href='/main_dash_layout2')),
         ], className='button-container')
     ], id='home-page')
 
@@ -1118,7 +1118,7 @@ def main_dash_layout():
             ]),
             dcc.Tab(label='Improvement actions', children=[
                 html.Div([
-                    html.Div('You can use selector of methods to check necessary improvement in chosen alternative to overrank other alternative, and than download a report', className='info')
+                    html.Div('You can use selector of methods to check necessary improvement in chosen alternative to overrank other alternative, and then download a report', className='info')
                 ], className='info-container'),
                 improvement_actions(buses)
             ]),
