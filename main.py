@@ -1628,9 +1628,10 @@ def improvement_genetic_results(n, alternative_to_improve, alternative_to_overca
             
         if no_exception:
             if improvement is None:
-                    proceed = True
-                    improvement = None
-                    raise PreventUpdate
+                proceed = True
+                improvement = None
+                print("Warning no solution found")
+                raise PreventUpdate
             rounded_improvement = improvement.apply(np.vectorize(formating))
             global improvement_parameters
             improvement_parameters = {'parameters':['method', 'alternative_to_improve', 'alternative_to_overcame', 'epsilon', 'features_to_change', 'boundary_values', 'allow_deterioration', 'popsize', 'generations'], 'values':[method, alternative_to_imptove, alternative_to_overcame, epsilon, features_to_change, boundary_values, allow_deterioration, popsize, generations]}
@@ -1683,9 +1684,10 @@ def improvement_features_results(n, alternative_to_improve, alternative_to_overc
 
         if no_exception:
             if improvement is None:
-                    proceed = True
-                    improvement = None
-                    raise PreventUpdate
+                proceed = True
+                improvement = None
+                print("Warning no solution found")
+                raise PreventUpdate
             rounded_improvement = improvement.applymap(formating)
             proceed = True
             return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
@@ -1732,9 +1734,10 @@ def improvement_feature_results(n, alternative_to_improve, alternative_to_overca
 
         if no_exception:
             if improvement is None:
-                    proceed = True
-                    improvement = None
-                    raise PreventUpdate
+                proceed = True
+                improvement = None
+                print("Warning no solution found")
+                raise PreventUpdate
             rounded_improvement = improvement.applymap(formating)
             proceed = True
             return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
@@ -1794,6 +1797,7 @@ def improvement_mean_results(n, alternative_to_improve, alternative_to_overcame,
             if improvement is None:
                 proceed = True
                 improvement = None
+                print("Warning no solution found")
                 raise PreventUpdate
             rounded_improvement = improvement.applymap(formating)
             criteria_params = list(params_g[0].keys())
@@ -1859,6 +1863,7 @@ def improvement_std_results(n, alternative_to_improve, alternative_to_overcame, 
             if improvement is None:
                 proceed = True
                 improvement = None
+                print("Warning no solution found")
                 raise PreventUpdate
             rounded_improvement = improvement.applymap(formating)
             proceed = True
