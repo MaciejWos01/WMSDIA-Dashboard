@@ -1127,6 +1127,8 @@ def main_dash_layout2():
     return main_dash_layout()
 
 def main_dash_layout():
+    global proceed
+    proceed = True
     global data
     data = data.set_index(data.columns[0])
     if agg_g == 'R':
@@ -1255,6 +1257,8 @@ def display_click_data(clickData):
 def improvement_actions(buses):
     global buses_g
     buses_g = buses
+    global raport_viz
+    raport_viz = 'hidden'
     ids = buses_g.X_new.index
     return html.Div(id = 'ia-tab', className = 'tab', children=[
         dbc.Container([
@@ -1289,7 +1293,7 @@ def improvement_actions(buses):
                     html.Div(id = 'advanced-content', children = None),
                     html.Button('Apply', id = 'apply-button', n_clicks=0),
                     html.Div(id = 'improvement-result', children=None),
-                    html.Button('Download report', id = 'download-raport', n_clicks=0),
+                    html.Button('Download report', id = 'download-raport', n_clicks=0, style={'visibility' : raport_viz,}),
                     html.Div(id = 'download-placeholder')
                 ])
             ], id='ia-options-content')
@@ -1677,13 +1681,27 @@ def improvement_genetic_results(n, alternative_to_improve, alternative_to_overca
             
             rounded_improvement = improvement.apply(np.vectorize(formating))
             global improvement_parameters
-            improvement_parameters = {'parameters':['method', 'alternative_to_improve', 'alternative_to_overcame', 'epsilon', 'features_to_change', 'boundary_values', 'allow_deterioration', 'popsize', 'generations'], 'values':[method, alternative_to_imptove, alternative_to_overcame, epsilon, features_to_change, boundary_values, allow_deterioration, popsize, generations]}
+            improvement_parameters = {'parameters':['method', 'alternative_to_improve', 'alternative_to_overcame', 'epsilon', 'features_to_change', 'boundary_values', 'allow_deterioration', 'popsize', 'generations'], 'values':[method, alternative_to_improve, alternative_to_overcame, epsilon, features_to_change, boundary_values, allow_deterioration, popsize, generations]}
+            global raport_viz
+            raport_viz = 'visible'
             proceed = True
             return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
 
     proceed = True
     improvement = None
     raise PreventUpdate
+
+@app.callback(
+        Output('download-raport', 'style'),
+        Input('apply-button', 'n_clicks')
+        )
+def raport_button_visibility(n):
+    time.sleep(0.5)
+    while True:
+        if proceed:
+            break
+        time.sleep(0.5)
+    return {'visibility' : raport_viz}
 
 @app.callback(
     Output('improvement_features-result', 'children'),
@@ -1734,6 +1752,8 @@ def improvement_features_results(n, alternative_to_improve, alternative_to_overc
                 raise PreventUpdate
             
             rounded_improvement = improvement.applymap(formating)
+            global raport_viz
+            raport_viz = 'visible'
             proceed = True
             return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
 
@@ -1786,6 +1806,8 @@ def improvement_feature_results(n, alternative_to_improve, alternative_to_overca
                 raise PreventUpdate
             
             rounded_improvement = improvement.applymap(formating)
+            global raport_viz
+            raport_viz = 'visible'
             proceed = True
             return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
 
@@ -1867,7 +1889,8 @@ def improvement_mean_results(n, alternative_to_improve, alternative_to_overcame,
             '''
             with open('html_report.html', 'w') as f:
                 f.write(raport)
-                
+            global raport_viz
+            raport_viz = 'visible'
             proceed = True
             return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
         
@@ -1921,6 +1944,8 @@ def improvement_std_results(n, alternative_to_improve, alternative_to_overcame, 
                 raise PreventUpdate
             
             rounded_improvement = improvement.applymap(formating)
+            global raport_viz
+            raport_viz = 'visible'
             proceed = True
             return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
 
