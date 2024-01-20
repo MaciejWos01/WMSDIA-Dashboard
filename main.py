@@ -1621,6 +1621,7 @@ def improvement_genetic_results(n, alternative_to_imptove, alternative_to_overca
         if improvement is None:
                 proceed = True
                 improvement = None
+                print("Warning no solution found")
                 raise PreventUpdate
         rounded_improvement = improvement.apply(np.vectorize(formating))
         global improvement_parameters
@@ -1663,6 +1664,7 @@ def improvement_features_results(n, alternative_to_imptove, alternative_to_overc
         if improvement is None:
                 proceed = True
                 improvement = None
+                print("Warning no solution found")
                 raise PreventUpdate
         rounded_improvement = improvement.applymap(formating)
         proceed = True
@@ -1699,6 +1701,7 @@ def improvement_feature_results(n, alternative_to_imptove, alternative_to_overca
         if improvement is None:
                 proceed = True
                 improvement = None
+                print("Warning no solution found")
                 raise PreventUpdate
         rounded_improvement = improvement.applymap(formating)
         proceed = True
@@ -1755,6 +1758,7 @@ def improvement_mean_results(n, alternative_to_improve, alternative_to_overcame,
             if improvement is None:
                 proceed = True
                 improvement = None
+                print("Warning no solution found")
                 raise PreventUpdate
             rounded_improvement = improvement.applymap(formating)
             criteria_params = list(params_g[0].keys())
@@ -1820,6 +1824,7 @@ def improvement_std_results(n, alternative_to_improve, alternative_to_overcame, 
             if improvement is None:
                 proceed = True
                 improvement = None
+                print("Warning no solution found")
                 raise PreventUpdate
             rounded_improvement = improvement.applymap(formating)
             proceed = True
