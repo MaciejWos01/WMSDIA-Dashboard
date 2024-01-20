@@ -1683,11 +1683,11 @@ def improvement_features_results(n, alternative_to_imptove, alternative_to_overc
     State('choose-method', 'value'),
     prevent_initial_call = True
 )
-def improvement_feature_results(n, alternative_to_imptove, alternative_to_overcame, epsilon, feature_to_change, method):    
+def improvement_feature_results(n, alternative_to_improve, alternative_to_overcame, epsilon, feature_to_change, method):    
     global proceed
     proceed = False
     global improvement
-    if alternative_to_imptove is None or alternative_to_overcame is None or feature_to_change is None:
+    if alternative_to_improve is None or alternative_to_overcame is None or feature_to_change is None:
         print("Warning Fields: alternative_to_improve, alternative_to_overcome and feature_to_change need to be filed")
         proceed = True
         improvement = None
@@ -1695,14 +1695,27 @@ def improvement_feature_results(n, alternative_to_imptove, alternative_to_overca
     if n>0:
         if epsilon is None:
             epsilon = 0.000001
-        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, epsilon, feature_to_change = feature_to_change)
-        if improvement is None:
-                proceed = True
-                improvement = None
-                raise PreventUpdate
-        rounded_improvement = improvement.applymap(formating)
-        proceed = True
-        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
+
+        no_exception = True
+
+        try:
+            improvement = buses_g.improvement(method, alternative_to_improve,alternative_to_overcame, epsilon, feature_to_change = feature_to_change)
+        except Exception as e:
+            print(e)
+            no_exception = False
+
+        if no_exception:
+            if improvement is None:
+                    proceed = True
+                    improvement = None
+                    raise PreventUpdate
+            rounded_improvement = improvement.applymap(formating)
+            proceed = True
+            return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
+        else:
+            proceed = True
+            improvement = None
+            raise PreventUpdate
     else:
         proceed = True
         raise PreventUpdate
