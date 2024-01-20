@@ -1713,7 +1713,7 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
     global proceed
     proceed = False
     global improvement
-    if alternative_to_imptove is None or alternative_to_overcame is None or features_to_change is None:
+    if alternative_to_imptove is None or alternative_to_overcame is None:
         print("Warning Fields: alternative_to_improve and alternative_to_overcome need to be filed")
         proceed = True
         improvement = None
@@ -1771,7 +1771,7 @@ def improvement_std_results(n, alternative_to_imptove, alternative_to_overcame, 
     global proceed
     proceed = False
     global improvement
-    if alternative_to_imptove is None or alternative_to_overcame is None or features_to_change is None:
+    if alternative_to_imptove is None or alternative_to_overcame is None:
         print("Warning Fields: alternative_to_improve and alternative_to_overcome need to be filed")
         proceed = True
         improvement = None
