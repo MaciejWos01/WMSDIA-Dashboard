@@ -30,7 +30,8 @@ title = "TOPSIS vizualization"
 
 def header():
     return dbc.Row([
-        dbc.Col(dcc.Link(html.I(className="fa fa-home fa-2x", id="css-home-icon"), href='/'), width="auto"),
+        #dbc.Col(dcc.Link(html.I(className="fa fa-home fa-2x", id="css-home-icon"), href='/'), width="auto"),
+        dbc.Col(html.I(className="fa fa-home fa-2x", id="css-home-icon", n_clicks=0), width="auto"),
         dbc.Col(html.H3('WMSD Transformer app', id="css-header-title"), width="auto"),
         dbc.Col(html.I(className="fa fa-info fa-2x", id="css-info-icon", n_clicks=0), width="auto")
     ], id="css-header")
@@ -61,6 +62,15 @@ infomodal = dbc.Modal(
     id="info-modal",
 )
 
+homemodal = dbc.Modal([
+    dbc.ModalHeader("Home"),
+    dbc.ModalBody("Do you want to discard changes and go back to home page?"),
+    dbc.ModalFooter([
+        dcc.Link(html.Button("Discard changes", id="discard-button", className="modal-buttons"), href='/'),
+        html.Button("Cancel", id="cancel-button", className="modal-buttons"),
+    ]),
+], centered=True, id='home-modal')
+
 @app.callback(
     Output("info-modal", "is_open", allow_duplicate=True),
     [Input("css-info-icon", "n_clicks")],
@@ -80,6 +90,29 @@ def toggle_modal(n, is_open):
 )
 def close_modal(n, is_open):
     if n:
+        return not is_open
+    return is_open
+
+@app.callback(
+    Output("home-modal", "is_open", allow_duplicate=True),
+    [Input("css-home-icon", "n_clicks")],
+    [State("home-modal", "is_open")],
+    prevent_initial_call=True,
+)
+def toggle_modal(n, is_open):
+    if n:
+        return not is_open
+    return is_open
+
+@app.callback(
+    Output("home-modal", "is_open", allow_duplicate=True),
+    [Input("cancel-button", "n_clicks"),
+     Input("discard-button", "n_clicks")],
+    [State("home-modal", "is_open")],
+    prevent_initial_call=True,
+)
+def close_modal(n, m, is_open):
+    if n or m:
         return not is_open
     return is_open
 
@@ -188,7 +221,8 @@ def wizard():
                     dbc.Modal([
                         dbc.ModalHeader("Warning"),
                         dbc.ModalBody(id='warning-upload-body')
-                    ], id='warning-upload', size='sm', centered=True)
+                    ], id='warning-upload', size='sm', centered=True),
+                    homemodal
                 ], className='page-with-side-bar')
             ], className='vertical-page')
         ], id='data_upload_layout', style={'display': 'block'}),
@@ -1128,7 +1162,8 @@ def main_dash_layout():
                 ], className='info-container'),
                 model_setter()
             ])
-        ])
+        ]),
+        homemodal
     ])
 
 def model_setter():

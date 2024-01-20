@@ -200,7 +200,8 @@
 #apply-button,
 #advanced-settings,
 #json-download-button,
-#download-raport {
+#download-raport,
+.modal-buttons {
     color: var(--white);
     background-color: var(--light);
     border-radius: 5px;
@@ -220,7 +221,8 @@
 #apply-button:hover,
 #advanced-settings:hover,
 #json-download-button:hover,
-#download-raport:hover {
+#download-raport:hover,
+.modal-buttons:hover {
     background-color: var(--light2);
 }
 
