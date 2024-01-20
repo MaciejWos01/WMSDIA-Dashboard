@@ -1163,6 +1163,26 @@ def main_dash_layout():
                 model_setter()
             ])
         ]),
+        dbc.Modal([
+            dbc.ModalHeader("Warning"),
+            dbc.ModalBody(id='warning-main1-body')
+        ], id='warning-main1', size='sm', centered=True),
+        dbc.Modal([
+            dbc.ModalHeader("Warning"),
+            dbc.ModalBody(id='warning-main2-body')
+        ], id='warning-main2', size='sm', centered=True),
+        dbc.Modal([
+            dbc.ModalHeader("Warning"),
+            dbc.ModalBody(id='warning-main3-body')
+        ], id='warning-main3', size='sm', centered=True),
+        dbc.Modal([
+            dbc.ModalHeader("Warning"),
+            dbc.ModalBody(id='warning-main4-body')
+        ], id='warning-main4', size='sm', centered=True),
+        dbc.Modal([
+            dbc.ModalHeader("Warning"),
+            dbc.ModalBody(id='warning-main5-body')
+        ], id='warning-main5', size='sm', centered=True),         
         homemodal
     ])
 
@@ -1615,6 +1635,8 @@ def set_advanced_settings(value, n_clicks):
 
 @app.callback(
     Output('improvement_genetic-result', 'children'),
+    Output('warning-main1-body', 'children'),
+    Output('warning-main1', 'is_open'),
     [Input('apply-button', 'n_clicks')],
     #Input('alternative-to-improve', 'value'),
     #Input('alternative-to-overcame', 'value'),
@@ -1633,12 +1655,16 @@ def improvement_genetic_results(n, alternative_to_improve, alternative_to_overca
     global proceed
     proceed = False
     global improvement
+    warnings_children = html.Div([])
+    is_open = False
 
     if alternative_to_improve is None or alternative_to_overcame is None or features_to_change is None:
-        print("Warning Fields: alternative_to_improve, alternative_to_overcome and features_to_change need to be filed")
+        #print("Warning Fields: alternative_to_improve, alternative_to_overcome and features_to_change need to be filed")
+        warnings_children = html.Div(["Alternative_to_improve, alternative_to_overcome and features_to_change need to be filed"])
+        is_open = True
         proceed = True
         improvement = None
-        return None
+        return None, warnings_children, is_open
     
     if n>0:
         if boundary_values is not None:
@@ -1672,14 +1698,17 @@ def improvement_genetic_results(n, alternative_to_improve, alternative_to_overca
             if improvement is None:
                 proceed = True
                 improvement = None
-                print("Warning no solution found")
-                raise PreventUpdate
+                #print("Warning no solution found")
+                warnings_children = html.Div(["No solution found"])
+                is_open = True
+                #raise PreventUpdate
+                return None, warnings_children, is_open
             
             rounded_improvement = improvement.apply(np.vectorize(formating))
             global improvement_parameters
-            improvement_parameters = {'parameters':['method', 'alternative_to_improve', 'alternative_to_overcame', 'epsilon', 'features_to_change', 'boundary_values', 'allow_deterioration', 'popsize', 'generations'], 'values':[method, alternative_to_imptove, alternative_to_overcame, epsilon, features_to_change, boundary_values, allow_deterioration, popsize, generations]}
+            improvement_parameters = {'parameters':['method', 'alternative_to_improve', 'alternative_to_overcame', 'epsilon', 'features_to_change', 'boundary_values', 'allow_deterioration', 'popsize', 'generations'], 'values':[method, alternative_to_improve, alternative_to_overcame, epsilon, features_to_change, boundary_values, allow_deterioration, popsize, generations]}
             proceed = True
-            return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
+            return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'}), warnings_children, is_open
 
     proceed = True
     improvement = None
@@ -1687,6 +1716,8 @@ def improvement_genetic_results(n, alternative_to_improve, alternative_to_overca
 
 @app.callback(
     Output('improvement_features-result', 'children'),
+    Output('warning-main2-body', 'children'),
+    Output('warning-main2', 'is_open'),
     [Input('apply-button', 'n_clicks')],
     #Input('alternative-to-improve', 'value'),
     #Input('alternative-to-overcame', 'value'),
@@ -1702,12 +1733,16 @@ def improvement_features_results(n, alternative_to_improve, alternative_to_overc
     global proceed
     proceed = False
     global improvement
+    warnings_children = html.Div([])
+    is_open = False
 
     if alternative_to_improve is None or alternative_to_overcame is None or features_to_change is None:
-        print("Warning Fields: alternative_to_improve, alternative_to_overcome and features_to_change need to be filed")
+        #print("Warning Fields: alternative_to_improve, alternative_to_overcome and features_to_change need to be filed")
+        warnings_children = html.Div(["Alternative_to_improve, alternative_to_overcome and features_to_change need to be filed"])
+        is_open = True
         proceed = True
         improvement = None
-        return None
+        return None, warnings_children, is_open
     
     if boundary_values is not None:
         boundary_values = boundary_values.split(',')
@@ -1730,12 +1765,15 @@ def improvement_features_results(n, alternative_to_improve, alternative_to_overc
             if improvement is None:
                 proceed = True
                 improvement = None
-                print("Warning no solution found")
-                raise PreventUpdate
+                #print("Warning no solution found")
+                #raise PreventUpdate
+                warnings_children = html.Div(["No solution found"])
+                is_open = True
+                return None, warnings_children, is_open
             
             rounded_improvement = improvement.applymap(formating)
             proceed = True
-            return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
+            return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'}), warnings_children, is_open
 
     proceed = True
     improvement = None
@@ -1743,6 +1781,8 @@ def improvement_features_results(n, alternative_to_improve, alternative_to_overc
     
 @app.callback(
     Output('improvement_single_feature-result', 'children'),
+    Output('warning-main3-body', 'children'),
+    Output('warning-main3', 'is_open'),
     [Input('apply-button', 'n_clicks')],
     #Input('alternative-to-improve', 'value'),
     #Input('alternative-to-overcame', 'value'),
@@ -1757,12 +1797,16 @@ def improvement_feature_results(n, alternative_to_improve, alternative_to_overca
     global proceed
     proceed = False
     global improvement
+    warnings_children = html.Div([])
+    is_open = False
 
     if alternative_to_improve is None or alternative_to_overcame is None or feature_to_change is None:
-        print("Warning Fields: alternative_to_improve, alternative_to_overcome and feature_to_change need to be filed")
+        #print("Warning Fields: alternative_to_improve, alternative_to_overcome and feature_to_change need to be filed")
+        warnings_children = html.Div(["Alternative_to_improve, alternative_to_overcome and features_to_change need to be filed"])
+        is_open = True
         proceed = True
         improvement = None
-        return None
+        return None, warnings_children, is_open
     
     if n>0:
 
@@ -1782,12 +1826,15 @@ def improvement_feature_results(n, alternative_to_improve, alternative_to_overca
             if improvement is None:
                 proceed = True
                 improvement = None
-                print("Warning no solution found")
-                raise PreventUpdate
+                #print("Warning no solution found")
+                #raise PreventUpdate
+                warnings_children = html.Div(["No solution found"])
+                is_open = True
+                return None, warnings_children, is_open
             
             rounded_improvement = improvement.applymap(formating)
             proceed = True
-            return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
+            return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'}), warnings_children, is_open
 
     proceed = True
     improvement = None
@@ -1796,6 +1843,8 @@ def improvement_feature_results(n, alternative_to_improve, alternative_to_overca
 
 @app.callback(
     Output('improvement_mean-result', 'children'),
+    Output('warning-main4-body', 'children'),
+    Output('warning-main4', 'is_open'),
     [Input('apply-button', 'n_clicks')],
     #Input('alternative-to-improve', 'value'),
     #Input('alternative-to-overcame', 'value'),
@@ -1812,12 +1861,16 @@ def improvement_mean_results(n, alternative_to_improve, alternative_to_overcame,
     global improvement
 
     proceed = False
+    warnings_children = html.Div([])
+    is_open = False
     
     if alternative_to_improve is None or alternative_to_overcame is None:
-        print("Warning Fields: alternative_to_improve and alternative_to_overcome need to be filed")
+        #print("Warning Fields: alternative_to_improve and alternative_to_overcome need to be filed")
+        warnings_children = html.Div(["Alternative_to_improve, alternative_to_overcome and features_to_change need to be filed"])
+        is_open = True
         proceed = True
         improvement = None
-        return None
+        return None, warnings_children, is_open
     
     if n>0:
 
@@ -1845,8 +1898,11 @@ def improvement_mean_results(n, alternative_to_improve, alternative_to_overcame,
             if improvement is None:
                 proceed = True
                 improvement = None
-                print("Warning no solution found")
-                raise PreventUpdate
+                #print("Warning no solution found")
+                #raise PreventUpdate
+                warnings_children = html.Div(["No solution found"])
+                is_open = True
+                return None, warnings_children, is_open
             
             rounded_improvement = improvement.applymap(formating)
             criteria_params = list(params_g[0].keys())
@@ -1869,7 +1925,7 @@ def improvement_mean_results(n, alternative_to_improve, alternative_to_overcame,
                 f.write(raport)
                 
             proceed = True
-            return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
+            return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'}), warnings_children, is_open
         
     proceed = True
     improvement = None
@@ -1878,6 +1934,8 @@ def improvement_mean_results(n, alternative_to_improve, alternative_to_overcame,
 
 @app.callback(
     Output('improvement_std-result', 'children'),
+    Output('warning-main5-body', 'children'),
+    Output('warning-main5', 'is_open'),
     [Input('apply-button', 'n_clicks')],
     #Input('alternative-to-improve', 'value'),
     #Input('alternative-to-overcame', 'value'),
@@ -1892,12 +1950,16 @@ def improvement_std_results(n, alternative_to_improve, alternative_to_overcame, 
     global proceed
     proceed = False
     global improvement
+    warnings_children = html.Div([])
+    is_open = False
 
     if alternative_to_improve is None or alternative_to_overcame is None:
-        print("Warning Fields: alternative_to_improve and alternative_to_overcome need to be filed")
+        #print("Warning Fields: alternative_to_improve and alternative_to_overcome need to be filed")
+        warnings_children = html.Div(["Alternative_to_improve, alternative_to_overcome and features_to_change need to be filed"])
+        is_open = True
         proceed = True
         improvement = None
-        return None
+        return None, warnings_children, is_open
     
     if n>0:
 
@@ -1917,12 +1979,15 @@ def improvement_std_results(n, alternative_to_improve, alternative_to_overcame, 
             if improvement is None:
                 proceed = True
                 improvement = None
-                print("Warning no solution found")
-                raise PreventUpdate
+                #print("Warning no solution found")
+                #raise PreventUpdate
+                warnings_children = html.Div(["No solution found"])
+                is_open = True
+                return None, warnings_children, is_open
             
             rounded_improvement = improvement.applymap(formating)
             proceed = True
-            return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
+            return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'}), warnings_children, is_open
 
     proceed = True
     improvement = None
@@ -1941,12 +2006,12 @@ def improvement_std_results(n, alternative_to_improve, alternative_to_overcame, 
     State('choose-method', 'value'),
     prevent_initial_call = True
 )
-def improvement_results(n, alternative_to_imptove, alternative_to_overcame, features_to_change,epsilon, method):
+def improvement_results(n, alternative_to_improve, alternative_to_overcame, features_to_change,epsilon, method):
     print(features_to_change)
     
     if n>0:
         global improvement
-        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame)
+        improvement = buses_g.improvement(method, alternative_to_improve,alternative_to_overcame)
         return dash_table.DataTable(improvement.to_dict('records'), [{"name": i, "id": i} for i in improvement.columns])
     else:
         raise PreventUpdate
@@ -1985,7 +2050,7 @@ def write_raport():
     State(component_id='alternative-to-improve', component_property='value'),
     prevent_initial_call = True
 )
-def vizualization_change(n, alternative_to_imptove):
+def vizualization_change(n, alternative_to_improve):
     time.sleep(0.5)
     while True:
         if proceed:
@@ -2010,7 +2075,7 @@ def vizualization_change(n, alternative_to_imptove):
         #a = buses_g.plot(plot_name = title, color = colour_g)
         if improvement is None:
             raise PreventUpdate
-        fig = buses_g.plot_improvement(alternative_to_imptove, improvement)
+        fig = buses_g.plot_improvement(alternative_to_improve, improvement)
         fig.write_image("chart.png")
         return html.Div(children=[
             dcc.Graph(
