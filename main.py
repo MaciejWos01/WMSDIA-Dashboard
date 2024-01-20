@@ -1332,8 +1332,8 @@ def set_conditional_settings(value):
                 ),
             ], className='css-help'),
             dcc.Dropdown(
-                id = 'features-to-change + ['all']',
-                options = features,
+                id = 'features-to-change',
+                options = features + ['all'],
                 multi = True)
         ])
     elif value == 'improvement_single_feature':
