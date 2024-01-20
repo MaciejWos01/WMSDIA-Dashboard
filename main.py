@@ -1709,11 +1709,13 @@ def improvement_feature_results(n, alternative_to_imptove, alternative_to_overca
     State('solutions-number', 'value'),
     prevent_initial_call = True
 )
-def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame, epsilon, allow_std, method, solutions_number):    
+def improvement_mean_results(n, alternative_to_improve, alternative_to_overcame, epsilon, allow_std, method, solutions_number):    
     global proceed
-    proceed = False
     global improvement
-    if alternative_to_imptove is None or alternative_to_overcame is None:
+
+    proceed = False
+    
+    if alternative_to_improve is None or alternative_to_overcame is None:
         print("Warning Fields: alternative_to_improve and alternative_to_overcome need to be filed")
         proceed = True
         improvement = None
@@ -1728,30 +1730,44 @@ def improvement_mean_results(n, alternative_to_imptove, alternative_to_overcame,
                 allow_std = True
             else:
                 allow_std = False
-        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, epsilon, allow_std = allow_std, solutions_number = solutions_number)
-        rounded_improvement = improvement.applymap(formating)
-        criteria_params = list(params_g[0].keys())
-        params = pd.DataFrame.from_dict(params_g).set_index(criteria_params[0])
-        raport = f'''
-            <html>
-                <head>
-                    <title>Topsis Improvement Actions Report</title>
-                </head>
-                <body>
-                    <h1>Dataset</h1>
-                    {data.to_html()}
-                    <h1>parameters</h1>
-                    {params.to_html()}
-                    <img src='chart.png' width="700">
-                </body>
-            </html>
-        '''
-        with open('html_report.html', 'w') as f:
-            f.write(raport)
-        proceed = True
-        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
+
+        no_exception = True
+
+        try:
+            improvement = buses_g.improvement(method, alternative_to_improve, alternative_to_overcame, epsilon, allow_std = allow_std, solutions_number = solutions_number)
+        except Exception as e:
+            print(e)
+            no_exception = False
+
+        if no_exception:
+            rounded_improvement = improvement.applymap(formating)
+            criteria_params = list(params_g[0].keys())
+            params = pd.DataFrame.from_dict(params_g).set_index(criteria_params[0])
+            raport = f'''
+                <html>
+                    <head>
+                        <title>Topsis Improvement Actions Report</title>
+                    </head>
+                    <body>
+                        <h1>Dataset</h1>
+                        {data.to_html()}
+                        <h1>parameters</h1>
+                        {params.to_html()}
+                        <img src='chart.png' width="700">
+                    </body>
+                </html>
+            '''
+            with open('html_report.html', 'w') as f:
+                f.write(raport)
+            proceed = True
+            return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
+        else:
+            proceed = True
+            improvement = None
+            raise PreventUpdate    
     else:
         proceed = True
+        improvement = None
         raise PreventUpdate
     
 
