@@ -1594,11 +1594,11 @@ def set_advanced_settings(value, n_clicks):
     State('choose-method', 'value'),
     prevent_initial_call = True
 )
-def improvement_genetic_results(n, alternative_to_imptove, alternative_to_overcame, epsilon, features_to_change, boundary_values, allow_deterioration, popsize, generations, method):    
+def improvement_genetic_results(n, alternative_to_improve, alternative_to_overcame, epsilon, features_to_change, boundary_values, allow_deterioration, popsize, generations, method):    
     global proceed
     proceed = False
     global improvement
-    if alternative_to_imptove is None or alternative_to_overcame is None or features_to_change is None:
+    if alternative_to_improve is None or alternative_to_overcame is None or features_to_change is None:
         print("Warning Fields: alternative_to_improve, alternative_to_overcome and features_to_change need to be filed")
         proceed = True
         improvement = None
@@ -1615,18 +1615,31 @@ def improvement_genetic_results(n, alternative_to_imptove, alternative_to_overca
             allow_deterioration = bool(allow_deterioration)
         if generations is None:
             generations = 200
-        improvement = buses_g.improvement(method, alternative_to_imptove,alternative_to_overcame, epsilon, features_to_change = features_to_change, boundary_values = boundary_values, allow_deterioration = allow_deterioration, popsize = popsize, n_generations = generations)[:10]
+
+        no_exception = True
+        try:
+            improvement = buses_g.improvement(method, alternative_to_improve,alternative_to_overcame, epsilon, features_to_change = features_to_change, boundary_values = boundary_values, allow_deterioration = allow_deterioration, popsize = popsize, n_generations = generations)[:10]
+        except Exception as e:
+            print(e)
+            no_exception = False
+
         #rounded_improvement = improvement.apply(formating)
         #rounded_improvement = [row.applymap(formating) for index, row in improvement.iterrows()]
-        if improvement is None:
-                proceed = True
-                improvement = None
-                raise PreventUpdate
-        rounded_improvement = improvement.apply(np.vectorize(formating))
-        global improvement_parameters
-        improvement_parameters = {'parameters':['method', 'alternative_to_imptove', 'alternative_to_overcame', 'epsilon', 'features_to_change', 'boundary_values', 'allow_deterioration', 'popsize', 'generations'], 'values':[method, alternative_to_imptove, alternative_to_overcame, epsilon, features_to_change, boundary_values, allow_deterioration, popsize, generations]}
-        proceed = True
-        return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
+            
+        if no_exception:
+            if improvement is None:
+                    proceed = True
+                    improvement = None
+                    raise PreventUpdate
+            rounded_improvement = improvement.apply(np.vectorize(formating))
+            global improvement_parameters
+            improvement_parameters = {'parameters':['method', 'alternative_to_improve', 'alternative_to_overcame', 'epsilon', 'features_to_change', 'boundary_values', 'allow_deterioration', 'popsize', 'generations'], 'values':[method, alternative_to_imptove, alternative_to_overcame, epsilon, features_to_change, boundary_values, allow_deterioration, popsize, generations]}
+            proceed = True
+            return dash_table.DataTable(rounded_improvement.to_dict('records'), [{"name": i, "id": i} for i in rounded_improvement.columns], style_cell={'textAlign': 'left'}, style_table={'overflowX': 'auto'})
+        else:
+            proceed = True
+            improvement = None
+            raise PreventUpdate
     else:
         proceed = True
         raise PreventUpdate
