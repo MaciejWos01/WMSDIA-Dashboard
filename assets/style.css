@@ -341,6 +341,7 @@
 #css-edit-icon {
     margin: 10px;
     color: var(--main);
+    cursor: pointer;
 }
 
 .fa-solid.fa-question.fa-xs {

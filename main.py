@@ -264,7 +264,7 @@ def wizard():
                                 html.Div("project_title", id='wizard-data-input-title'),
                                 #html.Button(id='wizard-data-input-title-button', children='title')
                             ], id='wizard-data-after-submit-output-project-title'),
-                            html.I(className="fa fa-pen-to-square", id="css-edit-icon"),
+                            html.I(className="fa fa-pen-to-square", id="css-edit-icon", n_clicks=0),
                         ], className="css-project-title"),
                         html.Div(id='wizard-data-output-parsed-data-after'),
                     ], id='data-content'),
@@ -898,6 +898,24 @@ def check_title_wizard_data_title(text):
              prevent_initial_call=True)
 def edit_title_wizard_data_after_submit(click, text):
     
+    if click:
+        return html.Div([
+                dcc.Input(id='wizard-data-input-type-title',
+                        type = 'text',
+                        placeholder=text,
+                        minLength=1,
+                        maxLength=20),
+            ])
+
+    return no_update
+
+@app.callback(
+    Output('wizard-data-after-submit-output-project-title', 'children', allow_duplicate=True),
+    Input('css-edit-icon', 'n_clicks'),
+    State('wizard-data-input-title', 'children'),
+    prevent_initial_call=True
+)
+def toggle_edit_mode(click, text):
     if click:
         return html.Div([
                 dcc.Input(id='wizard-data-input-type-title',
