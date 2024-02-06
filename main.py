@@ -58,7 +58,13 @@ def home_layout():
 infomodal = dbc.Modal(
     [
         dbc.ModalHeader("Information"),
-        dbc.ModalBody("This is the information you want to display")
+        dbc.ModalBody([html.Div("This dashboard is a part of an engineering thesis project, which implements a Python package developed for calculating TOPSIS rankings, visualizations in WMSD-space and performing improvement actions."),
+                      html.Div("Authors: Adam Ciesiółka, Bogna Kilanowska, Maciej Woś"),
+                      html.Div("Useful links:"),
+                      html.Div(" "),
+                      html.A("Github repository of the Python package", href = "https://github.com/dabrze/topsis-msd-improvement-actions"),
+                      html.Div(" "),
+                      html.A("Github repository of this Dashboard", href = "https://github.com/MaciejWos01/WMSDIA-Dashboard")])
     ],
     id="info-modal",
 )
@@ -2145,6 +2151,9 @@ app.layout = dbc.Container([
     dcc.Store(id='params-store', storage_type='memory'),
     footer()
 ], id="css-layout", fluid=True)
+
+app.title = 'WMSDTransformer'
+app._favicon = ("logosq.png")
 
 
 @app.callback(Output('page-content', 'children', allow_duplicate=True),
