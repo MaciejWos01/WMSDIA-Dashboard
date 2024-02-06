@@ -32,15 +32,16 @@ def header():
     return dbc.Row([
         #dbc.Col(dcc.Link(html.I(className="fa fa-home fa-2x", id="css-home-icon"), href='/'), width="auto"),
         dbc.Col(html.I(className="fa fa-home fa-2x", id="css-home-icon", n_clicks=0), width="auto"),
-        dbc.Col(html.H3('WMSD Transformer app', id="css-header-title"), width="auto"),
+        dbc.Col(html.Img(src="assets/logo.png", id="css-logo2-img"), width="auto"),
+        #dbc.Col(html.H3('WMSD Transformer app', id="css-header-title"), width="auto"),
         dbc.Col(html.I(className="fa fa-info fa-2x", id="css-info-icon", n_clicks=0), width="auto")
     ], id="css-header")
 
 def footer():
     github_url = "https://github.com/dabrze/topsis-msd-improvement-actions"
-    return dash.html.Footer(children=[
-        html.A(html.I(className="fab fa-github fa-2x", id="css-github-icon"), href=github_url, target="_blank"),
-        html.Div(html.Img(src="assets/PP_znak_pełny_RGB.png", id="css-logo-img"), id="css-logo-div")
+    return dbc.Row([
+        dbc.Col(html.A(html.I(className="fab fa-github fa-2x", id="css-github-icon"), href=github_url, target="_blank")),
+        dbc.Col(html.Img(src="assets/PP_znak_pełny_RGB.png", id="css-logo-img"), id="css-logo-div")
     ], id="css-footer")
 
 def home_layout():
@@ -57,7 +58,7 @@ def home_layout():
 infomodal = dbc.Modal(
     [
         dbc.ModalHeader("Information"),
-        dbc.ModalBody("This is the information you want to display.")
+        dbc.ModalBody("This is the information you want to display")
     ],
     id="info-modal",
 )
@@ -2135,7 +2136,7 @@ def vizualization_change(n, alternative_to_improve):
 #   MAIN
 #==============================================================
 
-app.layout = html.Div(children=[
+app.layout = dbc.Container([
     header(),
     infomodal,
     dcc.Location(id='url', refresh=False),
@@ -2143,7 +2144,7 @@ app.layout = html.Div(children=[
     dcc.Store(id='data-store', storage_type='memory'),
     dcc.Store(id='params-store', storage_type='memory'),
     footer()
-], id="css-layout")
+], id="css-layout", fluid=True)
 
 
 @app.callback(Output('page-content', 'children', allow_duplicate=True),
